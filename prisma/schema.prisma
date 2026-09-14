@@ -1,0 +1,133 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  TRAINER
+  STUDENT
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         Role
+  createdAt    DateTime @default(now())
+
+  // Trainer side
+  groupsOwned       Group[]        @relation("TrainerGroups")
+  exercisesCreated  Exercise[]     @relation("TrainerExercises")
+  workoutsCreated   Workout[]      @relation("TrainerWorkouts")
+  studentsCreated   User[]         @relation("TrainerStudents")
+  trainer           User?          @relation("TrainerStudents", fields: [trainerId], references: [id])
+  trainerId         String?
+
+  // Student side
+  memberships       GroupMember[]
+  assignedWorkouts  Workout[]      @relation("StudentWorkouts")
+  blockResults      BlockResult[]
+  personalRecords   PersonalRecord[]
+}
+
+model Group {
+  id        String   @id @default(cuid())
+  name      String
+  trainer   User     @relation("TrainerGroups", fields: [trainerId], references: [id])
+  trainerId String
+  createdAt DateTime @default(now())
+
+  members   GroupMember[]
+  workouts  Workout[]
+}
+
+model GroupMember {
+  id        String   @id @default(cuid())
+  group     Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  groupId   String
+  student   User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  studentId String
+  addedAt   DateTime @default(now())
+
+  @@unique([groupId, studentId])
+}
+
+model Exercise {
+  id        String   @id @default(cuid())
+  name      String
+  trainer   User     @relation("TrainerExercises", fields: [trainerId], references: [id])
+  trainerId String
+  createdAt DateTime @default(now())
+
+  blocks           WorkoutBlock[]
+  personalRecords  PersonalRecord[]
+
+  @@unique([trainerId, name])
+}
+
+model Workout {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  date        DateTime?
+  trainer     User      @relation("TrainerWorkouts", fields: [trainerId], references: [id])
+  trainerId   String
+  group       Group?    @relation(fields: [groupId], references: [id])
+  groupId     String?
+  student     User?     @relation("StudentWorkouts", fields: [studentId], references: [id])
+  studentId   String?
+  createdAt   DateTime  @default(now())
+
+  blocks      WorkoutBlock[]
+}
+
+model WorkoutBlock {
+  id                String   @id @default(cuid())
+  workout           Workout  @relation(fields: [workoutId], references: [id], onDelete: Cascade)
+  workoutId         String
+  order             Int
+  title             String
+  exercise          Exercise? @relation(fields: [exerciseId], references: [id])
+  exerciseId        String?
+  prescribedSets    Int?
+  prescribedReps    String?
+  prescribedWeight  String?
+  restSeconds       Int?
+  trainerNotes      String?
+
+  results           BlockResult[]
+}
+
+model BlockResult {
+  id             String       @id @default(cuid())
+  block          WorkoutBlock @relation(fields: [blockId], references: [id], onDelete: Cascade)
+  blockId        String
+  student        User         @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  studentId      String
+  setsCompleted  Int?
+  repsCompleted  String?
+  weightUsed     String?
+  rpe            Int?
+  studentNotes   String?
+  completedAt    DateTime     @default(now())
+
+  @@unique([blockId, studentId])
+}
+
+model PersonalRecord {
+  id          String   @id @default(cuid())
+  student     User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  studentId   String
+  exercise    Exercise @relation(fields: [exerciseId], references: [id])
+  exerciseId  String
+  value       String
+  unit        String?
+  notes       String?
+  recordDate  DateTime @default(now())
+  createdAt   DateTime @default(now())
+}

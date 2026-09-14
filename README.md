@@ -7,8 +7,8 @@ Plataforma web (instalável como PWA) para um personal trainer gerir alunos, gru
 - **Perfis individuais**: cada aluno tem a sua própria conta (email + palavra-passe).
 - **Grupos de alunos**: cria grupos (ex. "Turma da manhã") e atribui treinos a um grupo inteiro. Cada aluno do grupo reporta os seus resultados de forma individual.
 - **Construtor de treinos**: cria treinos com vários blocos (exercício, séries/reps/carga prescritas, tempo de descanso e notas para o aluno).
-- **Registo de resultados por bloco**: o aluno regista séries/reps/carga feitas, RPE e notas em cada bloco do treino, no telemóvel.
-- **Recordes pessoais**: o aluno regista os seus PRs por exercício.
+- **Registo de resultados em texto livre**: o aluno escreve o resultado de cada bloco como quiser (ex. "4x8 @ 60kg", "12:45", "21-15-9"), mais notas, no telemóvel.
+- **Perfil do aluno (2 separadores: Treino / Perfil)**: no separador Perfil o aluno regista e edita dados pessoais (data de nascimento, peso, altura) e os seus recordes pessoais, divididos em **Levantamentos** (carga) e **Treinos para tempo**. O treinador também pode editar estes dados e recordes a partir do perfil do aluno.
 - **Histórico por exercício**: o aluno (e o treinador, no perfil do aluno) vê a evolução de resultados e recordes de cada exercício ao longo do tempo.
 - **PWA**: pode ser instalada no ecrã inicial do telemóvel (manifest + service worker).
 
@@ -42,7 +42,7 @@ Abre http://localhost:3000
 ## Como funciona
 
 - O **treinador** entra em `/trainer`: cria alunos (define a palavra-passe inicial e partilha-a com o aluno), cria grupos, adiciona alunos aos grupos e cria treinos atribuídos a um grupo ou a um aluno específico. Dentro de cada treino, adiciona "blocos" (ex. "Bloco A" com o exercício, séries/reps/carga e notas). No perfil de cada aluno vê os recordes pessoais e o histórico de treinos/resultados.
-- O **aluno** entra em `/student`: vê a lista de treinos atribuídos (diretamente ou via grupo), abre um treino e, bloco a bloco, regista o que fez (séries, reps, carga, RPE, notas). Na secção "Recordes" regista os seus PRs por exercício, e a partir de qualquer bloco ou recorde pode ver o histórico completo desse exercício.
+- O **aluno** entra em `/student`, com dois separadores no fundo do ecrã: **Treino** (lista de treinos atribuídos, diretamente ou via grupo — abre um treino e regista o resultado de cada bloco em texto livre, mais notas) e **Perfil** (dados pessoais editáveis e recordes pessoais, agrupados em Levantamentos e Treinos para tempo, todos editáveis). A partir de qualquer bloco ou recorde pode ver o histórico completo desse exercício.
 
 ## Notas de produção
 

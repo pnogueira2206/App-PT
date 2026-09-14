@@ -1,14 +1,19 @@
 "use client";
 
 import { useActionState, useRef, useEffect, useState } from "react";
-import { addPersonalRecordAction } from "@/app/student/actions";
 
-export function NewRecordForm({ exerciseNames }: { exerciseNames: string[] }) {
+type ActionState = { error?: string; success?: string } | undefined;
+
+export function NewRecordForm({
+  exerciseNames,
+  action,
+}: {
+  exerciseNames: string[];
+  action: (state: ActionState, formData: FormData) => Promise<ActionState>;
+}) {
   const [open, setOpen] = useState(false);
-  const [state, formAction, isPending] = useActionState(
-    addPersonalRecordAction,
-    undefined
-  );
+  const [type, setType] = useState<"WEIGHT" | "TIME">("WEIGHT");
+  const [state, formAction, isPending] = useActionState(action, undefined);
   const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
@@ -43,11 +48,21 @@ export function NewRecordForm({ exerciseNames }: { exerciseNames: string[] }) {
         </button>
       </div>
 
+      <select
+        name="type"
+        value={type}
+        onChange={(e) => setType(e.target.value as "WEIGHT" | "TIME")}
+        className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+      >
+        <option value="WEIGHT">Levantamento (carga)</option>
+        <option value="TIME">Treino para tempo</option>
+      </select>
+
       <input
         name="exerciseName"
         list="exercise-options"
         required
-        placeholder="Exercício (ex: Supino)"
+        placeholder={type === "WEIGHT" ? "Exercício (ex: Supino)" : "Treino (ex: Fran)"}
         className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
       />
       <datalist id="exercise-options">
@@ -60,12 +75,12 @@ export function NewRecordForm({ exerciseNames }: { exerciseNames: string[] }) {
         <input
           name="value"
           required
-          placeholder="Valor (ex: 100)"
+          placeholder={type === "WEIGHT" ? "Valor (ex: 100)" : "Tempo (ex: 4:12)"}
           className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
         />
         <input
           name="unit"
-          placeholder="Unidade (ex: kg)"
+          placeholder={type === "WEIGHT" ? "Unidade (ex: kg)" : "Unidade (opcional)"}
           className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
         />
       </div>

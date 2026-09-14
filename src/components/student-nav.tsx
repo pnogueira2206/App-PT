@@ -5,8 +5,21 @@ import { usePathname } from "next/navigation";
 import { SignOutButton } from "@/components/sign-out-button";
 
 const links = [
-  { href: "/student", label: "Treinos", icon: "🏋️" },
-  { href: "/student/records", label: "Recordes", icon: "🏆" },
+  {
+    href: "/student",
+    label: "Treino",
+    icon: "🏋️",
+    isActive: (pathname: string) =>
+      pathname === "/student" ||
+      pathname.startsWith("/student/workouts") ||
+      pathname.startsWith("/student/exercises"),
+  },
+  {
+    href: "/student/profile",
+    label: "Perfil",
+    icon: "👤",
+    isActive: (pathname: string) => pathname.startsWith("/student/profile"),
+  },
 ];
 
 export function StudentTopBar() {
@@ -27,10 +40,7 @@ export function StudentBottomNav() {
     <nav className="sticky bottom-0 z-10 border-t border-slate-200 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur">
       <div className="mx-auto flex max-w-md">
         {links.map((link) => {
-          const active =
-            link.href === "/student"
-              ? pathname === "/student"
-              : pathname.startsWith(link.href);
+          const active = link.isActive(pathname);
           return (
             <Link
               key={link.href}

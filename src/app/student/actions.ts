@@ -30,10 +30,7 @@ export async function submitResultAction(
   const block = await assertBlockAssignedToStudent(blockId, session.user.id);
   if (!block) return { error: "Bloco não encontrado." };
 
-  const setsCompleted = formData.get("setsCompleted");
-  const repsCompleted = String(formData.get("repsCompleted") ?? "").trim();
-  const weightUsed = String(formData.get("weightUsed") ?? "").trim();
-  const rpe = formData.get("rpe");
+  const scoreText = String(formData.get("scoreText") ?? "").trim();
   const studentNotes = String(formData.get("studentNotes") ?? "").trim();
 
   await prisma.blockResult.upsert({
@@ -41,17 +38,11 @@ export async function submitResultAction(
     create: {
       blockId,
       studentId: session.user.id,
-      setsCompleted: setsCompleted ? Number(setsCompleted) : null,
-      repsCompleted: repsCompleted || null,
-      weightUsed: weightUsed || null,
-      rpe: rpe ? Number(rpe) : null,
+      scoreText: scoreText || null,
       studentNotes: studentNotes || null,
     },
     update: {
-      setsCompleted: setsCompleted ? Number(setsCompleted) : null,
-      repsCompleted: repsCompleted || null,
-      weightUsed: weightUsed || null,
-      rpe: rpe ? Number(rpe) : null,
+      scoreText: scoreText || null,
       studentNotes: studentNotes || null,
       completedAt: new Date(),
     },
@@ -59,6 +50,39 @@ export async function submitResultAction(
 
   revalidatePath(`/student/workouts/${block.workoutId}`);
   return { success: "Resultado guardado." };
+}
+
+export async function updateProfileAction(
+  _prev: ActionState,
+  formData: FormData
+): Promise<ActionState> {
+  const session = await requireStudent();
+
+  const dateOfBirthRaw = String(formData.get("dateOfBirth") ?? "");
+  const weightRaw = String(formData.get("weightKg") ?? "").trim();
+  const heightRaw = String(formData.get("heightCm") ?? "").trim();
+
+  const weightKg = weightRaw ? Number(weightRaw.replace(",", ".")) : null;
+  const heightCm = heightRaw ? Number(heightRaw.replace(",", ".")) : null;
+
+  if (weightRaw && (Number.isNaN(weightKg) || (weightKg as number) <= 0)) {
+    return { error: "Peso inválido." };
+  }
+  if (heightRaw && (Number.isNaN(heightCm) || (heightCm as number) <= 0)) {
+    return { error: "Altura inválida." };
+  }
+
+  await prisma.user.update({
+    where: { id: session.user.id },
+    data: {
+      dateOfBirth: dateOfBirthRaw ? new Date(dateOfBirthRaw) : null,
+      weightKg,
+      heightCm,
+    },
+  });
+
+  revalidatePath("/student/profile");
+  return { success: "Dados atualizados." };
 }
 
 export async function addPersonalRecordAction(
@@ -71,13 +95,17 @@ export async function addPersonalRecordAction(
   if (!student?.trainerId) return { error: "Sem treinador associado." };
 
   const exerciseName = String(formData.get("exerciseName") ?? "").trim();
+  const type = String(formData.get("type") ?? "WEIGHT").trim();
   const value = String(formData.get("value") ?? "").trim();
   const unit = String(formData.get("unit") ?? "").trim();
   const notes = String(formData.get("notes") ?? "").trim();
   const recordDateRaw = String(formData.get("recordDate") ?? "");
 
   if (!exerciseName || !value) {
-    return { error: "Indica o exercício e o valor do recorde." };
+    return { error: "Indica o exercício/treino e o valor do recorde." };
+  }
+  if (type !== "WEIGHT" && type !== "TIME") {
+    return { error: "Tipo de recorde inválido." };
   }
 
   const exercise = await prisma.exercise.upsert({
@@ -90,6 +118,7 @@ export async function addPersonalRecordAction(
     data: {
       studentId: session.user.id,
       exerciseId: exercise.id,
+      type,
       value,
       unit: unit || null,
       notes: notes || null,
@@ -97,17 +126,54 @@ export async function addPersonalRecordAction(
     },
   });
 
-  revalidatePath("/student/records");
+  revalidatePath("/student/profile");
   return { success: "Recorde adicionado." };
 }
 
-export async function deletePersonalRecordAction(formData: FormData) {
+export async function updatePersonalRecordAction(
+  recordId: string,
+  _prev: ActionState,
+  formData: FormData
+): Promise<ActionState> {
   const session = await requireStudent();
-  const id = String(formData.get("id") ?? "");
 
-  await prisma.personalRecord.deleteMany({
-    where: { id, studentId: session.user.id },
+  const record = await prisma.personalRecord.findFirst({
+    where: { id: recordId, studentId: session.user.id },
+  });
+  if (!record) return { error: "Recorde não encontrado." };
+
+  const type = String(formData.get("type") ?? "WEIGHT").trim();
+  const value = String(formData.get("value") ?? "").trim();
+  const unit = String(formData.get("unit") ?? "").trim();
+  const notes = String(formData.get("notes") ?? "").trim();
+  const recordDateRaw = String(formData.get("recordDate") ?? "");
+
+  if (!value) return { error: "Indica o valor do recorde." };
+  if (type !== "WEIGHT" && type !== "TIME") {
+    return { error: "Tipo de recorde inválido." };
+  }
+
+  await prisma.personalRecord.update({
+    where: { id: recordId },
+    data: {
+      type,
+      value,
+      unit: unit || null,
+      notes: notes || null,
+      recordDate: recordDateRaw ? new Date(recordDateRaw) : record.recordDate,
+    },
   });
 
-  revalidatePath("/student/records");
+  revalidatePath("/student/profile");
+  return { success: "Recorde atualizado." };
+}
+
+export async function deletePersonalRecordAction(recordId: string) {
+  const session = await requireStudent();
+
+  await prisma.personalRecord.deleteMany({
+    where: { id: recordId, studentId: session.user.id },
+  });
+
+  revalidatePath("/student/profile");
 }

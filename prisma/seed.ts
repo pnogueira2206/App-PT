@@ -27,6 +27,9 @@ async function main() {
       passwordHash: studentPasswordHash,
       role: "STUDENT",
       trainerId: trainer.id,
+      dateOfBirth: new Date("1996-04-12"),
+      weightKg: 62.5,
+      heightCm: 167,
     },
   });
 
@@ -127,10 +130,7 @@ async function main() {
     create: {
       blockId: blockA.id,
       studentId: ana.id,
-      setsCompleted: 4,
-      repsCompleted: "9",
-      weightUsed: "55kg",
-      rpe: 8,
+      scoreText: "4x9 @ 55kg, RPE 8",
       studentNotes: "Senti-me forte hoje!",
     },
   });
@@ -139,9 +139,26 @@ async function main() {
     data: {
       studentId: ana.id,
       exerciseId: agachamento.id,
+      type: "WEIGHT",
       value: "70",
       unit: "kg",
       notes: "1RM testado em ginásio",
+    },
+  });
+
+  const fran = await prisma.exercise.upsert({
+    where: { trainerId_name: { trainerId: trainer.id, name: "Fran" } },
+    update: {},
+    create: { name: "Fran", trainerId: trainer.id },
+  });
+
+  await prisma.personalRecord.create({
+    data: {
+      studentId: ana.id,
+      exerciseId: fran.id,
+      type: "TIME",
+      value: "4:12",
+      notes: "21-15-9 thrusters/pull-ups",
     },
   });
 

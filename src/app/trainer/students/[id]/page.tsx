@@ -3,6 +3,15 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireTrainer } from "@/lib/require-session";
 import { ResetPasswordForm } from "@/components/reset-password-form";
+import { ProfileDataForm } from "@/components/profile-data-form";
+import { NewRecordForm } from "@/components/new-record-form";
+import { RecordItem } from "@/components/record-item";
+import {
+  updateStudentProfileAction,
+  addStudentRecordAction,
+  updateStudentRecordAction,
+  deleteStudentRecordAction,
+} from "@/app/trainer/actions";
 
 export default async function StudentProfilePage({
   params,
@@ -22,12 +31,15 @@ export default async function StudentProfilePage({
 
   const groupIds = student.memberships.map((m) => m.groupId);
 
-  const [records, workouts] = await Promise.all([
+  const [records, exercises, workouts] = await Promise.all([
     prisma.personalRecord.findMany({
       where: { studentId: id },
       include: { exercise: true },
       orderBy: { recordDate: "desc" },
-      take: 10,
+    }),
+    prisma.exercise.findMany({
+      where: { trainerId: session.user.id },
+      orderBy: { name: "asc" },
     }),
     prisma.workout.findMany({
       where: {
@@ -47,6 +59,12 @@ export default async function StudentProfilePage({
       take: 15,
     }),
   ]);
+
+  const lifts = records.filter((r) => r.type === "WEIGHT");
+  const timeWorkouts = records.filter((r) => r.type === "TIME");
+
+  const boundUpdateProfile = updateStudentProfileAction.bind(null, student.id);
+  const boundAddRecord = addStudentRecordAction.bind(null, student.id);
 
   return (
     <div className="space-y-6">
@@ -73,25 +91,70 @@ export default async function StudentProfilePage({
         </div>
       </div>
 
-      <section>
-        <h2 className="mb-2 font-semibold text-slate-900">Recordes pessoais</h2>
-        {records.length === 0 ? (
-          <p className="text-sm text-slate-500">Ainda sem recordes registados.</p>
-        ) : (
-          <ul className="divide-y divide-slate-200 rounded-xl border border-slate-200 bg-white">
-            {records.map((r) => (
-              <li key={r.id} className="flex items-center justify-between px-4 py-2.5">
-                <span className="font-medium text-slate-800">{r.exercise.name}</span>
-                <span className="text-sm text-slate-600">
-                  {r.value} {r.unit ?? ""}
-                  <span className="ml-2 text-xs text-slate-400">
-                    {new Date(r.recordDate).toLocaleDateString("pt-PT")}
-                  </span>
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
+      <ProfileDataForm
+        dateOfBirth={student.dateOfBirth}
+        weightKg={student.weightKg}
+        heightCm={student.heightCm}
+        action={boundUpdateProfile}
+      />
+
+      <section className="space-y-3">
+        <h2 className="font-semibold text-slate-900">Recordes pessoais</h2>
+        <NewRecordForm exerciseNames={exercises.map((e) => e.name)} action={boundAddRecord} />
+
+        <div>
+          <h3 className="mb-1.5 text-sm font-medium text-slate-500">Levantamentos</h3>
+          {lifts.length === 0 ? (
+            <p className="text-sm text-slate-400">Sem recordes de levantamentos.</p>
+          ) : (
+            <ul className="space-y-2">
+              {lifts.map((r) => (
+                <RecordItem
+                  key={r.id}
+                  record={{
+                    id: r.id,
+                    exerciseId: r.exerciseId,
+                    exerciseName: r.exercise.name,
+                    type: r.type,
+                    value: r.value,
+                    unit: r.unit,
+                    notes: r.notes,
+                    recordDate: r.recordDate,
+                  }}
+                  updateAction={updateStudentRecordAction.bind(null, student.id, r.id)}
+                  deleteAction={deleteStudentRecordAction.bind(null, student.id, r.id)}
+                />
+              ))}
+            </ul>
+          )}
+        </div>
+
+        <div>
+          <h3 className="mb-1.5 text-sm font-medium text-slate-500">Treinos para tempo</h3>
+          {timeWorkouts.length === 0 ? (
+            <p className="text-sm text-slate-400">Sem recordes de treinos para tempo.</p>
+          ) : (
+            <ul className="space-y-2">
+              {timeWorkouts.map((r) => (
+                <RecordItem
+                  key={r.id}
+                  record={{
+                    id: r.id,
+                    exerciseId: r.exerciseId,
+                    exerciseName: r.exercise.name,
+                    type: r.type,
+                    value: r.value,
+                    unit: r.unit,
+                    notes: r.notes,
+                    recordDate: r.recordDate,
+                  }}
+                  updateAction={updateStudentRecordAction.bind(null, student.id, r.id)}
+                  deleteAction={deleteStudentRecordAction.bind(null, student.id, r.id)}
+                />
+              ))}
+            </ul>
+          )}
+        </div>
       </section>
 
       <section>

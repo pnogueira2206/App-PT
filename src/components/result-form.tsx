@@ -4,10 +4,7 @@ import { useActionState } from "react";
 import { submitResultAction } from "@/app/student/actions";
 
 type ExistingResult = {
-  setsCompleted: number | null;
-  repsCompleted: string | null;
-  weightUsed: string | null;
-  rpe: number | null;
+  scoreText: string | null;
   studentNotes: string | null;
 } | null;
 
@@ -26,35 +23,11 @@ export function ResultForm({
       <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
         O teu resultado
       </p>
-      <div className="grid grid-cols-3 gap-2">
-        <input
-          name="setsCompleted"
-          type="number"
-          min={0}
-          defaultValue={existing?.setsCompleted ?? ""}
-          placeholder="Séries"
-          className="rounded-lg border border-slate-300 px-2.5 py-2 text-sm"
-        />
-        <input
-          name="repsCompleted"
-          defaultValue={existing?.repsCompleted ?? ""}
-          placeholder="Reps"
-          className="rounded-lg border border-slate-300 px-2.5 py-2 text-sm"
-        />
-        <input
-          name="weightUsed"
-          defaultValue={existing?.weightUsed ?? ""}
-          placeholder="Carga"
-          className="rounded-lg border border-slate-300 px-2.5 py-2 text-sm"
-        />
-      </div>
-      <input
-        name="rpe"
-        type="number"
-        min={1}
-        max={10}
-        defaultValue={existing?.rpe ?? ""}
-        placeholder="RPE (1-10, opcional)"
+      <textarea
+        name="scoreText"
+        rows={2}
+        defaultValue={existing?.scoreText ?? ""}
+        placeholder="Escreve o resultado como quiseres: ex. 4x8 @ 60kg, ou 12:45, ou 21-15-9..."
         className="w-full rounded-lg border border-slate-300 px-2.5 py-2 text-sm"
       />
       <textarea
@@ -71,7 +44,7 @@ export function ResultForm({
         disabled={isPending}
         className="w-full rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-60"
       >
-        {isPending ? "A guardar..." : existing ? "Atualizar resultado" : "Guardar resultado"}
+        {isPending ? "A guardar..." : existing?.scoreText ? "Atualizar resultado" : "Guardar resultado"}
       </button>
     </form>
   );

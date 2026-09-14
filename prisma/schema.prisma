@@ -12,6 +12,11 @@ enum Role {
   STUDENT
 }
 
+enum RecordType {
+  WEIGHT
+  TIME
+}
+
 model User {
   id           String   @id @default(cuid())
   name         String
@@ -19,6 +24,11 @@ model User {
   passwordHash String
   role         Role
   createdAt    DateTime @default(now())
+
+  // Personal data (students)
+  dateOfBirth  DateTime?
+  weightKg     Float?
+  heightCm     Float?
 
   // Trainer side
   groupsOwned       Group[]        @relation("TrainerGroups")
@@ -109,10 +119,7 @@ model BlockResult {
   blockId        String
   student        User         @relation(fields: [studentId], references: [id], onDelete: Cascade)
   studentId      String
-  setsCompleted  Int?
-  repsCompleted  String?
-  weightUsed     String?
-  rpe            Int?
+  scoreText      String?
   studentNotes   String?
   completedAt    DateTime     @default(now())
 
@@ -125,6 +132,7 @@ model PersonalRecord {
   studentId   String
   exercise    Exercise @relation(fields: [exerciseId], references: [id])
   exerciseId  String
+  type        RecordType @default(WEIGHT)
   value       String
   unit        String?
   notes       String?

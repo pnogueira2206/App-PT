@@ -108,14 +108,7 @@ export default async function WorkoutDetailPage({
                       <span className="font-medium text-slate-700">{student.name}</span>
                       {result ? (
                         <span className="text-slate-600">
-                          {[
-                            result.setsCompleted ? `${result.setsCompleted} séries` : null,
-                            result.repsCompleted ? `${result.repsCompleted} reps` : null,
-                            result.weightUsed ?? null,
-                            result.rpe ? `RPE ${result.rpe}` : null,
-                          ]
-                            .filter(Boolean)
-                            .join(" · ") || "Concluído"}
+                          {result.scoreText || "Concluído"}
                           {result.studentNotes && (
                             <span className="italic text-slate-400"> — {result.studentNotes}</span>
                           )}

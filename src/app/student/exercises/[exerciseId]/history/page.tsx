@@ -33,7 +33,7 @@ export default async function ExerciseHistoryPage({
   return (
     <div className="space-y-5">
       <div>
-        <Link href="/student/records" className="text-sm text-slate-500 hover:text-slate-900">
+        <Link href="/student/profile" className="text-sm text-slate-500 hover:text-slate-900">
           ← Voltar
         </Link>
         <h1 className="mt-1 text-xl font-bold text-slate-900">{exercise.name}</h1>
@@ -78,16 +78,9 @@ export default async function ExerciseHistoryPage({
                     {new Date(r.completedAt).toLocaleDateString("pt-PT")}
                   </span>
                 </div>
-                <p className="mt-1 text-sm text-slate-600">
-                  {[
-                    r.setsCompleted ? `${r.setsCompleted} séries` : null,
-                    r.repsCompleted ? `${r.repsCompleted} reps` : null,
-                    r.weightUsed ?? null,
-                    r.rpe ? `RPE ${r.rpe}` : null,
-                  ]
-                    .filter(Boolean)
-                    .join(" · ")}
-                </p>
+                {r.scoreText && (
+                  <p className="mt-1 text-sm text-slate-600">{r.scoreText}</p>
+                )}
                 {r.studentNotes && (
                   <p className="mt-1 text-xs italic text-slate-400">{r.studentNotes}</p>
                 )}

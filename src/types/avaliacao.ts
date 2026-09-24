@@ -32,6 +32,11 @@ export interface AvaliacaoDraft {
   confirmacaoTreinador: Confirmacao;
 }
 
+export interface AvaliacaoGuardada extends AvaliacaoDraft {
+  id: string;
+  guardadaEm: string;
+}
+
 export function cabecalhoVazio(): Cabecalho {
   return { treinador: "", avaliador: "", espaco: "", data: "", hora: "", tipoAula: "", nAlunos: "" };
 }

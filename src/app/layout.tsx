@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import Image from "next/image";
 import "./globals.css";
 import { ServiceWorkerRegister } from "@/components/service-worker-register";
+import { NavTabs } from "@/components/nav-tabs";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -53,6 +54,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <p className="text-xs leading-tight text-neutral-400">Avaliação de desempenho do staff</p>
           </div>
         </header>
+        <NavTabs />
         <main className="flex-1">{children}</main>
         <ServiceWorkerRegister />
       </body>

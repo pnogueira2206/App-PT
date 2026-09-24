@@ -1,7 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import { grelha } from "@/data/grelha";
+import { guardarAvaliacao } from "@/lib/avaliacoes-store";
 import { avaliadores, espacos, tiposDeAula, treinadores } from "@/data/mock";
 import {
   AvaliacaoDraft,
@@ -51,20 +53,28 @@ export function NovaAvaliacaoForm() {
         <div className="flex h-16 w-16 items-center justify-center rounded-full bg-black text-2xl text-white">✓</div>
         <h1 className="text-xl font-semibold text-neutral-900">Avaliação guardada</h1>
         <p className="text-sm text-neutral-600">
-          A avaliação de {draft.cabecalho.treinador} em {draft.cabecalho.data} foi registada (dados fictícios, apenas
-          nesta sessão do browser).
+          A avaliação de {draft.cabecalho.treinador} em {draft.cabecalho.data} foi registada e já está visível no
+          Histórico (dados fictícios, guardados apenas neste browser).
         </p>
-        <button
-          type="button"
-          onClick={() => {
-            setDraft(draftVazio());
-            setStep(STEP_CABECALHO);
-            setGuardada(false);
-          }}
-          className="mt-4 rounded-md bg-black px-4 py-2 text-sm font-medium text-white"
-        >
-          Nova avaliação
-        </button>
+        <div className="mt-4 flex gap-3">
+          <button
+            type="button"
+            onClick={() => {
+              setDraft(draftVazio());
+              setStep(STEP_CABECALHO);
+              setGuardada(false);
+            }}
+            className="rounded-md bg-black px-4 py-2 text-sm font-medium text-white"
+          >
+            Nova avaliação
+          </button>
+          <Link
+            href="/historico"
+            className="rounded-md border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700"
+          >
+            Ver histórico
+          </Link>
+        </div>
       </div>
     );
   }
@@ -110,7 +120,10 @@ export function NovaAvaliacaoForm() {
             <button
               type="button"
               disabled={!tudoCompleto}
-              onClick={() => setGuardada(true)}
+              onClick={() => {
+                guardarAvaliacao(draft);
+                setGuardada(true);
+              }}
               className="rounded-md bg-black px-4 py-2 text-sm font-medium text-white disabled:opacity-40"
             >
               Guardar avaliação

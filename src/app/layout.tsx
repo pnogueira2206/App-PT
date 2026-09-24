@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import Image from "next/image";
 import "./globals.css";
 import { SessionProvider } from "next-auth/react";
+import Link from "next/link";
 import { ServiceWorkerRegister } from "@/components/service-worker-register";
 import { NavTabs } from "@/components/nav-tabs";
 import { SignOutButton } from "@/components/sign-out-button";
@@ -61,7 +62,9 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
             </div>
             {session && (
               <div className="text-right">
-                <p className="text-xs text-neutral-300">{session.user.name}</p>
+                <Link href="/perfil" className="block text-xs text-neutral-300 underline">
+                  {session.user.name}
+                </Link>
                 <SignOutButton />
               </div>
             )}

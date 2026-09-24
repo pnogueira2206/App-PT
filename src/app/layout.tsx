@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Image from "next/image";
 import "./globals.css";
 import { ServiceWorkerRegister } from "@/components/service-worker-register";
 
@@ -14,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "App PT",
-  description: "Plataforma de treinos para personal trainer e alunos",
+  title: "CFA Avaliações",
+  description: "Avaliação de desempenho do staff da CrossFit Alvalade",
   manifest: "/manifest.json",
   icons: {
     icon: [
@@ -27,7 +28,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "App PT",
+    title: "CFA Avaliações",
   },
 };
 
@@ -35,7 +36,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
-  themeColor: "#0f172a",
+  themeColor: "#000000",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -44,8 +45,15 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="pt"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-slate-50 text-slate-900">
-        {children}
+      <body className="min-h-full flex flex-col bg-white text-neutral-900">
+        <header className="flex items-center gap-3 bg-black px-4 py-3 text-white">
+          <Image src="/logo-cfa.jpg" alt="CrossFit Alvalade" width={32} height={32} className="rounded" />
+          <div>
+            <p className="text-sm font-semibold leading-tight">CFA Avaliações</p>
+            <p className="text-xs leading-tight text-neutral-400">Avaliação de desempenho do staff</p>
+          </div>
+        </header>
+        <main className="flex-1">{children}</main>
         <ServiceWorkerRegister />
       </body>
     </html>

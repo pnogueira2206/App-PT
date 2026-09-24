@@ -1,8 +1,5 @@
 import { redirect } from "next/navigation";
-import { auth } from "@/lib/auth";
 
-export default async function Home() {
-  const session = await auth();
-  if (!session) redirect("/login");
-  redirect(session.user.role === "TRAINER" ? "/trainer" : "/student");
+export default function Home() {
+  redirect("/nova-avaliacao");
 }

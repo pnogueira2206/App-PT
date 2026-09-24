@@ -1,11 +1,11 @@
 {
-  "name": "App PT",
-  "short_name": "App PT",
-  "description": "Plataforma de treinos para personal trainer e alunos",
+  "name": "CFA Avaliações",
+  "short_name": "CFA Avaliações",
+  "description": "Avaliação de desempenho do staff da CrossFit Alvalade",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f8fafc",
-  "theme_color": "#0f172a",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
   "orientation": "portrait",
   "icons": [
     {

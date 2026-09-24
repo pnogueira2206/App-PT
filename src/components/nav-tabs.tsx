@@ -6,13 +6,14 @@ import { usePathname } from "next/navigation";
 const tabs = [
   { href: "/nova-avaliacao", label: "Nova Avaliação" },
   { href: "/historico", label: "Histórico" },
+  { href: "/admin", label: "Admin" },
 ];
 
 export function NavTabs() {
   const pathname = usePathname();
 
   return (
-    <nav className="flex gap-1 border-b border-neutral-200 bg-white px-4">
+    <nav className="flex gap-1 overflow-x-auto border-b border-neutral-200 bg-white px-4">
       {tabs.map((tab) => {
         const ativo = pathname.startsWith(tab.href);
         return (

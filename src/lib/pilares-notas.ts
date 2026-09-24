@@ -1,6 +1,6 @@
 import { Seccao } from "@/data/grelha";
 import { Pilar } from "@/data/pilares";
-import { AtribuicoesPilares } from "@/lib/pilares-store";
+import type { AtribuicoesPilares } from "@/lib/pilares-actions";
 import { Respostas } from "@/types/avaliacao";
 
 export function subtotalPorPilar(

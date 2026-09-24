@@ -16,7 +16,7 @@ const areas = [
   },
 ];
 
-export function AdminMenu() {
+export function AdminMenu({ totalAvaliacoes }: { totalAvaliacoes: number }) {
   return (
     <div className="mx-auto max-w-lg px-4 py-4">
       <h1 className="mb-4 text-lg font-semibold text-neutral-900">Admin</h1>
@@ -39,7 +39,7 @@ export function AdminMenu() {
         <p className="mb-3 text-xs text-neutral-500">
           Descarrega todas as avaliações guardadas num ficheiro CSV (abre no Excel).
         </p>
-        <ExportarCsvButton />
+        <ExportarCsvButton total={totalAvaliacoes} />
       </div>
     </div>
   );

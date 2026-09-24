@@ -1,171 +1,200 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import { grelhaInicial } from "../src/data/grelha";
 
 const prisma = new PrismaClient();
 
+function criarRng(seed: number) {
+  let a = seed;
+  return function rng() {
+    a |= 0;
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+const horasPossiveis = ["07:00", "09:00", "12:30", "18:00", "19:00", "20:00"];
+const observacoesPossiveis = [
+  "Boa gestão do tempo, aula fluida.",
+  "Podia circular mais pela turma.",
+  "Excelente energia e ligação com os alunos.",
+  "Faltou reforçar os pontos de performance no fim.",
+  "",
+  "",
+];
+const comentariosPossiveis = [
+  "Aula sólida, continuar a trabalhar a circulação e o feedback individual.",
+  "Muito boa evolução desde a última avaliação.",
+  "Precisa de melhorar a gestão do tempo entre blocos.",
+  "Excelente exemplo de coaching, energia muito positiva.",
+];
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function gerarRespostas(rng: () => number): Record<string, any> {
+  const respostas: Record<string, unknown> = {};
+  for (const seccao of grelhaInicial) {
+    for (const c of seccao.criterios) {
+      if (c.tipoResposta === "TEXTO_LIVRE") {
+        respostas[c.id] = {
+          tipo: "TEXTO_LIVRE",
+          texto:
+            rng() < 0.85
+              ? "Foi identificada uma fraqueza específica e trabalhada com correções ao longo da aula."
+              : "Ainda não foi possível avaliar este ponto nesta aula.",
+        };
+        continue;
+      }
+      if (c.pesoMaximo == null) {
+        const r = rng();
+        respostas[c.id] =
+          r < 0.1 ? { tipo: "PONTOS", valor: null, na: true } : { tipo: "PONTOS", valor: r < 0.75 ? 1 : 0, na: false };
+        continue;
+      }
+      if (rng() < 0.05) {
+        respostas[c.id] = { tipo: "PONTOS", valor: null, na: true };
+        continue;
+      }
+      const passos = Math.round(c.pesoMaximo * 2);
+      const escolha = Math.min(passos, Math.round(passos * (0.55 + rng() * 0.55)));
+      respostas[c.id] = { tipo: "PONTOS", valor: escolha / 2, na: false };
+    }
+  }
+  return respostas;
+}
+
+const periodos = ["2026-03-05", "2026-06-10", "2026-09-12"];
+
+function adicionarDias(dataIso: string, dias: number): string {
+  const d = new Date(dataIso + "T00:00:00");
+  d.setDate(d.getDate() + dias);
+  return d.toISOString().slice(0, 10);
+}
+
 async function main() {
-  const trainerPasswordHash = await bcrypt.hash("treinador123", 10);
-  const studentPasswordHash = await bcrypt.hash("aluno123", 10);
+  const passwordAdmin = await bcrypt.hash("admin123", 10);
+  const passwordAvaliador = await bcrypt.hash("coach123", 10);
+  const passwordTreinador = await bcrypt.hash("treino123", 10);
 
-  const trainer = await prisma.user.upsert({
-    where: { email: "treinador@exemplo.com" },
+  await prisma.utilizador.upsert({
+    where: { email: "admin@cfa.pt" },
     update: {},
-    create: {
-      name: "Rui Treinador",
-      email: "treinador@exemplo.com",
-      passwordHash: trainerPasswordHash,
-      role: "TRAINER",
-    },
+    create: { nome: "Admin CFA", email: "admin@cfa.pt", passwordHash: passwordAdmin, papel: "ADMIN" },
   });
 
-  const ana = await prisma.user.upsert({
-    where: { email: "ana@exemplo.com" },
-    update: {},
-    create: {
-      name: "Ana Silva",
-      email: "ana@exemplo.com",
-      passwordHash: studentPasswordHash,
-      role: "STUDENT",
-      trainerId: trainer.id,
-      dateOfBirth: new Date("1996-04-12"),
-      weightKg: 62.5,
-      heightCm: 167,
-    },
-  });
+  const nomesAvaliadores = ["Head Coach 1", "Head Coach 2", "Head Coach 3"];
+  const avaliadores = [];
+  for (let i = 0; i < nomesAvaliadores.length; i++) {
+    const email = `headcoach${i + 1}@cfa.pt`;
+    avaliadores.push(
+      await prisma.utilizador.upsert({
+        where: { email },
+        update: {},
+        create: { nome: nomesAvaliadores[i], email, passwordHash: passwordAvaliador, papel: "AVALIADOR" },
+      })
+    );
+  }
 
-  const bruno = await prisma.user.upsert({
-    where: { email: "bruno@exemplo.com" },
-    update: {},
-    create: {
-      name: "Bruno Costa",
-      email: "bruno@exemplo.com",
-      passwordHash: studentPasswordHash,
-      role: "STUDENT",
-      trainerId: trainer.id,
-    },
-  });
+  const letrasTreinadores = ["A", "B", "C", "D", "E", "F"];
+  const treinadores = [];
+  for (const letra of letrasTreinadores) {
+    const email = `treinador${letra.toLowerCase()}@cfa.pt`;
+    treinadores.push(
+      await prisma.utilizador.upsert({
+        where: { email },
+        update: {},
+        create: { nome: `Treinador ${letra}`, email, passwordHash: passwordTreinador, papel: "TREINADOR" },
+      })
+    );
+  }
 
-  const group = await prisma.group.upsert({
-    where: { id: "seed-group-manha" },
-    update: {},
-    create: {
-      id: "seed-group-manha",
-      name: "Turma da manhã",
-      trainerId: trainer.id,
-    },
-  });
+  const nomesTiposAula = ["CrossFit", "Functional Bodybuilding", "Hybrid"];
+  const tiposAula = [];
+  for (const nome of nomesTiposAula) {
+    const existente = await prisma.tipoAula.findFirst({ where: { nome } });
+    tiposAula.push(existente ?? (await prisma.tipoAula.create({ data: { nome } })));
+  }
 
-  await prisma.groupMember.upsert({
-    where: { groupId_studentId: { groupId: group.id, studentId: ana.id } },
-    update: {},
-    create: { groupId: group.id, studentId: ana.id },
-  });
-  await prisma.groupMember.upsert({
-    where: { groupId_studentId: { groupId: group.id, studentId: bruno.id } },
-    update: {},
-    create: { groupId: group.id, studentId: bruno.id },
-  });
+  const espacos = ["CFA Oriente", "CFA Carnaxide"];
 
-  const agachamento = await prisma.exercise.upsert({
-    where: { trainerId_name: { trainerId: trainer.id, name: "Agachamento" } },
-    update: {},
-    create: { name: "Agachamento", trainerId: trainer.id },
-  });
-  const supino = await prisma.exercise.upsert({
-    where: { trainerId_name: { trainerId: trainer.id, name: "Supino" } },
-    update: {},
-    create: { name: "Supino", trainerId: trainer.id },
-  });
+  for (let i = 0; i < grelhaInicial.length; i++) {
+    const seccao = grelhaInicial[i];
+    await prisma.seccao.upsert({
+      where: { id: seccao.id },
+      update: {},
+      create: { id: seccao.id, nome: seccao.nome, percentagem: seccao.percentagem, ordem: i },
+    });
+    for (let j = 0; j < seccao.criterios.length; j++) {
+      const c = seccao.criterios[j];
+      await prisma.criterio.upsert({
+        where: { id: c.id },
+        update: {},
+        create: {
+          id: c.id,
+          seccaoId: seccao.id,
+          texto: c.texto,
+          pesoMaximo: c.pesoMaximo,
+          tipoResposta: c.tipoResposta,
+          dimensao: c.dimensao,
+          ordem: j,
+        },
+      });
+    }
+  }
 
-  const workout = await prisma.workout.upsert({
-    where: { id: "seed-workout-1" },
-    update: {},
-    create: {
-      id: "seed-workout-1",
-      title: "Treino de força - Semana 1",
-      description: "Foco em técnica e progressão de carga.",
-      date: new Date(),
-      trainerId: trainer.id,
-      groupId: group.id,
-    },
-  });
+  const jaExistem = await prisma.avaliacao.count();
+  if (jaExistem === 0) {
+    const rng = criarRng(42);
+    let contador = 0;
+    for (let ti = 0; ti < treinadores.length; ti++) {
+      for (let n = 0; n < 2; n++) {
+        const periodoIndex = (ti + n) % periodos.length;
+        const data = adicionarDias(periodos[periodoIndex], Math.floor(rng() * 15));
+        const avaliador = avaliadores[(ti + n) % avaliadores.length];
+        const espaco = espacos[(ti + n) % espacos.length];
+        const tipoAula = tiposAula[(ti + n * 2) % tiposAula.length];
+        const hora = horasPossiveis[Math.floor(rng() * horasPossiveis.length)];
+        const nAlunos = 6 + Math.floor(rng() * 11);
+        const respostas = gerarRespostas(rng);
+        const classificacaoGeral = 55 + Math.floor(rng() * 41);
 
-  const blockA = await prisma.workoutBlock.upsert({
-    where: { id: "seed-block-a" },
-    update: {},
-    create: {
-      id: "seed-block-a",
-      workoutId: workout.id,
-      order: 1,
-      title: "Bloco A",
-      exerciseId: agachamento.id,
-      prescribedSets: 4,
-      prescribedReps: "8-10",
-      prescribedWeight: "60kg",
-      restSeconds: 90,
-      trainerNotes: "Desce até à paralela, mantém o peito alto.",
-    },
-  });
+        const observacoes: Record<string, string> = {};
+        for (const seccao of grelhaInicial) {
+          observacoes[seccao.id] = observacoesPossiveis[Math.floor(rng() * observacoesPossiveis.length)];
+        }
 
-  await prisma.workoutBlock.upsert({
-    where: { id: "seed-block-b" },
-    update: {},
-    create: {
-      id: "seed-block-b",
-      workoutId: workout.id,
-      order: 2,
-      title: "Bloco B",
-      exerciseId: supino.id,
-      prescribedSets: 3,
-      prescribedReps: "10",
-      prescribedWeight: "40kg",
-      restSeconds: 75,
-      trainerNotes: "Controla a descida, não trancar os cotovelos no topo.",
-    },
-  });
+        const treinadorConfirmou = rng() < 0.7;
+        contador += 1;
 
-  await prisma.blockResult.upsert({
-    where: { blockId_studentId: { blockId: blockA.id, studentId: ana.id } },
-    update: {},
-    create: {
-      blockId: blockA.id,
-      studentId: ana.id,
-      scoreText: "4x9 @ 55kg, RPE 8",
-      studentNotes: "Senti-me forte hoje!",
-    },
-  });
-
-  await prisma.personalRecord.create({
-    data: {
-      studentId: ana.id,
-      exerciseId: agachamento.id,
-      type: "WEIGHT",
-      value: "70",
-      unit: "kg",
-      notes: "1RM testado em ginásio",
-    },
-  });
-
-  const fran = await prisma.exercise.upsert({
-    where: { trainerId_name: { trainerId: trainer.id, name: "Fran" } },
-    update: {},
-    create: { name: "Fran", trainerId: trainer.id },
-  });
-
-  await prisma.personalRecord.create({
-    data: {
-      studentId: ana.id,
-      exerciseId: fran.id,
-      type: "TIME",
-      value: "4:12",
-      notes: "21-15-9 thrusters/pull-ups",
-    },
-  });
+        await prisma.avaliacao.create({
+          data: {
+            id: `seed-${contador}`,
+            treinadorId: treinadores[ti].id,
+            avaliadorId: avaliador.id,
+            espaco,
+            tipoAulaId: tipoAula.id,
+            data,
+            hora,
+            nAlunos,
+            respostas: JSON.stringify(respostas),
+            observacoes: JSON.stringify(observacoes),
+            grelhaSnapshot: JSON.stringify(grelhaInicial),
+            classificacaoGeral,
+            comentarioGeral: comentariosPossiveis[Math.floor(rng() * comentariosPossiveis.length)],
+            confirmacaoAvaliadorData: data,
+            confirmacaoTreinadorData: treinadorConfirmou ? adicionarDias(data, 1 + Math.floor(rng() * 3)) : null,
+            guardadaEm: new Date(data + "T20:00:00.000Z"),
+          },
+        });
+      }
+    }
+  }
 
   console.log("Seed concluído.");
-  console.log("Treinador: treinador@exemplo.com / treinador123");
-  console.log("Aluna: ana@exemplo.com / aluno123");
-  console.log("Aluno: bruno@exemplo.com / aluno123");
+  console.log("Admin: admin@cfa.pt / admin123");
+  console.log("Avaliadores: headcoach1@cfa.pt (e 2, 3) / coach123");
+  console.log("Treinadores: treinadora@cfa.pt (e b..f) / treino123");
 }
 
 main()

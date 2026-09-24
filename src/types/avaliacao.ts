@@ -126,7 +126,6 @@ export function criterioRespondido(c: Criterio, respostas: Respostas): boolean {
 export function cabecalhoCompleto(c: Cabecalho): boolean {
   return (
     c.treinador !== "" &&
-    c.avaliador !== "" &&
     c.espaco !== "" &&
     c.data !== "" &&
     c.hora !== "" &&

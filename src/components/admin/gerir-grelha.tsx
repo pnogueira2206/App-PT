@@ -1,27 +1,24 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useSyncExternalStore } from "react";
+import { useRouter } from "next/navigation";
+import { useState, useTransition } from "react";
 import { Criterio, Seccao, TipoResposta } from "@/data/grelha";
 import {
-  adicionarCriterio,
-  adicionarSeccao,
-  alternarCriterioAtivo,
-  alternarSeccaoAtiva,
-  editarCriterio,
-  editarSeccao,
-  listarGrelha,
-  moverCriterio,
-  moverSeccao,
-  subscreverGrelha,
-} from "@/lib/grelha-store";
+  adicionarCriterioAction,
+  adicionarSeccaoAction,
+  alternarCriterioAtivoAction,
+  alternarSeccaoAtivaAction,
+  editarCriterioAction,
+  editarSeccaoAction,
+  moverCriterioAction,
+  moverSeccaoAction,
+} from "@/lib/grelha-actions";
 
 const inputClasses =
   "rounded-md border border-neutral-300 px-2 py-1 text-sm text-neutral-900 focus:border-black focus:outline-none focus:ring-1 focus:ring-black";
 
-export function GerirGrelha() {
-  const seccoes = useSyncExternalStore(subscreverGrelha, listarGrelha, listarGrelha);
-
+export function GerirGrelha({ seccoes }: { seccoes: Seccao[] }) {
   return (
     <div className="mx-auto max-w-lg px-4 py-4">
       <Link href="/admin" className="mb-3 inline-block text-sm font-medium text-neutral-500 underline">
@@ -45,6 +42,8 @@ export function GerirGrelha() {
 }
 
 function SeccaoCard({ seccao, podeSubir, podeDescer }: { seccao: Seccao; podeSubir: boolean; podeDescer: boolean }) {
+  const router = useRouter();
+  const [, startTransition] = useTransition();
   const [aEditar, setAEditar] = useState(false);
   const [nome, setNome] = useState(seccao.nome);
   const [percentagem, setPercentagem] = useState(String(seccao.percentagem));
@@ -57,7 +56,10 @@ function SeccaoCard({ seccao, podeSubir, podeDescer }: { seccao: Seccao; podeSub
           className="flex flex-wrap items-center gap-2"
           onSubmit={(e) => {
             e.preventDefault();
-            editarSeccao(seccao.id, { nome: nome.trim() || seccao.nome, percentagem: Number(percentagem) || 0 });
+            startTransition(async () => {
+              await editarSeccaoAction(seccao.id, { nome: nome.trim() || seccao.nome, percentagem: Number(percentagem) || 0 });
+              router.refresh();
+            });
             setAEditar(false);
           }}
         >
@@ -82,10 +84,20 @@ function SeccaoCard({ seccao, podeSubir, podeDescer }: { seccao: Seccao; podeSub
             <p className="text-xs text-neutral-500">{seccao.percentagem}%</p>
           </div>
           <div className="flex shrink-0 items-center gap-2">
-            <button type="button" disabled={!podeSubir} onClick={() => moverSeccao(seccao.id, -1)} className="text-xs disabled:opacity-30">
+            <button
+              type="button"
+              disabled={!podeSubir}
+              onClick={() => startTransition(async () => { await moverSeccaoAction(seccao.id, -1); router.refresh(); })}
+              className="text-xs disabled:opacity-30"
+            >
               ↑
             </button>
-            <button type="button" disabled={!podeDescer} onClick={() => moverSeccao(seccao.id, 1)} className="text-xs disabled:opacity-30">
+            <button
+              type="button"
+              disabled={!podeDescer}
+              onClick={() => startTransition(async () => { await moverSeccaoAction(seccao.id, 1); router.refresh(); })}
+              className="text-xs disabled:opacity-30"
+            >
               ↓
             </button>
             <button type="button" onClick={() => setAEditar(true)} className="text-xs font-medium text-neutral-500 underline">
@@ -93,7 +105,7 @@ function SeccaoCard({ seccao, podeSubir, podeDescer }: { seccao: Seccao; podeSub
             </button>
             <button
               type="button"
-              onClick={() => alternarSeccaoAtiva(seccao.id, !ativa)}
+              onClick={() => startTransition(async () => { await alternarSeccaoAtivaAction(seccao.id, !ativa); router.refresh(); })}
               className={`text-xs font-medium underline ${ativa ? "text-red-600" : "text-green-700"}`}
             >
               {ativa ? "Desativar" : "Reativar"}
@@ -130,6 +142,8 @@ function CriterioRow({
   podeSubir: boolean;
   podeDescer: boolean;
 }) {
+  const router = useRouter();
+  const [, startTransition] = useTransition();
   const [aEditar, setAEditar] = useState(false);
   const [texto, setTexto] = useState(criterio.texto);
   const [peso, setPeso] = useState(criterio.pesoMaximo == null ? "" : String(criterio.pesoMaximo));
@@ -141,9 +155,12 @@ function CriterioRow({
         className="flex flex-wrap items-center gap-2 py-1"
         onSubmit={(e) => {
           e.preventDefault();
-          editarCriterio(criterio.id, {
-            texto: texto.trim() || criterio.texto,
-            pesoMaximo: peso.trim() === "" ? null : Number(peso),
+          startTransition(async () => {
+            await editarCriterioAction(criterio.id, {
+              texto: texto.trim() || criterio.texto,
+              pesoMaximo: peso.trim() === "" ? null : Number(peso),
+            });
+            router.refresh();
           });
           setAEditar(false);
         }}
@@ -172,10 +189,20 @@ function CriterioRow({
         <span className="text-neutral-400"> ({criterio.pesoMaximo == null ? "sem peso" : criterio.pesoMaximo})</span>
       </p>
       <div className="flex shrink-0 items-center gap-2">
-        <button type="button" disabled={!podeSubir} onClick={() => moverCriterio(seccaoId, criterio.id, -1)} className="text-xs disabled:opacity-30">
+        <button
+          type="button"
+          disabled={!podeSubir}
+          onClick={() => startTransition(async () => { await moverCriterioAction(seccaoId, criterio.id, -1); router.refresh(); })}
+          className="text-xs disabled:opacity-30"
+        >
           ↑
         </button>
-        <button type="button" disabled={!podeDescer} onClick={() => moverCriterio(seccaoId, criterio.id, 1)} className="text-xs disabled:opacity-30">
+        <button
+          type="button"
+          disabled={!podeDescer}
+          onClick={() => startTransition(async () => { await moverCriterioAction(seccaoId, criterio.id, 1); router.refresh(); })}
+          className="text-xs disabled:opacity-30"
+        >
           ↓
         </button>
         <button type="button" onClick={() => setAEditar(true)} className="text-xs font-medium text-neutral-500 underline">
@@ -183,7 +210,7 @@ function CriterioRow({
         </button>
         <button
           type="button"
-          onClick={() => alternarCriterioAtivo(criterio.id, !ativo)}
+          onClick={() => startTransition(async () => { await alternarCriterioAtivoAction(criterio.id, !ativo); router.refresh(); })}
           className={`text-xs font-medium underline ${ativo ? "text-red-600" : "text-green-700"}`}
         >
           {ativo ? "Desativar" : "Reativar"}
@@ -194,6 +221,8 @@ function CriterioRow({
 }
 
 function NovoCriterioForm({ seccaoId }: { seccaoId: string }) {
+  const router = useRouter();
+  const [, startTransition] = useTransition();
   const [aAbrir, setAAbrir] = useState(false);
   const [texto, setTexto] = useState("");
   const [peso, setPeso] = useState("1");
@@ -213,10 +242,13 @@ function NovoCriterioForm({ seccaoId }: { seccaoId: string }) {
       onSubmit={(e) => {
         e.preventDefault();
         if (!texto.trim()) return;
-        adicionarCriterio(seccaoId, {
-          texto: texto.trim(),
-          pesoMaximo: tipo === "TEXTO_LIVRE" || peso.trim() === "" ? null : Number(peso),
-          tipoResposta: tipo,
+        startTransition(async () => {
+          await adicionarCriterioAction(seccaoId, {
+            texto: texto.trim(),
+            pesoMaximo: tipo === "TEXTO_LIVRE" || peso.trim() === "" ? null : Number(peso),
+            tipoResposta: tipo,
+          });
+          router.refresh();
         });
         setTexto("");
         setPeso("1");
@@ -258,6 +290,8 @@ function NovoCriterioForm({ seccaoId }: { seccaoId: string }) {
 }
 
 function NovaSeccaoForm() {
+  const router = useRouter();
+  const [, startTransition] = useTransition();
   const [aAbrir, setAAbrir] = useState(false);
   const [nome, setNome] = useState("");
   const [percentagem, setPercentagem] = useState("");
@@ -276,7 +310,10 @@ function NovaSeccaoForm() {
       onSubmit={(e) => {
         e.preventDefault();
         if (!nome.trim()) return;
-        adicionarSeccao(nome.trim(), Number(percentagem) || 0);
+        startTransition(async () => {
+          await adicionarSeccaoAction(nome.trim(), Number(percentagem) || 0);
+          router.refresh();
+        });
         setNome("");
         setPercentagem("");
         setAAbrir(false);

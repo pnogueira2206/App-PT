@@ -1,12 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState, useSyncExternalStore } from "react";
-import { AVALIACOES_VAZIAS, listarAvaliacoes } from "@/lib/avaliacoes-store";
-import { treinadoresStore } from "@/lib/treinadores-store";
-import { tiposAulaStore } from "@/lib/tipos-aula-store";
-
-const semSubscricao = () => () => {};
+import { useRouter } from "next/navigation";
+import { useMemo, useState, useTransition } from "react";
+import type { Papel } from "@prisma/client";
+import { confirmarComoTreinadorAction } from "@/lib/avaliacoes-actions";
+import { AvaliacaoGuardada } from "@/types/avaliacao";
 
 const inputClasses =
   "w-full rounded-md border border-neutral-300 px-3 py-2 text-sm text-neutral-900 focus:border-black focus:outline-none focus:ring-1 focus:ring-black";
@@ -20,10 +19,25 @@ function Campo({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-export function HistoricoList() {
-  const avaliacoes = useSyncExternalStore(semSubscricao, listarAvaliacoes, () => AVALIACOES_VAZIAS);
-  const treinadores = useSyncExternalStore(treinadoresStore.subscrever, treinadoresStore.listar, treinadoresStore.listar);
-  const tiposDeAula = useSyncExternalStore(tiposAulaStore.subscrever, tiposAulaStore.listar, tiposAulaStore.listar);
+interface ItemLista {
+  id: string;
+  nome: string;
+  ativo: boolean;
+}
+
+export function HistoricoList({
+  avaliacoesIniciais,
+  treinadores,
+  tiposAula,
+  papel,
+}: {
+  avaliacoesIniciais: AvaliacaoGuardada[];
+  treinadores: ItemLista[];
+  tiposAula: ItemLista[];
+  papel: Papel;
+}) {
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
   const [treinador, setTreinador] = useState("");
   const [tipoAula, setTipoAula] = useState("");
   const [dataDe, setDataDe] = useState("");
@@ -32,7 +46,7 @@ export function HistoricoList() {
   const [classMax, setClassMax] = useState("");
 
   const filtradas = useMemo(() => {
-    return avaliacoes
+    return avaliacoesIniciais
       .filter((a) => !treinador || a.cabecalho.treinador === treinador)
       .filter((a) => !tipoAula || a.cabecalho.tipoAula === tipoAula)
       .filter((a) => !dataDe || a.cabecalho.data >= dataDe)
@@ -40,7 +54,7 @@ export function HistoricoList() {
       .filter((a) => !classMin || Number(a.classificacaoGeral) >= Number(classMin))
       .filter((a) => !classMax || Number(a.classificacaoGeral) <= Number(classMax))
       .sort((a, b) => (a.cabecalho.data + a.cabecalho.hora < b.cabecalho.data + b.cabecalho.hora ? 1 : -1));
-  }, [avaliacoes, treinador, tipoAula, dataDe, dataAte, classMin, classMax]);
+  }, [avaliacoesIniciais, treinador, tipoAula, dataDe, dataAte, classMin, classMax]);
 
   const filtrosAtivos = treinador || tipoAula || dataDe || dataAte || classMin || classMax;
 
@@ -49,22 +63,24 @@ export function HistoricoList() {
       <h1 className="mb-4 text-lg font-semibold text-neutral-900">Histórico de avaliações</h1>
 
       <div className="mb-5 space-y-3 rounded-md border border-neutral-200 p-3">
-        <Campo label="Treinador">
-          <select className={inputClasses} value={treinador} onChange={(e) => setTreinador(e.target.value)}>
-            <option value="">Todos</option>
-            {treinadores.map((t) => (
-              <option key={t.id} value={t.nome}>
-                {t.nome}
-                {!t.ativo ? " (inativo)" : ""}
-              </option>
-            ))}
-          </select>
-        </Campo>
+        {papel !== "TREINADOR" && (
+          <Campo label="Treinador">
+            <select className={inputClasses} value={treinador} onChange={(e) => setTreinador(e.target.value)}>
+              <option value="">Todos</option>
+              {treinadores.map((t) => (
+                <option key={t.id} value={t.nome}>
+                  {t.nome}
+                  {!t.ativo ? " (inativo)" : ""}
+                </option>
+              ))}
+            </select>
+          </Campo>
+        )}
 
         <Campo label="Tipo de aula">
           <select className={inputClasses} value={tipoAula} onChange={(e) => setTipoAula(e.target.value)}>
             <option value="">Todos</option>
-            {tiposDeAula.map((t) => (
+            {tiposAula.map((t) => (
               <option key={t.id} value={t.nome}>
                 {t.nome}
                 {!t.ativo ? " (inativo)" : ""}
@@ -131,7 +147,7 @@ export function HistoricoList() {
         <div className="rounded-md border border-dashed border-neutral-300 px-4 py-10 text-center">
           <p className="text-sm font-medium text-neutral-700">Sem resultados</p>
           <p className="mt-1 text-xs text-neutral-500">
-            {avaliacoes.length === 0
+            {avaliacoesIniciais.length === 0
               ? "Ainda não há avaliações guardadas."
               : "Não há avaliações que correspondam aos filtros escolhidos."}
           </p>
@@ -139,11 +155,8 @@ export function HistoricoList() {
       ) : (
         <ul className="space-y-2">
           {filtradas.map((a) => (
-            <li key={a.id}>
-              <Link
-                href={`/historico/${a.id}`}
-                className="block rounded-md border border-neutral-200 px-3 py-3 transition hover:border-black"
-              >
+            <li key={a.id} className="rounded-md border border-neutral-200 px-3 py-3 transition hover:border-black">
+              <Link href={`/historico/${a.id}`} className="block">
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-semibold text-neutral-900">{a.cabecalho.treinador}</p>
                   <span className="rounded-full bg-black px-2 py-0.5 text-xs font-semibold text-white">
@@ -154,6 +167,27 @@ export function HistoricoList() {
                   {a.cabecalho.avaliador} · {a.cabecalho.data} · {a.cabecalho.tipoAula}
                 </p>
               </Link>
+              {papel === "TREINADOR" && (
+                <div className="mt-2 border-t border-neutral-100 pt-2">
+                  {a.confirmacaoTreinador.data ? (
+                    <span className="text-xs text-green-700">Confirmada em {a.confirmacaoTreinador.data}</span>
+                  ) : (
+                    <button
+                      type="button"
+                      disabled={pending}
+                      onClick={() =>
+                        startTransition(async () => {
+                          await confirmarComoTreinadorAction(a.id);
+                          router.refresh();
+                        })
+                      }
+                      className="text-xs font-medium underline"
+                    >
+                      Confirmar esta avaliação
+                    </button>
+                  )}
+                </div>
+              )}
             </li>
           ))}
         </ul>

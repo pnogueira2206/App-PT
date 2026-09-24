@@ -1,13 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState, useSyncExternalStore } from "react";
+import { useSession } from "next-auth/react";
+import { useMemo, useState } from "react";
 import { Seccao } from "@/data/grelha";
-import { guardarAvaliacao } from "@/lib/avaliacoes-store";
-import { listarGrelhaAtiva, subscreverGrelha } from "@/lib/grelha-store";
-import { treinadoresStore } from "@/lib/treinadores-store";
-import { tiposAulaStore } from "@/lib/tipos-aula-store";
-import { avaliadores, espacos } from "@/data/mock";
+import { guardarAvaliacaoAction } from "@/lib/avaliacoes-actions";
+import { espacos } from "@/data/mock";
 import {
   AvaliacaoDraft,
   agruparPorDimensao,
@@ -27,14 +25,18 @@ import { ResumoAvaliacao } from "./resumo-avaliacao";
 
 const STEP_CABECALHO = 0;
 
-export function NovaAvaliacaoForm() {
-  const seccoes = useSyncExternalStore(subscreverGrelha, listarGrelhaAtiva, listarGrelhaAtiva);
-  const treinadoresAtivos = useSyncExternalStore(
-    treinadoresStore.subscrever,
-    treinadoresStore.listarAtivos,
-    treinadoresStore.listarAtivos
-  );
-  const tiposAtivos = useSyncExternalStore(tiposAulaStore.subscrever, tiposAulaStore.listarAtivos, tiposAulaStore.listarAtivos);
+export function NovaAvaliacaoForm({
+  seccoesIniciais,
+  treinadores,
+  tiposDeAula,
+}: {
+  seccoesIniciais: Seccao[];
+  treinadores: string[];
+  tiposDeAula: string[];
+}) {
+  const { data: session } = useSession();
+  const nomeAvaliador = session?.user?.name ?? "";
+  const seccoes = seccoesIniciais;
 
   const STEP_FINAL = seccoes.length + 1;
   const STEP_RESUMO = seccoes.length + 2;
@@ -42,6 +44,8 @@ export function NovaAvaliacaoForm() {
   const [draft, setDraft] = useState<AvaliacaoDraft>(draftVazio());
   const [step, setStep] = useState(STEP_CABECALHO);
   const [guardada, setGuardada] = useState(false);
+  const [aGuardar, setAGuardar] = useState(false);
+  const [erro, setErro] = useState("");
 
   const stepsInfo: StepInfo[] = useMemo(() => {
     const secoes = seccoes.map((s) => ({ label: s.nome, completo: seccaoCompleta(s, draft.respostas) }));
@@ -50,12 +54,14 @@ export function NovaAvaliacaoForm() {
       ...secoes,
       {
         label: "Classificação",
-        completo: classificacaoValida(draft.classificacaoGeral) && confirmacaoAvaliadorCompleta(draft.confirmacaoAvaliador),
+        completo:
+          classificacaoValida(draft.classificacaoGeral) &&
+          confirmacaoAvaliadorCompleta({ nome: nomeAvaliador, data: draft.confirmacaoAvaliador.data }),
       },
     ];
     const tudo = anteriores.every((s) => s.completo);
     return [...anteriores, { label: "Resumo", completo: tudo }];
-  }, [draft, seccoes]);
+  }, [draft, seccoes, nomeAvaliador]);
 
   const tudoCompleto = stepsInfo[STEP_RESUMO].completo;
 
@@ -66,7 +72,7 @@ export function NovaAvaliacaoForm() {
         <h1 className="text-xl font-semibold text-neutral-900">Avaliação guardada</h1>
         <p className="text-sm text-neutral-600">
           A avaliação de {draft.cabecalho.treinador} em {draft.cabecalho.data} foi registada e já está visível no
-          Histórico (dados fictícios, guardados apenas neste browser).
+          Histórico.
         </p>
         <div className="mt-4 flex gap-3">
           <button
@@ -97,24 +103,22 @@ export function NovaAvaliacaoForm() {
 
       <div className="mx-auto w-full max-w-lg flex-1 px-4 py-4">
         {step === STEP_CABECALHO && (
-          <CabecalhoStep
-            draft={draft}
-            setDraft={setDraft}
-            treinadores={treinadoresAtivos.map((t) => t.nome)}
-            tiposDeAula={tiposAtivos.map((t) => t.nome)}
-          />
+          <CabecalhoStep draft={draft} setDraft={setDraft} treinadores={treinadores} tiposDeAula={tiposDeAula} />
         )}
 
         {step > STEP_CABECALHO && step < STEP_FINAL && (
           <SeccaoStep draft={draft} setDraft={setDraft} seccao={seccoes[step - 1]} indice={step} />
         )}
 
-        {step === STEP_FINAL && <FinalStep draft={draft} setDraft={setDraft} seccoes={seccoes} />}
+        {step === STEP_FINAL && (
+          <FinalStep draft={draft} setDraft={setDraft} seccoes={seccoes} nomeAvaliador={nomeAvaliador} />
+        )}
 
-        {step === STEP_RESUMO && <ResumoAvaliacao draft={draft} seccoes={seccoes} />}
+        {step === STEP_RESUMO && <ResumoAvaliacao draft={{ ...draft, cabecalho: { ...draft.cabecalho, avaliador: nomeAvaliador } }} seccoes={seccoes} />}
       </div>
 
       <div className="fixed inset-x-0 bottom-0 border-t border-neutral-200 bg-white">
+        {erro && <p className="mx-auto max-w-lg px-4 pt-2 text-xs text-red-600">{erro}</p>}
         <div className="mx-auto flex max-w-lg items-center justify-between gap-3 px-4 py-3">
           <button
             type="button"
@@ -136,14 +140,25 @@ export function NovaAvaliacaoForm() {
           ) : (
             <button
               type="button"
-              disabled={!tudoCompleto}
-              onClick={() => {
-                guardarAvaliacao(draft, seccoes);
-                setGuardada(true);
+              disabled={!tudoCompleto || aGuardar}
+              onClick={async () => {
+                setAGuardar(true);
+                setErro("");
+                try {
+                  await guardarAvaliacaoAction(
+                    { ...draft, cabecalho: { ...draft.cabecalho, avaliador: nomeAvaliador } },
+                    seccoes
+                  );
+                  setGuardada(true);
+                } catch (e) {
+                  setErro(e instanceof Error ? e.message : "Não foi possível guardar a avaliação.");
+                } finally {
+                  setAGuardar(false);
+                }
               }}
               className="rounded-md bg-black px-4 py-2 text-sm font-medium text-white disabled:opacity-40"
             >
-              Guardar avaliação
+              {aGuardar ? "A guardar..." : "Guardar avaliação"}
             </button>
           )}
         </div>
@@ -193,17 +208,6 @@ function CabecalhoStep({
           {treinadores.map((t) => (
             <option key={t} value={t}>
               {t}
-            </option>
-          ))}
-        </select>
-      </Campo>
-
-      <Campo label="Avaliador">
-        <select className={inputClasses} value={c.avaliador} onChange={(e) => update({ avaliador: e.target.value })}>
-          <option value="">Seleciona...</option>
-          {avaliadores.map((a) => (
-            <option key={a} value={a}>
-              {a}
             </option>
           ))}
         </select>
@@ -328,10 +332,12 @@ function FinalStep({
   draft,
   setDraft,
   seccoes,
+  nomeAvaliador,
 }: {
   draft: AvaliacaoDraft;
   setDraft: React.Dispatch<React.SetStateAction<AvaliacaoDraft>>;
   seccoes: Seccao[];
+  nomeAvaliador: string;
 }) {
   const total = totalGeralObtido(seccoes, draft.respostas);
 
@@ -369,7 +375,7 @@ function FinalStep({
 
       <div className="rounded-md border border-neutral-200 p-3">
         <p className="mb-2 text-sm font-semibold text-neutral-900">Confirmação do avaliador</p>
-        <p className="mb-2 text-sm text-neutral-700">{draft.cabecalho.avaliador || "— (define o avaliador no cabeçalho)"}</p>
+        <p className="mb-2 text-sm text-neutral-700">{nomeAvaliador}</p>
         <Campo label="Data de confirmação">
           <input
             type="date"
@@ -378,7 +384,7 @@ function FinalStep({
             onChange={(e) =>
               setDraft((d) => ({
                 ...d,
-                confirmacaoAvaliador: { nome: d.cabecalho.avaliador, data: e.target.value },
+                confirmacaoAvaliador: { nome: nomeAvaliador, data: e.target.value },
               }))
             }
           />
@@ -388,21 +394,8 @@ function FinalStep({
       <div className="rounded-md border border-neutral-200 p-3">
         <p className="mb-2 text-sm font-semibold text-neutral-900">Confirmação do treinador</p>
         <p className="mb-2 text-sm text-neutral-700">{draft.cabecalho.treinador || "— (define o treinador no cabeçalho)"}</p>
-        <Campo label="Data de confirmação (opcional)">
-          <input
-            type="date"
-            className={inputClasses}
-            value={draft.confirmacaoTreinador.data}
-            onChange={(e) =>
-              setDraft((d) => ({
-                ...d,
-                confirmacaoTreinador: { nome: d.cabecalho.treinador, data: e.target.value },
-              }))
-            }
-          />
-        </Campo>
-        <p className="mt-1 text-xs text-neutral-500">
-          Deixa em branco se o treinador ainda não confirmou — a avaliação pode ficar &quot;por confirmar&quot;.
+        <p className="text-xs text-neutral-500">
+          O treinador confirma a avaliação através da própria conta, no Histórico.
         </p>
       </div>
     </div>

@@ -1,16 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { useSyncExternalStore } from "react";
-import { listarGrelhaAtiva, subscreverGrelha } from "@/lib/grelha-store";
+import { useRouter } from "next/navigation";
+import { useTransition } from "react";
+import { Seccao } from "@/data/grelha";
 import { PILARES } from "@/data/pilares";
-import { ATRIBUICOES_VAZIAS, alternarPilar, obterAtribuicoesPilares, subscreverPilares } from "@/lib/pilares-store";
+import { alternarPilarAction, AtribuicoesPilares } from "@/lib/pilares-actions";
 
-export function CriteriosPilares() {
-  const atribuicoes = useSyncExternalStore(subscreverPilares, obterAtribuicoesPilares, () => ATRIBUICOES_VAZIAS);
-  const grelha = useSyncExternalStore(subscreverGrelha, listarGrelhaAtiva, listarGrelhaAtiva);
+export function CriteriosPilares({ seccoes, atribuicoes }: { seccoes: Seccao[]; atribuicoes: AtribuicoesPilares }) {
+  const router = useRouter();
+  const [, startTransition] = useTransition();
 
-  const criteriosPontuaveis = grelha.flatMap((s) => s.criterios.filter((c) => c.tipoResposta === "PONTOS"));
+  const criteriosPontuaveis = seccoes.flatMap((s) => s.criterios.filter((c) => c.tipoResposta === "PONTOS"));
   const total = criteriosPontuaveis.length;
   const categorizados = criteriosPontuaveis.filter((c) => (atribuicoes[c.id]?.length ?? 0) > 0).length;
 
@@ -38,7 +39,7 @@ export function CriteriosPilares() {
       </div>
 
       <div className="space-y-6">
-        {grelha.map((seccao) => (
+        {seccoes.map((seccao) => (
           <section key={seccao.id}>
             <h2 className="mb-2 text-sm font-semibold text-neutral-900">{seccao.nome}</h2>
             <div className="space-y-2">
@@ -57,7 +58,12 @@ export function CriteriosPilares() {
                             <button
                               key={p}
                               type="button"
-                              onClick={() => alternarPilar(c.id, p)}
+                              onClick={() =>
+                                startTransition(async () => {
+                                  await alternarPilarAction(c.id, p);
+                                  router.refresh();
+                                })
+                              }
                               className={`rounded-full border px-3 py-1.5 text-xs font-medium transition ${
                                 selecionado ? "border-black bg-black text-white" : "border-neutral-300 text-neutral-700"
                               }`}

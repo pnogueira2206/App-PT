@@ -1,21 +1,23 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useSyncExternalStore } from "react";
-import { treinadoresStore } from "@/lib/treinadores-store";
-import { tiposAulaStore } from "@/lib/tipos-aula-store";
+import { useRouter } from "next/navigation";
+import { useState, useTransition } from "react";
+import {
+  adicionarTipoAulaAction,
+  alternarTipoAulaAtivoAction,
+  editarTipoAulaAction,
+} from "@/lib/tipos-aula-actions";
 
-export function GerirLista({
-  titulo,
-  singular,
-  tipo,
-}: {
-  titulo: string;
-  singular: string;
-  tipo: "treinadores" | "tipos-aula";
-}) {
-  const store = tipo === "treinadores" ? treinadoresStore : tiposAulaStore;
-  const itens = useSyncExternalStore(store.subscrever, store.listar, store.listar);
+interface Item {
+  id: string;
+  nome: string;
+  ativo: boolean;
+}
+
+export function GerirTiposAula({ itens }: { itens: Item[] }) {
+  const router = useRouter();
+  const [, startTransition] = useTransition();
   const [novoNome, setNovoNome] = useState("");
   const [aEditar, setAEditar] = useState<string | null>(null);
   const [nomeEdicao, setNomeEdicao] = useState("");
@@ -25,20 +27,23 @@ export function GerirLista({
       <Link href="/admin" className="mb-3 inline-block text-sm font-medium text-neutral-500 underline">
         ← Voltar ao Admin
       </Link>
-      <h1 className="mb-4 text-lg font-semibold text-neutral-900">{titulo}</h1>
+      <h1 className="mb-4 text-lg font-semibold text-neutral-900">Tipos de Aula</h1>
 
       <form
         onSubmit={(e) => {
           e.preventDefault();
           if (!novoNome.trim()) return;
-          store.adicionar(novoNome.trim());
-          setNovoNome("");
+          startTransition(async () => {
+            await adicionarTipoAulaAction(novoNome.trim());
+            setNovoNome("");
+            router.refresh();
+          });
         }}
         className="mb-5 flex gap-2"
       >
         <input
           className="flex-1 rounded-md border border-neutral-300 px-3 py-2 text-sm text-neutral-900 focus:border-black focus:outline-none focus:ring-1 focus:ring-black"
-          placeholder={`Novo ${singular}`}
+          placeholder="Novo tipo de aula"
           value={novoNome}
           onChange={(e) => setNovoNome(e.target.value)}
         />
@@ -55,7 +60,12 @@ export function GerirLista({
                 className="flex flex-1 gap-2"
                 onSubmit={(e) => {
                   e.preventDefault();
-                  if (nomeEdicao.trim()) store.editar(item.id, nomeEdicao.trim());
+                  if (nomeEdicao.trim()) {
+                    startTransition(async () => {
+                      await editarTipoAulaAction(item.id, nomeEdicao.trim());
+                      router.refresh();
+                    });
+                  }
                   setAEditar(null);
                 }}
               >
@@ -87,7 +97,12 @@ export function GerirLista({
                   </button>
                   <button
                     type="button"
-                    onClick={() => store.alternarAtivo(item.id, !item.ativo)}
+                    onClick={() =>
+                      startTransition(async () => {
+                        await alternarTipoAulaAtivoAction(item.id, !item.ativo);
+                        router.refresh();
+                      })
+                    }
                     className={`text-xs font-medium underline ${item.ativo ? "text-red-600" : "text-green-700"}`}
                   >
                     {item.ativo ? "Desativar" : "Reativar"}

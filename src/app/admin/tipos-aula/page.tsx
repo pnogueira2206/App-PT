@@ -1,5 +1,7 @@
-import { GerirLista } from "@/components/admin/gerir-lista";
+import { GerirTiposAula } from "@/components/admin/gerir-tipos-aula";
+import { listarTiposAula } from "@/lib/tipos-aula-actions";
 
-export default function TiposAulaPage() {
-  return <GerirLista titulo="Tipos de Aula" singular="tipo de aula" tipo="tipos-aula" />;
+export default async function TiposAulaPage() {
+  const itens = await listarTiposAula();
+  return <GerirTiposAula itens={itens} />;
 }

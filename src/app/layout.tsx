@@ -2,8 +2,11 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Image from "next/image";
 import "./globals.css";
+import { SessionProvider } from "next-auth/react";
 import { ServiceWorkerRegister } from "@/components/service-worker-register";
 import { NavTabs } from "@/components/nav-tabs";
+import { SignOutButton } from "@/components/sign-out-button";
+import { auth } from "@/lib/auth";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -40,23 +43,33 @@ export const viewport: Viewport = {
   themeColor: "#000000",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  const session = await auth();
+
   return (
     <html
       lang="pt"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-white text-neutral-900">
-        <header className="flex items-center gap-3 bg-black px-4 py-3 text-white">
-          <Image src="/logo-cfa.jpg" alt="CrossFit Alvalade" width={32} height={32} className="rounded" />
-          <div>
-            <p className="text-sm font-semibold leading-tight">CFA Avaliações</p>
-            <p className="text-xs leading-tight text-neutral-400">Avaliação de desempenho do staff</p>
-          </div>
-        </header>
-        <NavTabs />
-        <main className="flex-1">{children}</main>
-        <ServiceWorkerRegister />
+        <SessionProvider session={session}>
+          <header className="flex items-center gap-3 bg-black px-4 py-3 text-white">
+            <Image src="/logo-cfa.jpg" alt="CrossFit Alvalade" width={32} height={32} className="rounded" />
+            <div className="flex-1">
+              <p className="text-sm font-semibold leading-tight">CFA Avaliações</p>
+              <p className="text-xs leading-tight text-neutral-400">Avaliação de desempenho do staff</p>
+            </div>
+            {session && (
+              <div className="text-right">
+                <p className="text-xs text-neutral-300">{session.user.name}</p>
+                <SignOutButton />
+              </div>
+            )}
+          </header>
+          {session && <NavTabs papel={session.user.papel} />}
+          <main className="flex-1">{children}</main>
+          <ServiceWorkerRegister />
+        </SessionProvider>
       </body>
     </html>
   );

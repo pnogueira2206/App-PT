@@ -32,7 +32,7 @@ export function AvaliacaoDetalhe({ id }: { id: string }) {
       </Link>
       <div className="rounded-md bg-neutral-100 px-3 py-2 text-xs text-neutral-500">Consulta apenas de leitura</div>
       <div className="mt-4">
-        <ResumoAvaliacao draft={avaliacao} />
+        <ResumoAvaliacao draft={avaliacao} seccoes={avaliacao.grelhaSnapshot} />
       </div>
     </div>
   );

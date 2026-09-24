@@ -1,3 +1,4 @@
+import { Seccao } from "@/data/grelha";
 import { gerarAvaliacoesFicticias } from "@/data/seed-avaliacoes";
 import { AvaliacaoDraft, AvaliacaoGuardada } from "@/types/avaliacao";
 
@@ -32,12 +33,13 @@ export function obterAvaliacao(id: string): AvaliacaoGuardada | undefined {
   return carregar().find((a) => a.id === id);
 }
 
-export function guardarAvaliacao(draft: AvaliacaoDraft): AvaliacaoGuardada {
+export function guardarAvaliacao(draft: AvaliacaoDraft, grelhaSnapshot: Seccao[]): AvaliacaoGuardada {
   const anteriores = carregar();
   const nova: AvaliacaoGuardada = {
     ...draft,
     id: `av-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
     guardadaEm: new Date().toISOString(),
+    grelhaSnapshot,
   };
   cache = [...anteriores, nova];
   if (typeof window !== "undefined") {

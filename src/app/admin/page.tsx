@@ -1,5 +1,5 @@
-import { CriteriosPilares } from "@/components/admin/criterios-pilares";
+import { AdminMenu } from "@/components/admin/admin-menu";
 
 export default function AdminPage() {
-  return <CriteriosPilares />;
+  return <AdminMenu />;
 }

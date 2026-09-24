@@ -1,4 +1,4 @@
-import { grelha } from "@/data/grelha";
+import { Seccao } from "@/data/grelha";
 import { AvaliacaoDraft, dimensoesDaSeccao, subtotalDimensao, subtotalSeccao, totalGeralObtido } from "@/types/avaliacao";
 
 function Linha({ label, valor }: { label: string; valor: string }) {
@@ -10,8 +10,8 @@ function Linha({ label, valor }: { label: string; valor: string }) {
   );
 }
 
-export function ResumoAvaliacao({ draft }: { draft: AvaliacaoDraft }) {
-  const total = totalGeralObtido(draft.respostas);
+export function ResumoAvaliacao({ draft, seccoes }: { draft: AvaliacaoDraft; seccoes: Seccao[] }) {
+  const total = totalGeralObtido(seccoes, draft.respostas);
 
   return (
     <div className="space-y-6">
@@ -28,7 +28,7 @@ export function ResumoAvaliacao({ draft }: { draft: AvaliacaoDraft }) {
         <Linha label="Nº de alunos" valor={draft.cabecalho.nAlunos || "—"} />
       </section>
 
-      {grelha.map((seccao) => {
+      {seccoes.map((seccao) => {
         const st = subtotalSeccao(seccao, draft.respostas);
         const dims = dimensoesDaSeccao(seccao);
         return (

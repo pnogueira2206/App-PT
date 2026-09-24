@@ -1,11 +1,11 @@
 "use client";
 
 import { useMemo, useState, useSyncExternalStore } from "react";
-import { treinadores } from "@/data/mock";
 import { PILARES } from "@/data/pilares";
 import { AVALIACOES_VAZIAS, listarAvaliacoes } from "@/lib/avaliacoes-store";
 import { ATRIBUICOES_VAZIAS, obterAtribuicoesPilares, subscreverPilares } from "@/lib/pilares-store";
 import { percentagemPorPilar } from "@/lib/pilares-notas";
+import { treinadoresStore } from "@/lib/treinadores-store";
 import { EvolucaoChart } from "./evolucao-chart";
 import { PilaresRadarChart } from "./pilares-radar-chart";
 
@@ -17,7 +17,8 @@ const inputClasses =
 export function PorTreinadorView() {
   const avaliacoes = useSyncExternalStore(semSubscricao, listarAvaliacoes, () => AVALIACOES_VAZIAS);
   const atribuicoes = useSyncExternalStore(subscreverPilares, obterAtribuicoesPilares, () => ATRIBUICOES_VAZIAS);
-  const [treinador, setTreinador] = useState<string>(treinadores[0]);
+  const treinadores = useSyncExternalStore(treinadoresStore.subscrever, treinadoresStore.listar, treinadoresStore.listar);
+  const [treinador, setTreinador] = useState<string>(() => treinadoresStore.listar()[0]?.nome ?? "");
 
   const doTreinador = useMemo(
     () =>
@@ -30,8 +31,12 @@ export function PorTreinadorView() {
   const ultima = doTreinador[doTreinador.length - 1];
   const anterior = doTreinador.length >= 2 ? doTreinador[doTreinador.length - 2] : null;
 
-  const notasUltima = ultima ? PILARES.map((p) => percentagemPorPilar(ultima.respostas, p, atribuicoes)) : [];
-  const notasAnterior = anterior ? PILARES.map((p) => percentagemPorPilar(anterior.respostas, p, atribuicoes)) : null;
+  const notasUltima = ultima
+    ? PILARES.map((p) => percentagemPorPilar(ultima.grelhaSnapshot, ultima.respostas, p, atribuicoes))
+    : [];
+  const notasAnterior = anterior
+    ? PILARES.map((p) => percentagemPorPilar(anterior.grelhaSnapshot, anterior.respostas, p, atribuicoes))
+    : null;
 
   const semCriteriosCategorizados = Object.keys(atribuicoes).length === 0;
 
@@ -43,8 +48,9 @@ export function PorTreinadorView() {
         <span className="mb-1 block text-sm font-medium text-neutral-700">Treinador</span>
         <select className={inputClasses} value={treinador} onChange={(e) => setTreinador(e.target.value)}>
           {treinadores.map((t) => (
-            <option key={t} value={t}>
-              {t}
+            <option key={t.id} value={t.nome}>
+              {t.nome}
+              {!t.ativo ? " (inativo)" : ""}
             </option>
           ))}
         </select>

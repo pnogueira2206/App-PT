@@ -1,4 +1,4 @@
-import { Criterio, Seccao, grelha } from "@/data/grelha";
+import { Criterio, Seccao } from "@/data/grelha";
 
 export interface Cabecalho {
   treinador: string;
@@ -35,32 +35,23 @@ export interface AvaliacaoDraft {
 export interface AvaliacaoGuardada extends AvaliacaoDraft {
   id: string;
   guardadaEm: string;
+  /** Cópia da grelha (secções/critérios ativos) tal como estava no momento em que a avaliação foi preenchida. */
+  grelhaSnapshot: Seccao[];
 }
 
 export function cabecalhoVazio(): Cabecalho {
   return { treinador: "", avaliador: "", espaco: "", data: "", hora: "", tipoAula: "", nAlunos: "" };
 }
 
-export function respostasVazias(): Respostas {
-  const respostas: Respostas = {};
-  for (const seccao of grelha) {
-    for (const c of seccao.criterios) {
-      respostas[c.id] =
-        c.tipoResposta === "TEXTO_LIVRE"
-          ? { tipo: "TEXTO_LIVRE", texto: "" }
-          : { tipo: "PONTOS", valor: null, na: false };
-    }
-  }
-  return respostas;
-}
-
+/**
+ * Começa sempre vazio — uma entrada em falta para um critério significa
+ * "ainda não respondido", tanto para critérios de pontos como de texto livre.
+ */
 export function draftVazio(): AvaliacaoDraft {
-  const observacoes: ObservacoesSeccao = {};
-  for (const seccao of grelha) observacoes[seccao.id] = "";
   return {
     cabecalho: cabecalhoVazio(),
-    respostas: respostasVazias(),
-    observacoes,
+    respostas: {},
+    observacoes: {},
     classificacaoGeral: "",
     comentarioGeral: "",
     confirmacaoAvaliador: { nome: "", data: "" },
@@ -105,10 +96,10 @@ export function subtotal(criterios: Criterio[], respostas: Respostas): { obtidos
   for (const c of criterios) {
     if (c.tipoResposta !== "PONTOS" || c.pesoMaximo == null) continue;
     const r = respostas[c.id];
-    if (!r || r.tipo !== "PONTOS") continue;
-    if (r.na) continue;
+    // Critério ainda não respondido conta para o máximo (só N/A explícito exclui).
+    if (r?.tipo === "PONTOS" && r.na) continue;
     max += c.pesoMaximo;
-    obtidos += r.valor ?? 0;
+    obtidos += r?.tipo === "PONTOS" ? (r.valor ?? 0) : 0;
   }
   return { obtidos, max };
 }
@@ -159,7 +150,7 @@ export function confirmacaoAvaliadorCompleta(c: Confirmacao): boolean {
   return c.nome.trim() !== "" && c.data !== "";
 }
 
-export function totalGeralObtido(respostas: Respostas): { obtidos: number; max: number } {
-  const todosOsCriterios = grelha.flatMap((s) => s.criterios);
+export function totalGeralObtido(seccoes: Seccao[], respostas: Respostas): { obtidos: number; max: number } {
+  const todosOsCriterios = seccoes.flatMap((s) => s.criterios);
   return subtotal(todosOsCriterios, respostas);
 }

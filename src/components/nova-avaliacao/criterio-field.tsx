@@ -21,11 +21,11 @@ export function CriterioField({
   onChange,
 }: {
   criterio: Criterio;
-  resposta: Resposta;
+  resposta: Resposta | undefined;
   onChange: (r: Resposta) => void;
 }) {
   if (criterio.tipoResposta === "TEXTO_LIVRE") {
-    const texto = resposta.tipo === "TEXTO_LIVRE" ? resposta.texto : "";
+    const texto = resposta?.tipo === "TEXTO_LIVRE" ? resposta.texto : "";
     return (
       <div className="py-3 border-b border-neutral-200 last:border-b-0">
         <p className="text-sm font-medium text-neutral-900">{criterio.texto}</p>
@@ -41,8 +41,8 @@ export function CriterioField({
   }
 
   const semPeso = criterio.pesoMaximo == null;
-  const valor = resposta.tipo === "PONTOS" ? resposta.valor : null;
-  const na = resposta.tipo === "PONTOS" ? resposta.na : false;
+  const valor = resposta?.tipo === "PONTOS" ? resposta.valor : null;
+  const na = resposta?.tipo === "PONTOS" ? resposta.na : false;
 
   const selecionar = (novoValor: number | null, novoNa: boolean) => {
     onChange({ tipo: "PONTOS", valor: novoValor, na: novoNa });

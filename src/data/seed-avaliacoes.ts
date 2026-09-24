@@ -1,4 +1,4 @@
-import { grelha } from "@/data/grelha";
+import { grelhaInicial } from "@/data/grelha";
 import { avaliadores, espacos, tiposDeAula, treinadores } from "@/data/mock";
 import { AvaliacaoGuardada, Respostas } from "@/types/avaliacao";
 
@@ -32,7 +32,7 @@ const comentariosPossiveis = [
 
 function gerarRespostas(rng: () => number): Respostas {
   const respostas: Respostas = {};
-  for (const seccao of grelha) {
+  for (const seccao of grelhaInicial) {
     for (const c of seccao.criterios) {
       if (c.tipoResposta === "TEXTO_LIVRE") {
         respostas[c.id] = {
@@ -90,7 +90,7 @@ export function gerarAvaliacoesFicticias(): AvaliacaoGuardada[] {
       const classificacaoGeral = String(55 + Math.floor(rng() * 41));
 
       const observacoes: Record<string, string> = {};
-      for (const seccao of grelha) {
+      for (const seccao of grelhaInicial) {
         observacoes[seccao.id] = observacoesPossiveis[Math.floor(rng() * observacoesPossiveis.length)];
       }
 
@@ -100,6 +100,7 @@ export function gerarAvaliacoesFicticias(): AvaliacaoGuardada[] {
       avaliacoes.push({
         id: `seed-${contador}`,
         guardadaEm: data + "T20:00:00.000Z",
+        grelhaSnapshot: grelhaInicial,
         cabecalho: { treinador, avaliador, espaco, data, hora, tipoAula, nAlunos },
         respostas,
         observacoes,

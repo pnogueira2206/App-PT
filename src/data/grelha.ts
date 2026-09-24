@@ -8,6 +8,8 @@ export interface Criterio {
   tipoResposta: TipoResposta;
   /** Nome da dimensão/subgrupo indicado na ficha original (para as notas por dimensão) */
   dimensao?: string;
+  /** false = desativado pelo Admin; ausente/true = ativo */
+  ativo?: boolean;
 }
 
 export interface Seccao {
@@ -15,12 +17,14 @@ export interface Seccao {
   nome: string;
   percentagem: number;
   criterios: Criterio[];
+  /** false = desativada pelo Admin; ausente/true = ativa */
+  ativa?: boolean;
 }
 
 let n = 0;
 const id = () => `c${++n}`;
 
-export const grelha: Seccao[] = [
+export const grelhaInicial: Seccao[] = [
   {
     id: "s1",
     nome: "Plano de Aula",
@@ -177,15 +181,3 @@ export const grelha: Seccao[] = [
     ],
   },
 ];
-
-export function dimensoesDaSeccao(seccao: Seccao): string[] {
-  const vistas = new Set<string>();
-  const ordem: string[] = [];
-  for (const c of seccao.criterios) {
-    if (c.dimensao && !vistas.has(c.dimensao)) {
-      vistas.add(c.dimensao);
-      ordem.push(c.dimensao);
-    }
-  }
-  return ordem;
-}

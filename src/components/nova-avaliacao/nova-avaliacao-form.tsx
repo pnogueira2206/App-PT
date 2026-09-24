@@ -1,10 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
-import { grelha } from "@/data/grelha";
+import { useMemo, useState, useSyncExternalStore } from "react";
+import { Seccao } from "@/data/grelha";
 import { guardarAvaliacao } from "@/lib/avaliacoes-store";
-import { avaliadores, espacos, tiposDeAula, treinadores } from "@/data/mock";
+import { listarGrelhaAtiva, subscreverGrelha } from "@/lib/grelha-store";
+import { treinadoresStore } from "@/lib/treinadores-store";
+import { tiposAulaStore } from "@/lib/tipos-aula-store";
+import { avaliadores, espacos } from "@/data/mock";
 import {
   AvaliacaoDraft,
   agruparPorDimensao,
@@ -23,16 +26,25 @@ import { StepInfo, StepperNav } from "./stepper-nav";
 import { ResumoAvaliacao } from "./resumo-avaliacao";
 
 const STEP_CABECALHO = 0;
-const STEP_FINAL = grelha.length + 1;
-const STEP_RESUMO = grelha.length + 2;
 
 export function NovaAvaliacaoForm() {
+  const seccoes = useSyncExternalStore(subscreverGrelha, listarGrelhaAtiva, listarGrelhaAtiva);
+  const treinadoresAtivos = useSyncExternalStore(
+    treinadoresStore.subscrever,
+    treinadoresStore.listarAtivos,
+    treinadoresStore.listarAtivos
+  );
+  const tiposAtivos = useSyncExternalStore(tiposAulaStore.subscrever, tiposAulaStore.listarAtivos, tiposAulaStore.listarAtivos);
+
+  const STEP_FINAL = seccoes.length + 1;
+  const STEP_RESUMO = seccoes.length + 2;
+
   const [draft, setDraft] = useState<AvaliacaoDraft>(draftVazio());
   const [step, setStep] = useState(STEP_CABECALHO);
   const [guardada, setGuardada] = useState(false);
 
   const stepsInfo: StepInfo[] = useMemo(() => {
-    const secoes = grelha.map((s) => ({ label: s.nome, completo: seccaoCompleta(s, draft.respostas) }));
+    const secoes = seccoes.map((s) => ({ label: s.nome, completo: seccaoCompleta(s, draft.respostas) }));
     const anteriores = [
       { label: "Cabeçalho", completo: cabecalhoCompleto(draft.cabecalho) },
       ...secoes,
@@ -43,7 +55,7 @@ export function NovaAvaliacaoForm() {
     ];
     const tudo = anteriores.every((s) => s.completo);
     return [...anteriores, { label: "Resumo", completo: tudo }];
-  }, [draft]);
+  }, [draft, seccoes]);
 
   const tudoCompleto = stepsInfo[STEP_RESUMO].completo;
 
@@ -85,16 +97,21 @@ export function NovaAvaliacaoForm() {
 
       <div className="mx-auto w-full max-w-lg flex-1 px-4 py-4">
         {step === STEP_CABECALHO && (
-          <CabecalhoStep draft={draft} setDraft={setDraft} />
+          <CabecalhoStep
+            draft={draft}
+            setDraft={setDraft}
+            treinadores={treinadoresAtivos.map((t) => t.nome)}
+            tiposDeAula={tiposAtivos.map((t) => t.nome)}
+          />
         )}
 
         {step > STEP_CABECALHO && step < STEP_FINAL && (
-          <SeccaoStep draft={draft} setDraft={setDraft} seccaoIndex={step - 1} />
+          <SeccaoStep draft={draft} setDraft={setDraft} seccao={seccoes[step - 1]} indice={step} />
         )}
 
-        {step === STEP_FINAL && <FinalStep draft={draft} setDraft={setDraft} />}
+        {step === STEP_FINAL && <FinalStep draft={draft} setDraft={setDraft} seccoes={seccoes} />}
 
-        {step === STEP_RESUMO && <ResumoAvaliacao draft={draft} />}
+        {step === STEP_RESUMO && <ResumoAvaliacao draft={draft} seccoes={seccoes} />}
       </div>
 
       <div className="fixed inset-x-0 bottom-0 border-t border-neutral-200 bg-white">
@@ -121,7 +138,7 @@ export function NovaAvaliacaoForm() {
               type="button"
               disabled={!tudoCompleto}
               onClick={() => {
-                guardarAvaliacao(draft);
+                guardarAvaliacao(draft, seccoes);
                 setGuardada(true);
               }}
               className="rounded-md bg-black px-4 py-2 text-sm font-medium text-white disabled:opacity-40"
@@ -155,9 +172,13 @@ const inputClasses =
 function CabecalhoStep({
   draft,
   setDraft,
+  treinadores,
+  tiposDeAula,
 }: {
   draft: AvaliacaoDraft;
   setDraft: React.Dispatch<React.SetStateAction<AvaliacaoDraft>>;
+  treinadores: string[];
+  tiposDeAula: string[];
 }) {
   const c = draft.cabecalho;
   const update = (patch: Partial<typeof c>) => setDraft((d) => ({ ...d, cabecalho: { ...d.cabecalho, ...patch } }));
@@ -236,13 +257,14 @@ function CabecalhoStep({
 function SeccaoStep({
   draft,
   setDraft,
-  seccaoIndex,
+  seccao,
+  indice,
 }: {
   draft: AvaliacaoDraft;
   setDraft: React.Dispatch<React.SetStateAction<AvaliacaoDraft>>;
-  seccaoIndex: number;
+  seccao: Seccao;
+  indice: number;
 }) {
-  const seccao = grelha[seccaoIndex];
   const grupos = agruparPorDimensao(seccao.criterios);
   const totalSeccao = subtotalSeccao(seccao, draft.respostas);
 
@@ -250,7 +272,7 @@ function SeccaoStep({
     <div>
       <div className="mb-3 flex items-baseline justify-between">
         <h1 className="text-lg font-semibold text-neutral-900">
-          {seccaoIndex + 1}. {seccao.nome}
+          {indice}. {seccao.nome}
         </h1>
         <span className="text-xs text-neutral-500">{seccao.percentagem}% da avaliação</span>
       </div>
@@ -305,11 +327,13 @@ function SeccaoStep({
 function FinalStep({
   draft,
   setDraft,
+  seccoes,
 }: {
   draft: AvaliacaoDraft;
   setDraft: React.Dispatch<React.SetStateAction<AvaliacaoDraft>>;
+  seccoes: Seccao[];
 }) {
-  const total = totalGeralObtido(draft.respostas);
+  const total = totalGeralObtido(seccoes, draft.respostas);
 
   return (
     <div className="space-y-5">

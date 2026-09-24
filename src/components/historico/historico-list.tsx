@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useMemo, useState, useSyncExternalStore } from "react";
-import { tiposDeAula, treinadores } from "@/data/mock";
 import { AVALIACOES_VAZIAS, listarAvaliacoes } from "@/lib/avaliacoes-store";
+import { treinadoresStore } from "@/lib/treinadores-store";
+import { tiposAulaStore } from "@/lib/tipos-aula-store";
 
 const semSubscricao = () => () => {};
 
@@ -21,6 +22,8 @@ function Campo({ label, children }: { label: string; children: React.ReactNode }
 
 export function HistoricoList() {
   const avaliacoes = useSyncExternalStore(semSubscricao, listarAvaliacoes, () => AVALIACOES_VAZIAS);
+  const treinadores = useSyncExternalStore(treinadoresStore.subscrever, treinadoresStore.listar, treinadoresStore.listar);
+  const tiposDeAula = useSyncExternalStore(tiposAulaStore.subscrever, tiposAulaStore.listar, tiposAulaStore.listar);
   const [treinador, setTreinador] = useState("");
   const [tipoAula, setTipoAula] = useState("");
   const [dataDe, setDataDe] = useState("");
@@ -50,8 +53,9 @@ export function HistoricoList() {
           <select className={inputClasses} value={treinador} onChange={(e) => setTreinador(e.target.value)}>
             <option value="">Todos</option>
             {treinadores.map((t) => (
-              <option key={t} value={t}>
-                {t}
+              <option key={t.id} value={t.nome}>
+                {t.nome}
+                {!t.ativo ? " (inativo)" : ""}
               </option>
             ))}
           </select>
@@ -61,8 +65,9 @@ export function HistoricoList() {
           <select className={inputClasses} value={tipoAula} onChange={(e) => setTipoAula(e.target.value)}>
             <option value="">Todos</option>
             {tiposDeAula.map((t) => (
-              <option key={t} value={t}>
-                {t}
+              <option key={t.id} value={t.nome}>
+                {t.nome}
+                {!t.ativo ? " (inativo)" : ""}
               </option>
             ))}
           </select>

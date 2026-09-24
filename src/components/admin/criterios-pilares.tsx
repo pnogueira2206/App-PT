@@ -1,12 +1,14 @@
 "use client";
 
+import Link from "next/link";
 import { useSyncExternalStore } from "react";
-import { grelha } from "@/data/grelha";
+import { listarGrelhaAtiva, subscreverGrelha } from "@/lib/grelha-store";
 import { PILARES } from "@/data/pilares";
 import { ATRIBUICOES_VAZIAS, alternarPilar, obterAtribuicoesPilares, subscreverPilares } from "@/lib/pilares-store";
 
 export function CriteriosPilares() {
   const atribuicoes = useSyncExternalStore(subscreverPilares, obterAtribuicoesPilares, () => ATRIBUICOES_VAZIAS);
+  const grelha = useSyncExternalStore(subscreverGrelha, listarGrelhaAtiva, listarGrelhaAtiva);
 
   const criteriosPontuaveis = grelha.flatMap((s) => s.criterios.filter((c) => c.tipoResposta === "PONTOS"));
   const total = criteriosPontuaveis.length;
@@ -14,6 +16,9 @@ export function CriteriosPilares() {
 
   return (
     <div className="mx-auto max-w-lg px-4 py-4">
+      <Link href="/admin" className="mb-3 inline-block text-sm font-medium text-neutral-500 underline">
+        ← Voltar ao Admin
+      </Link>
       <h1 className="mb-1 text-lg font-semibold text-neutral-900">Critérios &amp; Pilares</h1>
       <p className="mb-4 text-sm text-neutral-600">
         Atribui a cada critério um ou mais dos 6 pilares do ensino eficaz. Isto vai alimentar a spider web de

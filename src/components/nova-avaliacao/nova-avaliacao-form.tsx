@@ -4,9 +4,11 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useMemo, useState } from "react";
 import { Seccao } from "@/data/grelha";
+import { PILARES } from "@/data/pilares";
 import { guardarAvaliacaoAction } from "@/lib/avaliacoes-actions";
-import { origensDisponiveis, sugerirPontosFracos } from "@/lib/pilares-notas";
+import { origensDisponiveis, percentagemPorPilar, sugerirPontosFracos, temPilaresCategorizados } from "@/lib/pilares-notas";
 import type { AtribuicoesPilares } from "@/lib/pilares-actions";
+import { PilaresRadarChart } from "@/components/por-treinador/pilares-radar-chart";
 import { espacos } from "@/data/mock";
 import {
   AvaliacaoDraft,
@@ -43,8 +45,9 @@ export function NovaAvaliacaoForm({
   const seccoes = seccoesIniciais;
 
   const STEP_FINAL = seccoes.length + 1;
-  const STEP_PLANO_ACAO = seccoes.length + 2;
-  const STEP_RESUMO = seccoes.length + 3;
+  const STEP_SPIDER = seccoes.length + 2;
+  const STEP_PLANO_ACAO = seccoes.length + 3;
+  const STEP_RESUMO = seccoes.length + 4;
 
   const [draft, setDraft] = useState<AvaliacaoDraft>(draftVazio());
   const [step, setStep] = useState(STEP_CABECALHO);
@@ -64,9 +67,13 @@ export function NovaAvaliacaoForm({
           confirmacaoAvaliadorCompleta({ nome: nomeAvaliador, data: draft.confirmacaoAvaliador.data }),
       },
     ];
-    const comPlanoAcao = [...anteriores, { label: "Plano de Ação", completo: true }];
-    const tudo = comPlanoAcao.every((s) => s.completo);
-    return [...comPlanoAcao, { label: "Resumo", completo: tudo }];
+    const comSpiderEPlano = [
+      ...anteriores,
+      { label: "Notas por Pilar", completo: true },
+      { label: "Plano de Ação", completo: true },
+    ];
+    const tudo = comSpiderEPlano.every((s) => s.completo);
+    return [...comSpiderEPlano, { label: "Resumo", completo: tudo }];
   }, [draft, seccoes, nomeAvaliador]);
 
   const tudoCompleto = stepsInfo[STEP_RESUMO].completo;
@@ -119,6 +126,8 @@ export function NovaAvaliacaoForm({
         {step === STEP_FINAL && (
           <FinalStep draft={draft} setDraft={setDraft} seccoes={seccoes} nomeAvaliador={nomeAvaliador} />
         )}
+
+        {step === STEP_SPIDER && <SpiderWebStep draft={draft} seccoes={seccoes} atribuicoes={atribuicoes} />}
 
         {step === STEP_PLANO_ACAO && (
           <PlanoAcaoStep draft={draft} setDraft={setDraft} seccoes={seccoes} atribuicoes={atribuicoes} />
@@ -412,6 +421,39 @@ function FinalStep({
   );
 }
 
+function SpiderWebStep({
+  draft,
+  seccoes,
+  atribuicoes,
+}: {
+  draft: AvaliacaoDraft;
+  seccoes: Seccao[];
+  atribuicoes: AtribuicoesPilares;
+}) {
+  const temPilares = temPilaresCategorizados(seccoes, draft.respostas, atribuicoes);
+  const notas = PILARES.map((p) => percentagemPorPilar(seccoes, draft.respostas, p, atribuicoes));
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <h1 className="text-lg font-semibold text-neutral-900">Notas por Pilar</h1>
+        <p className="mt-1 text-sm text-neutral-600">
+          Com base nas respostas desta avaliação, esta é a distribuição pelos 6 pilares do ensino eficaz.
+        </p>
+      </div>
+
+      {temPilares ? (
+        <PilaresRadarChart ultima={notas} anterior={null} />
+      ) : (
+        <p className="rounded-md border border-dashed border-neutral-300 px-4 py-10 text-center text-xs text-neutral-500">
+          Ainda não há critérios categorizados por pilar (Admin &gt; Critérios &amp; Pilares), por isso o plano de
+          ação a seguir vai basear-se nas secções mais fracas.
+        </p>
+      )}
+    </div>
+  );
+}
+
 function PlanoAcaoStep({
   draft,
   setDraft,
@@ -446,8 +488,8 @@ function PlanoAcaoStep({
       <div>
         <h1 className="text-lg font-semibold text-neutral-900">Plano de Ação</h1>
         <p className="mt-1 text-sm text-neutral-600">
-          Passo opcional. Com base nesta avaliação, estes são os pontos mais fracos — confirma-os, ajusta-os ou
-          adiciona outros, e escreve a ação concreta para cada um.
+          Passo opcional. Com base na spider web anterior, estes são os pontos menos desenvolvidos — confirma-os,
+          ajusta-os ou adiciona outros, e escreve a ação concreta para cada um.
         </p>
       </div>
 

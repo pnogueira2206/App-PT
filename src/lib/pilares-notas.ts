@@ -65,9 +65,13 @@ export function sugerirPontosFracos(
     .slice(0, quantos);
 }
 
+/** Se há pelo menos um pilar com critérios categorizados (e por isso com nota calculável). */
+export function temPilaresCategorizados(seccoes: Seccao[], respostas: Respostas, atribuicoes: AtribuicoesPilares): boolean {
+  return PILARES.some((p) => subtotalPorPilar(seccoes, respostas, p, atribuicoes).max > 0);
+}
+
 /** Todas as origens possíveis para o plano de ação (pilares se houver dados, senão secções). */
 export function origensDisponiveis(seccoes: Seccao[], respostas: Respostas, atribuicoes: AtribuicoesPilares): string[] {
-  const temPilares = PILARES.some((p) => subtotalPorPilar(seccoes, respostas, p, atribuicoes).max > 0);
-  if (temPilares) return [...PILARES];
+  if (temPilaresCategorizados(seccoes, respostas, atribuicoes)) return [...PILARES];
   return seccoes.map((s) => s.nome);
 }

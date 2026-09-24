@@ -103,6 +103,9 @@ model Avaliacao {
   classificacaoGeral Int
   comentarioGeral    String
 
+  /// JSON: { origem: string; texto: string }[] — plano de ação desta avaliação
+  planoAcao String @default("[]")
+
   confirmacaoAvaliadorData String?
   confirmacaoTreinadorData String?
 

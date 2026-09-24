@@ -33,6 +33,7 @@ export function gerarCsvAvaliacoes(avaliacoes: AvaliacaoGuardada[]): string {
     "confirmacao_treinador_nome",
     "confirmacao_treinador_data",
     "comentario_geral",
+    "plano_de_acao",
   ];
 
   const linhas = avaliacoes.map((a) => {
@@ -62,6 +63,7 @@ export function gerarCsvAvaliacoes(avaliacoes: AvaliacaoGuardada[]): string {
       a.confirmacaoTreinador.nome,
       a.confirmacaoTreinador.data,
       a.comentarioGeral,
+      a.planoAcao.map((p) => `${p.origem}: ${p.texto}`).join(" | "),
     ].map((v) => escaparCsv(String(v)));
   });
 

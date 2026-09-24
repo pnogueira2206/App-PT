@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { Seccao } from "@/data/grelha";
-import { AvaliacaoDraft, AvaliacaoGuardada, Respostas } from "@/types/avaliacao";
+import { AvaliacaoDraft, AvaliacaoGuardada, PlanoAcaoItem, Respostas } from "@/types/avaliacao";
 
 const INCLUDE = { treinador: true, avaliador: true, tipoAula: true } as const;
 
@@ -22,6 +22,7 @@ type LinhaComRelacoes = {
   grelhaSnapshot: string;
   classificacaoGeral: number;
   comentarioGeral: string;
+  planoAcao: string;
   confirmacaoAvaliadorData: string | null;
   confirmacaoTreinadorData: string | null;
   guardadaEm: Date;
@@ -45,6 +46,7 @@ function paraAvaliacaoGuardada(row: LinhaComRelacoes): AvaliacaoGuardada {
     observacoes: JSON.parse(row.observacoes),
     classificacaoGeral: String(row.classificacaoGeral),
     comentarioGeral: row.comentarioGeral,
+    planoAcao: JSON.parse(row.planoAcao) as PlanoAcaoItem[],
     confirmacaoAvaliador: { nome: row.avaliador.nome, data: row.confirmacaoAvaliadorData ?? "" },
     confirmacaoTreinador: { nome: row.treinador.nome, data: row.confirmacaoTreinadorData ?? "" },
   };
@@ -94,6 +96,7 @@ export async function guardarAvaliacaoAction(draft: AvaliacaoDraft, grelhaSnapsh
       grelhaSnapshot: JSON.stringify(grelhaSnapshot),
       classificacaoGeral: Number(draft.classificacaoGeral),
       comentarioGeral: draft.comentarioGeral,
+      planoAcao: JSON.stringify(draft.planoAcao.filter((p) => p.texto.trim() !== "")),
       confirmacaoAvaliadorData: draft.confirmacaoAvaliador.data || new Date().toISOString().slice(0, 10),
       confirmacaoTreinadorData: draft.confirmacaoTreinador.data || null,
     },

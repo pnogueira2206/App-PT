@@ -22,6 +22,12 @@ export interface Confirmacao {
   data: string;
 }
 
+export interface PlanoAcaoItem {
+  /** Nome do pilar ou da secção a que esta ação se refere. */
+  origem: string;
+  texto: string;
+}
+
 export interface AvaliacaoDraft {
   cabecalho: Cabecalho;
   respostas: Respostas;
@@ -30,6 +36,7 @@ export interface AvaliacaoDraft {
   comentarioGeral: string;
   confirmacaoAvaliador: Confirmacao;
   confirmacaoTreinador: Confirmacao;
+  planoAcao: PlanoAcaoItem[];
 }
 
 export interface AvaliacaoGuardada extends AvaliacaoDraft {
@@ -56,6 +63,7 @@ export function draftVazio(): AvaliacaoDraft {
     comentarioGeral: "",
     confirmacaoAvaliador: { nome: "", data: "" },
     confirmacaoTreinador: { nome: "", data: "" },
+    planoAcao: [],
   };
 }
 

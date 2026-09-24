@@ -5,6 +5,8 @@ import { useSession } from "next-auth/react";
 import { useMemo, useState } from "react";
 import { Seccao } from "@/data/grelha";
 import { guardarAvaliacaoAction } from "@/lib/avaliacoes-actions";
+import { origensDisponiveis, sugerirPontosFracos } from "@/lib/pilares-notas";
+import type { AtribuicoesPilares } from "@/lib/pilares-actions";
 import { espacos } from "@/data/mock";
 import {
   AvaliacaoDraft,
@@ -29,17 +31,20 @@ export function NovaAvaliacaoForm({
   seccoesIniciais,
   treinadores,
   tiposDeAula,
+  atribuicoes,
 }: {
   seccoesIniciais: Seccao[];
   treinadores: string[];
   tiposDeAula: string[];
+  atribuicoes: AtribuicoesPilares;
 }) {
   const { data: session } = useSession();
   const nomeAvaliador = session?.user?.name ?? "";
   const seccoes = seccoesIniciais;
 
   const STEP_FINAL = seccoes.length + 1;
-  const STEP_RESUMO = seccoes.length + 2;
+  const STEP_PLANO_ACAO = seccoes.length + 2;
+  const STEP_RESUMO = seccoes.length + 3;
 
   const [draft, setDraft] = useState<AvaliacaoDraft>(draftVazio());
   const [step, setStep] = useState(STEP_CABECALHO);
@@ -59,8 +64,9 @@ export function NovaAvaliacaoForm({
           confirmacaoAvaliadorCompleta({ nome: nomeAvaliador, data: draft.confirmacaoAvaliador.data }),
       },
     ];
-    const tudo = anteriores.every((s) => s.completo);
-    return [...anteriores, { label: "Resumo", completo: tudo }];
+    const comPlanoAcao = [...anteriores, { label: "Plano de Ação", completo: true }];
+    const tudo = comPlanoAcao.every((s) => s.completo);
+    return [...comPlanoAcao, { label: "Resumo", completo: tudo }];
   }, [draft, seccoes, nomeAvaliador]);
 
   const tudoCompleto = stepsInfo[STEP_RESUMO].completo;
@@ -112,6 +118,10 @@ export function NovaAvaliacaoForm({
 
         {step === STEP_FINAL && (
           <FinalStep draft={draft} setDraft={setDraft} seccoes={seccoes} nomeAvaliador={nomeAvaliador} />
+        )}
+
+        {step === STEP_PLANO_ACAO && (
+          <PlanoAcaoStep draft={draft} setDraft={setDraft} seccoes={seccoes} atribuicoes={atribuicoes} />
         )}
 
         {step === STEP_RESUMO && <ResumoAvaliacao draft={{ ...draft, cabecalho: { ...draft.cabecalho, avaliador: nomeAvaliador } }} seccoes={seccoes} />}
@@ -398,6 +408,124 @@ function FinalStep({
           O treinador confirma a avaliação através da própria conta, no Histórico.
         </p>
       </div>
+    </div>
+  );
+}
+
+function PlanoAcaoStep({
+  draft,
+  setDraft,
+  seccoes,
+  atribuicoes,
+}: {
+  draft: AvaliacaoDraft;
+  setDraft: React.Dispatch<React.SetStateAction<AvaliacaoDraft>>;
+  seccoes: Seccao[];
+  atribuicoes: AtribuicoesPilares;
+}) {
+  const sugestoes = useMemo(
+    () => sugerirPontosFracos(seccoes, draft.respostas, atribuicoes),
+    [seccoes, draft.respostas, atribuicoes]
+  );
+  const origens = useMemo(
+    () => origensDisponiveis(seccoes, draft.respostas, atribuicoes),
+    [seccoes, draft.respostas, atribuicoes]
+  );
+  const origensNoPlano = new Set(draft.planoAcao.map((p) => p.origem));
+  const origensPorEscolher = origens.filter((o) => !origensNoPlano.has(o));
+
+  const adicionar = (origem: string) =>
+    setDraft((d) => ({ ...d, planoAcao: [...d.planoAcao, { origem, texto: "" }] }));
+  const remover = (origem: string) =>
+    setDraft((d) => ({ ...d, planoAcao: d.planoAcao.filter((p) => p.origem !== origem) }));
+  const atualizarTexto = (origem: string, texto: string) =>
+    setDraft((d) => ({ ...d, planoAcao: d.planoAcao.map((p) => (p.origem === origem ? { ...p, texto } : p)) }));
+
+  return (
+    <div className="space-y-5">
+      <div>
+        <h1 className="text-lg font-semibold text-neutral-900">Plano de Ação</h1>
+        <p className="mt-1 text-sm text-neutral-600">
+          Passo opcional. Com base nesta avaliação, estes são os pontos mais fracos — confirma-os, ajusta-os ou
+          adiciona outros, e escreve a ação concreta para cada um.
+        </p>
+      </div>
+
+      {sugestoes.length > 0 && (
+        <div>
+          <p className="mb-2 text-xs font-medium text-neutral-500">Sugestões desta avaliação</p>
+          <div className="flex flex-wrap gap-2">
+            {sugestoes.map((s) => (
+              <button
+                key={s.origem}
+                type="button"
+                disabled={origensNoPlano.has(s.origem)}
+                onClick={() => adicionar(s.origem)}
+                className="rounded-full border border-neutral-300 px-3 py-1.5 text-xs font-medium text-neutral-700 disabled:opacity-40"
+              >
+                {s.origem} ({Math.round(s.percentagem)}%){!origensNoPlano.has(s.origem) && " · adicionar"}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {draft.planoAcao.length === 0 ? (
+        <p className="rounded-md border border-dashed border-neutral-300 px-4 py-6 text-center text-xs text-neutral-500">
+          Ainda não há nenhum ponto no plano de ação.
+        </p>
+      ) : (
+        <div className="space-y-3">
+          {draft.planoAcao.map((item) => (
+            <div key={item.origem} className="rounded-md border border-neutral-200 p-3">
+              <div className="mb-2 flex items-center justify-between">
+                <p className="text-sm font-semibold text-neutral-900">{item.origem}</p>
+                <button type="button" onClick={() => remover(item.origem)} className="text-xs text-red-600 underline">
+                  Remover
+                </button>
+              </div>
+              <textarea
+                className={inputClasses}
+                rows={2}
+                placeholder="O que trabalhar até à próxima avaliação..."
+                value={item.texto}
+                onChange={(e) => atualizarTexto(item.origem, e.target.value)}
+              />
+            </div>
+          ))}
+        </div>
+      )}
+
+      {origensPorEscolher.length > 0 && (
+        <AdicionarPontoForm origens={origensPorEscolher} onAdicionar={adicionar} />
+      )}
+    </div>
+  );
+}
+
+function AdicionarPontoForm({ origens, onAdicionar }: { origens: string[]; onAdicionar: (origem: string) => void }) {
+  const [escolha, setEscolha] = useState(origens[0]);
+
+  return (
+    <div className="flex items-center gap-2">
+      <select
+        className={inputClasses}
+        value={origens.includes(escolha) ? escolha : origens[0]}
+        onChange={(e) => setEscolha(e.target.value)}
+      >
+        {origens.map((o) => (
+          <option key={o} value={o}>
+            {o}
+          </option>
+        ))}
+      </select>
+      <button
+        type="button"
+        onClick={() => onAdicionar(escolha)}
+        className="shrink-0 rounded-md border border-neutral-300 px-3 py-2 text-sm font-medium text-neutral-700"
+      >
+        Adicionar
+      </button>
     </div>
   );
 }

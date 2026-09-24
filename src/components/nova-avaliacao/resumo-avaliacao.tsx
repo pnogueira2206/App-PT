@@ -59,6 +59,20 @@ export function ResumoAvaliacao({ draft, seccoes }: { draft: AvaliacaoDraft; sec
         )}
       </section>
 
+      {draft.planoAcao.length > 0 && (
+        <section className="rounded-md border border-neutral-200 p-3">
+          <p className="mb-2 text-sm font-semibold text-neutral-900">Plano de Ação</p>
+          <div className="space-y-2">
+            {draft.planoAcao.map((item) => (
+              <div key={item.origem}>
+                <p className="text-xs font-medium text-neutral-700">{item.origem}</p>
+                <p className="text-sm text-neutral-600">{item.texto}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
       <section className="rounded-md border border-neutral-200 p-3">
         <p className="mb-1 text-sm font-semibold text-neutral-900">Confirmações</p>
         <Linha

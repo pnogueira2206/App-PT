@@ -1,8 +1,9 @@
 import { Pilar } from "@/data/pilares";
 
-const STORAGE_KEY = "cfa-pilares-v1";
+const STORAGE_KEY = "cfa-pilares-v2";
 
-export type AtribuicoesPilares = Record<string, Pilar>;
+/** Cada critério pode estar ligado a mais do que um pilar. */
+export type AtribuicoesPilares = Record<string, Pilar[]>;
 
 export const ATRIBUICOES_VAZIAS: AtribuicoesPilares = {};
 
@@ -34,14 +35,19 @@ export function subscreverPilares(callback: () => void): () => void {
   return () => listeners.delete(callback);
 }
 
-export function definirPilar(criterioId: string, pilar: Pilar | null) {
+/** Liga/desliga um pilar num critério, mantendo os outros pilares já atribuídos. */
+export function alternarPilar(criterioId: string, pilar: Pilar) {
   const atuais = carregar();
+  const lista = atuais[criterioId] ?? [];
+  const novaLista = lista.includes(pilar) ? lista.filter((p) => p !== pilar) : [...lista, pilar];
+
   const novas = { ...atuais };
-  if (pilar) {
-    novas[criterioId] = pilar;
+  if (novaLista.length > 0) {
+    novas[criterioId] = novaLista;
   } else {
     delete novas[criterioId];
   }
+
   cache = novas;
   if (typeof window !== "undefined") {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(novas));

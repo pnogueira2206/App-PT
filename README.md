@@ -1,22 +1,20 @@
-# App PT
+# CFA Avaliações
 
-Plataforma web (instalável como PWA) para um personal trainer gerir alunos, grupos, treinos e acompanhar resultados.
+Plataforma web (instalável como PWA) para a CrossFit Alvalade avaliar o desempenho dos treinadores em substituição da grelha em papel.
 
 ## Funcionalidades
 
-- **Perfis individuais**: cada aluno tem a sua própria conta (email + palavra-passe).
-- **Grupos de alunos**: cria grupos (ex. "Turma da manhã") e atribui treinos a um grupo inteiro. Cada aluno do grupo reporta os seus resultados de forma individual.
-- **Construtor de treinos**: cria treinos com vários blocos (exercício, séries/reps/carga prescritas, tempo de descanso e notas para o aluno).
-- **Registo de resultados em texto livre**: o aluno escreve o resultado de cada bloco como quiser (ex. "4x8 @ 60kg", "12:45", "21-15-9"), mais notas, no telemóvel.
-- **Perfil do aluno (2 separadores: Treino / Perfil)**: no separador Perfil o aluno regista e edita dados pessoais (data de nascimento, peso, altura) e os seus recordes pessoais, divididos em **Levantamentos** (carga) e **Treinos para tempo**. O treinador também pode editar estes dados e recordes a partir do perfil do aluno.
-- **Histórico por exercício**: o aluno (e o treinador, no perfil do aluno) vê a evolução de resultados e recordes de cada exercício ao longo do tempo.
-- **PWA**: pode ser instalada no ecrã inicial do telemóvel (manifest + service worker).
+- **Nova Avaliação**: grelha completa por secções, fiel à ficha original (pontos parciais e N/A por critério, notas por dimensão em tempo real), classificação geral e confirmação do avaliador.
+- **Histórico**: lista de avaliações com filtros (treinador, tipo de aula, período, classificação), detalhe só de leitura, e confirmação da avaliação pelo próprio treinador (a partir da conta dele).
+- **Por Treinador**: evolução da classificação geral ao longo do tempo, spider web por pilar (Ensinar, Ver, Corrigir, Gestão de Grupo, Presença e Atitude, Demonstração) comparando a última avaliação com a anterior, e comentários da última avaliação.
+- **Admin** (só Admin): gestão de treinadores, tipos de aula e da grelha (secções/critérios — editar, adicionar, reordenar, desativar, nunca apagar), atribuição de pilares a cada critério, e exportação de todas as avaliações para CSV.
+- **PWA**: pode ser instalada no ecrã inicial do telemóvel.
 
 ## Stack técnica
 
 - [Next.js](https://nextjs.org) (App Router, TypeScript, Server Actions)
-- [Prisma](https://www.prisma.io) + SQLite (fácil de migrar para Postgres/MySQL em produção)
-- [NextAuth v5](https://authjs.dev) (credenciais, sessão JWT)
+- [Prisma](https://www.prisma.io) + SQLite (fácil de migrar para Postgres em produção)
+- [NextAuth v5](https://authjs.dev) (credenciais, sessão JWT, 3 papéis: Admin/Avaliador/Treinador)
 - Tailwind CSS
 
 ## Como correr localmente
@@ -25,7 +23,7 @@ Plataforma web (instalável como PWA) para um personal trainer gerir alunos, gru
 npm install
 cp .env.example .env      # edita o AUTH_SECRET
 npx prisma migrate dev    # cria a base de dados SQLite
-npm run db:seed           # (opcional) cria dados de exemplo
+npm run db:seed           # cria contas e dados de exemplo
 npm run dev
 ```
 
@@ -35,17 +33,20 @@ Abre http://localhost:3000
 
 | Papel      | Email                  | Palavra-passe  |
 |------------|-------------------------|----------------|
-| Treinador  | treinador@exemplo.com   | treinador123   |
-| Aluna      | ana@exemplo.com         | aluno123       |
-| Aluno      | bruno@exemplo.com       | aluno123       |
+| Admin      | admin@cfa.pt            | admin123       |
+| Avaliador  | headcoach1@cfa.pt (e 2, 3) | coach123    |
+| Treinador  | treinadora@cfa.pt (e b..f) | treino123   |
 
 ## Como funciona
 
-- O **treinador** entra em `/trainer`: cria alunos (define a palavra-passe inicial e partilha-a com o aluno), cria grupos, adiciona alunos aos grupos e cria treinos atribuídos a um grupo ou a um aluno específico. Dentro de cada treino, adiciona "blocos" (ex. "Bloco A" com o exercício, séries/reps/carga e notas). No perfil de cada aluno vê os recordes pessoais e o histórico de treinos/resultados.
-- O **aluno** entra em `/student`, com dois separadores no fundo do ecrã: **Treino** (lista de treinos atribuídos, diretamente ou via grupo — abre um treino e regista o resultado de cada bloco em texto livre, mais notas) e **Perfil** (dados pessoais editáveis e recordes pessoais, agrupados em Levantamentos e Treinos para tempo, todos editáveis). A partir de qualquer bloco ou recorde pode ver o histórico completo desse exercício.
+- O **avaliador** (head coach) entra e vê "Nova Avaliação" e "Histórico"/"Por Treinador" de todos os treinadores.
+- O **treinador** entra e só vê "Histórico"/"Por Treinador" com os dados dele próprio; confirma cada avaliação a partir da própria conta.
+- O **admin** vê tudo, mais a área "Admin" para gerir treinadores, tipos de aula, a grelha de avaliação e exportar dados.
+- Cada avaliação guardada leva consigo uma cópia da grelha (secções/critérios) tal como estava no momento em que foi preenchida — editar a grelha no Admin não altera avaliações já guardadas.
 
 ## Notas de produção
 
 - Muda `AUTH_SECRET` para um valor aleatório forte antes de publicar.
-- SQLite é suficiente para uma base de alunos pequena/média; para produção com mais volume, muda o `datasource` do `prisma/schema.prisma` para Postgres e atualiza `DATABASE_URL`.
-- Os ícones da PWA (`public/icon-192.png`, `public/icon-512.png`, `public/apple-touch-icon.png`) são um placeholder simples — substitui pelo logótipo do teu negócio quando tiveres um.
+- SQLite chega para desenvolvimento e um piloto pequeno; para produção com os 2 espaços em simultâneo, muda o `datasource` do `prisma/schema.prisma` para Postgres e atualiza `DATABASE_URL`.
+- Não há ainda recuperação de password por email, nem gestão de contas de avaliador pela interface (só via seed/base de dados).
+- Os ícones da PWA (`public/icon-192.png`, `public/icon-512.png`, `public/apple-touch-icon.png`) ainda são placeholders — substituir pelo logótipo definitivo da CrossFit Alvalade.

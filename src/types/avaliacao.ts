@@ -3,6 +3,7 @@ import { Criterio, Seccao, grelha } from "@/data/grelha";
 export interface Cabecalho {
   treinador: string;
   avaliador: string;
+  espaco: string;
   data: string;
   hora: string;
   tipoAula: string;
@@ -32,7 +33,7 @@ export interface AvaliacaoDraft {
 }
 
 export function cabecalhoVazio(): Cabecalho {
-  return { treinador: "", avaliador: "", data: "", hora: "", tipoAula: "", nAlunos: "" };
+  return { treinador: "", avaliador: "", espaco: "", data: "", hora: "", tipoAula: "", nAlunos: "" };
 }
 
 export function respostasVazias(): Respostas {
@@ -74,6 +75,25 @@ export function dimensoesDaSeccao(seccao: Seccao): string[] {
   return ordem;
 }
 
+export interface GrupoCriterios {
+  dimensao?: string;
+  criterios: Criterio[];
+}
+
+/** Agrupa critérios consecutivos com a mesma dimensão, preservando a ordem/formatação da ficha original. */
+export function agruparPorDimensao(criterios: Criterio[]): GrupoCriterios[] {
+  const grupos: GrupoCriterios[] = [];
+  for (const c of criterios) {
+    const ultimo = grupos[grupos.length - 1];
+    if (ultimo && ultimo.dimensao === c.dimensao) {
+      ultimo.criterios.push(c);
+    } else {
+      grupos.push({ dimensao: c.dimensao, criterios: [c] });
+    }
+  }
+  return grupos;
+}
+
 export function subtotal(criterios: Criterio[], respostas: Respostas): { obtidos: number; max: number } {
   let obtidos = 0;
   let max = 0;
@@ -111,6 +131,7 @@ export function cabecalhoCompleto(c: Cabecalho): boolean {
   return (
     c.treinador !== "" &&
     c.avaliador !== "" &&
+    c.espaco !== "" &&
     c.data !== "" &&
     c.hora !== "" &&
     c.tipoAula !== "" &&

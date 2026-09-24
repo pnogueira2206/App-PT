@@ -2,16 +2,16 @@
 
 import { useMemo, useState } from "react";
 import { grelha } from "@/data/grelha";
-import { avaliadores, tiposDeAula, treinadores } from "@/data/mock";
+import { avaliadores, espacos, tiposDeAula, treinadores } from "@/data/mock";
 import {
   AvaliacaoDraft,
+  agruparPorDimensao,
   cabecalhoCompleto,
   classificacaoValida,
   confirmacaoAvaliadorCompleta,
   draftVazio,
-  dimensoesDaSeccao,
   seccaoCompleta,
-  subtotalDimensao,
+  subtotal,
   subtotalSeccao,
   totalGeralObtido,
 } from "@/types/avaliacao";
@@ -175,6 +175,17 @@ function CabecalhoStep({
         </select>
       </Campo>
 
+      <Campo label="Espaço">
+        <select className={inputClasses} value={c.espaco} onChange={(e) => update({ espaco: e.target.value })}>
+          <option value="">Seleciona...</option>
+          {espacos.map((e) => (
+            <option key={e} value={e}>
+              {e}
+            </option>
+          ))}
+        </select>
+      </Campo>
+
       <div className="grid grid-cols-2 gap-3">
         <Campo label="Data da aula">
           <input type="date" className={inputClasses} value={c.data} onChange={(e) => update({ data: e.target.value })} />
@@ -219,7 +230,7 @@ function SeccaoStep({
   seccaoIndex: number;
 }) {
   const seccao = grelha[seccaoIndex];
-  const dimensoes = dimensoesDaSeccao(seccao);
+  const grupos = agruparPorDimensao(seccao.criterios);
   const totalSeccao = subtotalSeccao(seccao, draft.respostas);
 
   return (
@@ -231,31 +242,35 @@ function SeccaoStep({
         <span className="text-xs text-neutral-500">{seccao.percentagem}% da avaliação</span>
       </div>
 
-      {dimensoes.length > 0 && (
-        <div className="mb-4 space-y-1.5">
-          {dimensoes.map((dim) => {
-            const st = subtotalDimensao(seccao, dim, draft.respostas);
-            return <DimensaoBadge key={dim} nome={dim} obtidos={st.obtidos} max={st.max} />;
-          })}
+      <div className="space-y-4">
+        {grupos.map((grupo, i) => {
+          const st = subtotal(grupo.criterios, draft.respostas);
+          return (
+            <div key={i} className="rounded-md border border-neutral-200">
+              {grupo.dimensao && <DimensaoBadge nome={grupo.dimensao} obtidos={st.obtidos} max={st.max} />}
+              <div className="px-3">
+                {grupo.criterios.map((criterio) => (
+                  <CriterioField
+                    key={criterio.id}
+                    criterio={criterio}
+                    resposta={draft.respostas[criterio.id]}
+                    onChange={(r) =>
+                      setDraft((d) => ({ ...d, respostas: { ...d.respostas, [criterio.id]: r } }))
+                    }
+                  />
+                ))}
+              </div>
+            </div>
+          );
+        })}
+
+        <div className="flex items-center justify-between rounded-md bg-black px-3 py-2 text-sm font-semibold text-white">
+          <span>Total</span>
+          <span className="tabular-nums">
+            {totalSeccao.obtidos} / {totalSeccao.max}
+          </span>
         </div>
-      )}
-
-      <div className="rounded-md border border-neutral-200 px-3">
-        {seccao.criterios.map((criterio) => (
-          <CriterioField
-            key={criterio.id}
-            criterio={criterio}
-            resposta={draft.respostas[criterio.id]}
-            onChange={(r) =>
-              setDraft((d) => ({ ...d, respostas: { ...d.respostas, [criterio.id]: r } }))
-            }
-          />
-        ))}
       </div>
-
-      <p className="mt-3 text-right text-sm font-medium text-neutral-700">
-        Total da secção: {totalSeccao.obtidos} / {totalSeccao.max}
-      </p>
 
       <div className="mt-4">
         <Campo label="Observações da secção">

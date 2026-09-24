@@ -21,6 +21,7 @@ export function ResumoAvaliacao({ draft }: { draft: AvaliacaoDraft }) {
         <p className="mb-1 text-sm font-semibold text-neutral-900">Cabeçalho</p>
         <Linha label="Treinador" valor={draft.cabecalho.treinador || "—"} />
         <Linha label="Avaliador" valor={draft.cabecalho.avaliador || "—"} />
+        <Linha label="Espaço" valor={draft.cabecalho.espaco || "—"} />
         <Linha label="Data" valor={draft.cabecalho.data || "—"} />
         <Linha label="Hora" valor={draft.cabecalho.hora || "—"} />
         <Linha label="Tipo de aula" valor={draft.cabecalho.tipoAula || "—"} />

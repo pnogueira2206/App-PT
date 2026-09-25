@@ -8,6 +8,9 @@ const LIMIAR_TENTATIVAS = 5;
 const DURACAO_BLOQUEIO_MIN = 15;
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  // Necessário fora da Vercel (ex.: Netlify) para o Auth.js confiar no header
+  // Host do pedido ao construir URLs de callback.
+  trustHost: true,
   session: { strategy: "jwt" },
   pages: { signIn: "/login" },
   providers: [

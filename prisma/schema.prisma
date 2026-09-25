@@ -1,5 +1,9 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  // "native" mantém o dev local a funcionar; rhel-openssl-3.0.x é o alvo das
+  // funções serverless da Netlify (e de outras plataformas AWS Lambda), cuja
+  // imagem de build pode não corresponder exatamente à de execução.
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
 }
 
 datasource db {

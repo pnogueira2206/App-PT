@@ -14,7 +14,7 @@ import {
   StyleSheet,
 } from "@react-pdf/renderer";
 import { Seccao } from "@/data/grelha";
-import { AvaliacaoGuardada, dimensoesDaSeccao, subtotalDimensao, subtotalSeccao } from "@/types/avaliacao";
+import { AvaliacaoGuardada, subtotalSeccao } from "@/types/avaliacao";
 import { PILARES } from "@/data/pilares";
 import { AtribuicoesPilares } from "@/lib/pilares-actions";
 import { percentagemPorPilar, temPilaresCategorizados } from "@/lib/pilares-notas";
@@ -80,7 +80,6 @@ const styles = StyleSheet.create({
   campoCabecalho: { width: "50%", paddingVertical: 3, paddingRight: 8 },
   classificacaoGrande: { fontSize: 28, fontWeight: "bold" },
   classificacaoLabel: { fontSize: 8, color: MUTED, marginTop: 2 },
-  dimLinha: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 1, paddingLeft: 8 },
   comentario: { fontSize: 8, color: MUTED, marginTop: 6, fontStyle: "italic" },
   prioridade: { marginBottom: 8, paddingBottom: 8, borderBottomWidth: 1, borderBottomColor: LINE },
   prioridadeOrigem: { fontSize: 9, fontWeight: "bold", marginBottom: 2 },
@@ -234,7 +233,6 @@ export function RelatorioAvaliacaoDocument({
           <Text style={styles.secaoTitulo}>Discriminação por Parte da Aula</Text>
           {seccoes.map((seccao) => {
             const st = subtotalSeccao(seccao, avaliacao.respostas);
-            const dims = dimensoesDaSeccao(seccao);
             return (
               <View key={seccao.id} style={{ marginBottom: 6 }}>
                 <View style={styles.linha}>
@@ -243,17 +241,6 @@ export function RelatorioAvaliacaoDocument({
                     {st.obtidos} / {st.max}
                   </Text>
                 </View>
-                {dims.map((dim) => {
-                  const dst = subtotalDimensao(seccao, dim, avaliacao.respostas);
-                  return (
-                    <View key={dim} style={styles.dimLinha}>
-                      <Text style={styles.label}>{dim}</Text>
-                      <Text>
-                        {dst.obtidos} / {dst.max}
-                      </Text>
-                    </View>
-                  );
-                })}
                 {avaliacao.observacoes[seccao.id]?.trim() && (
                   <Text style={styles.comentario}>&quot;{avaliacao.observacoes[seccao.id]}&quot;</Text>
                 )}

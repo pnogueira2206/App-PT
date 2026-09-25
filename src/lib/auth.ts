@@ -61,11 +61,19 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
-    jwt({ token, user }) {
+    async jwt({ token, user }) {
       if (user) {
         token.id = user.id!;
         token.papel = user.papel;
+        return token;
       }
+
+      // Pedidos seguintes (não é o login inicial): confirma que a conta continua ativa,
+      // para que desativar alguém revogue de imediato as sessões já iniciadas.
+      const utilizador = await prisma.utilizador.findUnique({ where: { id: token.id as string } });
+      if (!utilizador || !utilizador.ativo) return null;
+      token.papel = utilizador.papel;
+
       return token;
     },
     session({ session, token }) {

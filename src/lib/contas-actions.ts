@@ -19,6 +19,7 @@ export async function reporPasswordAction(id: string, novaPassword: string): Pro
   await registarAuditoria(session.user.id, "REPOS_PASSWORD", `${alvo.nome} (${alvo.email})`);
   revalidatePath("/admin/treinadores");
   revalidatePath("/admin/avaliadores");
+  revalidatePath("/admin/administradores");
   return {};
 }
 
@@ -28,6 +29,14 @@ export async function anonimizarContaAction(id: string): Promise<{ erro?: string
 
   const alvo = await prisma.utilizador.findUnique({ where: { id } });
   if (!alvo) return { erro: "Conta não encontrada." };
+
+  if (alvo.papel === "ADMIN") {
+    if (id === session.user.id) return { erro: "Não podes anonimizar a tua própria conta." };
+    const outrosAtivos = await prisma.utilizador.count({
+      where: { papel: "ADMIN", ativo: true, id: { not: id } },
+    });
+    if (outrosAtivos === 0) return { erro: "Tem de haver sempre pelo menos um administrador ativo." };
+  }
 
   const sufixo = alvo.id.slice(-6);
   await prisma.utilizador.update({
@@ -43,6 +52,7 @@ export async function anonimizarContaAction(id: string): Promise<{ erro?: string
   await registarAuditoria(session.user.id, "ANONIMIZOU_CONTA", `${alvo.nome} → anonimizado (${sufixo})`);
   revalidatePath("/admin/treinadores");
   revalidatePath("/admin/avaliadores");
+  revalidatePath("/admin/administradores");
   return {};
 }
 

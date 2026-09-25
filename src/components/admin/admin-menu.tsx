@@ -4,6 +4,11 @@ import { ExportarCsvButton } from "./exportar-csv-button";
 const areas = [
   { href: "/admin/treinadores", nome: "Treinadores", descricao: "Adicionar, editar, desativar e repor palavra-passe." },
   { href: "/admin/avaliadores", nome: "Avaliadores", descricao: "Adicionar, editar, desativar e repor palavra-passe." },
+  {
+    href: "/admin/administradores",
+    nome: "Administradores",
+    descricao: "Adicionar, editar, desativar e repor palavra-passe.",
+  },
   { href: "/admin/tipos-aula", nome: "Tipos de Aula", descricao: "Adicionar, editar e desativar tipos de aula." },
   { href: "/admin/espacos", nome: "Espaços", descricao: "Adicionar, editar e desativar espaços (ex.: CFA Oriente, CFA Carnaxide)." },
   {

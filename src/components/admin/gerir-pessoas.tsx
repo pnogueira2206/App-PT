@@ -13,6 +13,11 @@ import {
   alternarAvaliadorAtivoAction,
   editarAvaliadorAction,
 } from "@/lib/avaliadores-actions";
+import {
+  adicionarAdminAction,
+  alternarAdminAtivoAction,
+  editarAdminAction,
+} from "@/lib/administradores-actions";
 import { anonimizarContaAction, reporPasswordAction } from "@/lib/contas-actions";
 
 interface Item {
@@ -25,7 +30,13 @@ interface Item {
 const inputClasses =
   "w-full rounded-none border border-line bg-transparent px-3 py-2 text-sm text-neutral-900 dark:text-neutral-100 focus:border-black dark:focus:border-white focus:outline-none focus:ring-1 focus:ring-black dark:focus:ring-white";
 
-export function GerirPessoas({ itens, tipo }: { itens: Item[]; tipo: "treinadores" | "avaliadores" }) {
+export function GerirPessoas({
+  itens,
+  tipo,
+}: {
+  itens: Item[];
+  tipo: "treinadores" | "avaliadores" | "administradores";
+}) {
   const router = useRouter();
   const [, startTransition] = useTransition();
   const [nome, setNome] = useState("");
@@ -39,14 +50,34 @@ export function GerirPessoas({ itens, tipo }: { itens: Item[]; tipo: "treinadore
   const [erroPassword, setErroPassword] = useState("");
   const [aAnonimizar, setAAnonimizar] = useState<string | null>(null);
   const [erroAnonimizar, setErroAnonimizar] = useState("");
+  const [erroAtivo, setErroAtivo] = useState<{ id: string; msg: string } | null>(null);
+
+  const alternarAtivoGenerico = async (
+    acao: (id: string, ativo: boolean) => Promise<void>,
+    id: string,
+    ativo: boolean
+  ): Promise<{ erro?: string }> => {
+    await acao(id, ativo);
+    return {};
+  };
 
   const acoes =
     tipo === "treinadores"
-      ? { adicionar: adicionarTreinadorAction, editar: editarTreinadorAction, alternarAtivo: alternarTreinadorAtivoAction }
-      : { adicionar: adicionarAvaliadorAction, editar: editarAvaliadorAction, alternarAtivo: alternarAvaliadorAtivoAction };
+      ? {
+          adicionar: adicionarTreinadorAction,
+          editar: editarTreinadorAction,
+          alternarAtivo: (id: string, ativo: boolean) => alternarAtivoGenerico(alternarTreinadorAtivoAction, id, ativo),
+        }
+      : tipo === "avaliadores"
+        ? {
+            adicionar: adicionarAvaliadorAction,
+            editar: editarAvaliadorAction,
+            alternarAtivo: (id: string, ativo: boolean) => alternarAtivoGenerico(alternarAvaliadorAtivoAction, id, ativo),
+          }
+        : { adicionar: adicionarAdminAction, editar: editarAdminAction, alternarAtivo: alternarAdminAtivoAction };
 
-  const titulo = tipo === "treinadores" ? "Treinadores" : "Avaliadores";
-  const singular = tipo === "treinadores" ? "treinador" : "avaliador";
+  const titulo = tipo === "treinadores" ? "Treinadores" : tipo === "avaliadores" ? "Avaliadores" : "Administradores";
+  const singular = tipo === "treinadores" ? "treinador" : tipo === "avaliadores" ? "avaliador" : "administrador";
 
   return (
     <div className="mx-auto max-w-lg px-4 py-4 md:max-w-2xl lg:max-w-3xl md:px-6 md:py-6">
@@ -245,7 +276,12 @@ export function GerirPessoas({ itens, tipo }: { itens: Item[]; tipo: "treinadore
                     type="button"
                     onClick={() =>
                       startTransition(async () => {
-                        await acoes.alternarAtivo(item.id, !item.ativo);
+                        setErroAtivo(null);
+                        const resultado = await acoes.alternarAtivo(item.id, !item.ativo);
+                        if (resultado?.erro) {
+                          setErroAtivo({ id: item.id, msg: resultado.erro });
+                          return;
+                        }
                         router.refresh();
                       })
                     }
@@ -264,6 +300,7 @@ export function GerirPessoas({ itens, tipo }: { itens: Item[]; tipo: "treinadore
                     Anonimizar (RGPD)
                   </button>
                 </div>
+                {erroAtivo?.id === item.id && <p className="w-full text-xs text-red-600 dark:text-red-400">{erroAtivo.msg}</p>}
               </div>
             )}
           </li>

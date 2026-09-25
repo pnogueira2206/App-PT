@@ -7,6 +7,7 @@ import type { Papel } from "@prisma/client";
 import { confirmarComoTreinadorAction } from "@/lib/avaliacoes-actions";
 import { AvaliacaoGuardada } from "@/types/avaliacao";
 import { ResumoAvaliacao } from "@/components/nova-avaliacao/resumo-avaliacao";
+import { RelatorioAvaliacaoButtons } from "@/components/historico/relatorio-avaliacao-buttons";
 
 export function AvaliacaoDetalhe({ avaliacao, papel }: { avaliacao: AvaliacaoGuardada | null; papel: Papel }) {
   const router = useRouter();
@@ -49,6 +50,16 @@ export function AvaliacaoDetalhe({ avaliacao, papel }: { avaliacao: AvaliacaoGua
               Confirmar esta avaliação
             </button>
           )}
+        </div>
+      )}
+
+      {papel !== "TREINADOR" && (
+        <div className="mt-3">
+          <RelatorioAvaliacaoButtons
+            avaliacaoId={avaliacao.id}
+            nomeTreinador={avaliacao.cabecalho.treinador}
+            relatorioEnviadoEm={avaliacao.relatorioEnviadoEm}
+          />
         </div>
       )}
 

@@ -20,11 +20,19 @@ const ROTULOS_ACAO: Record<string, string> = {
   MUDOU_PASSWORD_PROPRIA: "Mudou a própria palavra-passe",
   ANONIMIZOU_CONTA: "Anonimizou conta (RGPD)",
   EXPORTOU_MEUS_DADOS: "Descarregou os próprios dados",
+  GEROU_RELATORIO: "Gerou relatório em PDF",
+  ENVIOU_RELATORIO: "Enviou relatório por email",
 };
 
 function corAcao(acao: string): string {
   if (acao === "LOGIN_FALHOU" || acao === "LOGIN_BLOQUEADO") return "text-red-600 dark:text-red-400";
-  if (acao === "EXPORTOU_CSV" || acao === "REPOS_PASSWORD" || acao === "ANONIMIZOU_CONTA") return "text-amber-700 dark:text-amber-400";
+  if (
+    acao === "EXPORTOU_CSV" ||
+    acao === "REPOS_PASSWORD" ||
+    acao === "ANONIMIZOU_CONTA" ||
+    acao === "ENVIOU_RELATORIO"
+  )
+    return "text-amber-700 dark:text-amber-400";
   return "text-neutral-900 dark:text-neutral-100";
 }
 

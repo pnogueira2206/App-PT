@@ -26,6 +26,7 @@ type LinhaComRelacoes = {
   planoAcao: string;
   confirmacaoAvaliadorData: string | null;
   confirmacaoTreinadorData: string | null;
+  relatorioEnviadoEm: Date | null;
   guardadaEm: Date;
 };
 
@@ -33,6 +34,7 @@ function paraAvaliacaoGuardada(row: LinhaComRelacoes): AvaliacaoGuardada {
   return {
     id: row.id,
     guardadaEm: row.guardadaEm.toISOString(),
+    relatorioEnviadoEm: row.relatorioEnviadoEm ? row.relatorioEnviadoEm.toISOString() : null,
     grelhaSnapshot: JSON.parse(row.grelhaSnapshot) as Seccao[],
     cabecalho: {
       treinador: row.treinador.nome,

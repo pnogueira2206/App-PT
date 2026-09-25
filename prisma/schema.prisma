@@ -133,5 +133,7 @@ model Avaliacao {
   confirmacaoAvaliadorData String?
   confirmacaoTreinadorData String?
 
+  relatorioEnviadoEm DateTime?
+
   guardadaEm DateTime @default(now())
 }

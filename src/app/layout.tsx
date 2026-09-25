@@ -40,7 +40,6 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
   themeColor: "#000000",
 };
 
@@ -54,20 +53,22 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col bg-white text-neutral-900">
         <SessionProvider session={session}>
-          <header className="flex items-center gap-3 bg-black px-4 py-3 text-white">
-            <Image src="/logo-cfa.jpg" alt="CrossFit Alvalade" width={32} height={32} className="rounded" />
-            <div className="flex-1">
-              <p className="text-sm font-semibold leading-tight">CFA Avaliações</p>
-              <p className="text-xs leading-tight text-neutral-400">Avaliação de desempenho do staff</p>
-            </div>
-            {session && (
-              <div className="text-right">
-                <Link href="/perfil" className="block text-xs text-neutral-300 underline">
-                  {session.user.name}
-                </Link>
-                <SignOutButton />
+          <header className="bg-black px-4 py-3 text-white md:px-6">
+            <div className="mx-auto flex max-w-5xl items-center gap-3">
+              <Image src="/logo-cfa.jpg" alt="CrossFit Alvalade" width={32} height={32} className="rounded" />
+              <div className="flex-1">
+                <p className="text-sm font-semibold leading-tight">CFA Avaliações</p>
+                <p className="text-xs leading-tight text-neutral-400">Avaliação de desempenho do staff</p>
               </div>
-            )}
+              {session && (
+                <div className="text-right">
+                  <Link href="/perfil" className="block text-xs text-neutral-300 underline">
+                    {session.user.name}
+                  </Link>
+                  <SignOutButton />
+                </div>
+              )}
+            </div>
           </header>
           {session && <NavTabs papel={session.user.papel} />}
           <main className="flex-1">{children}</main>

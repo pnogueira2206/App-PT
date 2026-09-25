@@ -16,21 +16,23 @@ export function NavTabs({ papel }: { papel: Papel }) {
   const visiveis = tabs.filter((t) => t.papeis.includes(papel));
 
   return (
-    <nav className="flex gap-1 overflow-x-auto border-b border-neutral-200 bg-white px-4">
-      {visiveis.map((tab) => {
-        const ativo = pathname.startsWith(tab.href);
-        return (
-          <Link
-            key={tab.href}
-            href={tab.href}
-            className={`border-b-2 px-3 py-2 text-sm font-medium transition ${
-              ativo ? "border-black text-black" : "border-transparent text-neutral-500"
-            }`}
-          >
-            {tab.label}
-          </Link>
-        );
-      })}
+    <nav className="border-b border-neutral-200 bg-white px-4 md:px-6">
+      <div className="mx-auto flex max-w-5xl gap-1 overflow-x-auto">
+        {visiveis.map((tab) => {
+          const ativo = pathname.startsWith(tab.href);
+          return (
+            <Link
+              key={tab.href}
+              href={tab.href}
+              className={`border-b-2 px-3 py-2 text-sm font-medium transition ${
+                ativo ? "border-black text-black" : "border-transparent text-neutral-500"
+              }`}
+            >
+              {tab.label}
+            </Link>
+          );
+        })}
+      </div>
     </nav>
   );
 }

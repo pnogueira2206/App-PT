@@ -15,7 +15,7 @@ export function StepperNav({
   const concluidos = steps.filter((s) => s.completo).length;
   return (
     <div className="border-b border-neutral-200 bg-white">
-      <div className="mx-auto max-w-lg px-4 pt-2">
+      <div className="mx-auto max-w-lg md:max-w-2xl lg:max-w-3xl px-4 pt-2">
         <p className="text-xs text-neutral-500">
           {concluidos} de {steps.length} secções concluídas
         </p>
@@ -26,7 +26,7 @@ export function StepperNav({
           />
         </div>
       </div>
-      <div className="mx-auto flex max-w-lg gap-1 overflow-x-auto px-4 py-2 [scrollbar-width:none]">
+      <div className="mx-auto flex max-w-lg md:max-w-2xl lg:max-w-3xl gap-1 overflow-x-auto px-4 py-2 [scrollbar-width:none]">
         {steps.map((step, i) => (
           <button
             key={step.label}

@@ -25,10 +25,10 @@ const areas = [
 
 export function AdminMenu({ totalAvaliacoes }: { totalAvaliacoes: number }) {
   return (
-    <div className="mx-auto max-w-lg px-4 py-4">
+    <div className="mx-auto max-w-lg px-4 py-4 md:max-w-2xl lg:max-w-3xl md:px-6 md:py-6">
       <h1 className="mb-4 text-lg font-semibold text-neutral-900">Admin</h1>
 
-      <div className="space-y-2">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         {areas.map((a) => (
           <Link
             key={a.href}

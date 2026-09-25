@@ -59,10 +59,10 @@ export function HistoricoList({
   const filtrosAtivos = treinador || tipoAula || dataDe || dataAte || classMin || classMax;
 
   return (
-    <div className="mx-auto max-w-lg px-4 py-4">
+    <div className="mx-auto max-w-lg px-4 py-4 md:max-w-2xl lg:max-w-3xl md:px-6 md:py-6">
       <h1 className="mb-4 text-lg font-semibold text-neutral-900">Histórico de avaliações</h1>
 
-      <div className="mb-5 space-y-3 rounded-md border border-neutral-200 p-3">
+      <div className="mb-5 space-y-3 rounded-md border border-neutral-200 p-3 md:space-y-0 md:grid md:grid-cols-2 md:gap-3 lg:grid-cols-3">
         {papel !== "TREINADOR" && (
           <Campo label="Treinador">
             <select className={inputClasses} value={treinador} onChange={(e) => setTreinador(e.target.value)}>
@@ -89,7 +89,7 @@ export function HistoricoList({
           </select>
         </Campo>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-3 md:contents">
           <Campo label="Período: de">
             <input type="date" className={inputClasses} value={dataDe} onChange={(e) => setDataDe(e.target.value)} />
           </Campo>
@@ -98,7 +98,7 @@ export function HistoricoList({
           </Campo>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-3 md:contents">
           <Campo label="Classificação mín.">
             <input
               type="number"
@@ -132,7 +132,7 @@ export function HistoricoList({
               setClassMin("");
               setClassMax("");
             }}
-            className="text-xs font-medium text-neutral-500 underline"
+            className="text-xs font-medium text-neutral-500 underline md:col-span-full"
           >
             Limpar filtros
           </button>
@@ -153,7 +153,7 @@ export function HistoricoList({
           </p>
         </div>
       ) : (
-        <ul className="space-y-2">
+        <ul className="grid grid-cols-1 gap-2 md:grid-cols-2">
           {filtradas.map((a) => (
             <li key={a.id} className="rounded-md border border-neutral-200 px-3 py-3 transition hover:border-black">
               <Link href={`/historico/${a.id}`} className="block">

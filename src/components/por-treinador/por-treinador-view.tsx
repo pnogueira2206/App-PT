@@ -51,13 +51,13 @@ export function PorTreinadorView({
   const semCriteriosCategorizados = Object.keys(atribuicoes).length === 0;
 
   return (
-    <div className="mx-auto max-w-lg px-4 py-4">
+    <div className="mx-auto max-w-lg px-4 py-4 md:max-w-2xl lg:max-w-4xl md:px-6 md:py-6">
       <h1 className="mb-4 text-lg font-semibold text-neutral-900">Por Treinador</h1>
 
       {nomeTreinadorFixo ? (
         <p className="mb-5 text-sm font-medium text-neutral-900">{nomeTreinadorFixo}</p>
       ) : (
-        <label className="mb-5 block">
+        <label className="mb-5 block md:max-w-xs">
           <span className="mb-1 block text-sm font-medium text-neutral-700">Treinador</span>
           <select className={inputClasses} value={treinador} onChange={(e) => setTreinador(e.target.value)}>
             {treinadores.map((t) => (
@@ -77,31 +77,33 @@ export function PorTreinadorView({
         </div>
       ) : (
         <div className="space-y-6">
-          <section className="rounded-md border border-neutral-200 p-3">
-            <h2 className="mb-2 text-sm font-semibold text-neutral-900">Evolução da classificação geral</h2>
-            <EvolucaoChart
-              pontos={doTreinador.map((a) => ({ data: a.cabecalho.data, classificacao: Number(a.classificacaoGeral) }))}
-            />
-          </section>
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <section className="rounded-md border border-neutral-200 p-3">
+              <h2 className="mb-2 text-sm font-semibold text-neutral-900">Evolução da classificação geral</h2>
+              <EvolucaoChart
+                pontos={doTreinador.map((a) => ({ data: a.cabecalho.data, classificacao: Number(a.classificacaoGeral) }))}
+              />
+            </section>
 
-          <section className="rounded-md border border-neutral-200 p-3">
-            <h2 className="mb-2 text-sm font-semibold text-neutral-900">Notas por pilar</h2>
-            {semCriteriosCategorizados ? (
-              <p className="py-6 text-center text-xs text-neutral-500">
-                Ainda não há critérios categorizados por pilar.
-                {nomeTreinadorFixo ? "" : " Vai a Admin > Critérios & Pilares para os atribuir."}
-              </p>
-            ) : (
-              <>
-                <PilaresRadarChart ultima={notasUltima} anterior={notasAnterior} />
-                {!anterior && (
-                  <p className="mt-2 text-center text-xs text-neutral-500">
-                    Ainda só há uma avaliação — sem avaliação anterior para comparar.
-                  </p>
-                )}
-              </>
-            )}
-          </section>
+            <section className="rounded-md border border-neutral-200 p-3">
+              <h2 className="mb-2 text-sm font-semibold text-neutral-900">Notas por pilar</h2>
+              {semCriteriosCategorizados ? (
+                <p className="py-6 text-center text-xs text-neutral-500">
+                  Ainda não há critérios categorizados por pilar.
+                  {nomeTreinadorFixo ? "" : " Vai a Admin > Critérios & Pilares para os atribuir."}
+                </p>
+              ) : (
+                <>
+                  <PilaresRadarChart ultima={notasUltima} anterior={notasAnterior} />
+                  {!anterior && (
+                    <p className="mt-2 text-center text-xs text-neutral-500">
+                      Ainda só há uma avaliação — sem avaliação anterior para comparar.
+                    </p>
+                  )}
+                </>
+              )}
+            </section>
+          </div>
 
           <section className="rounded-md border border-neutral-200 p-3">
             <h2 className="mb-1 text-sm font-semibold text-neutral-900">Comentários da última avaliação</h2>

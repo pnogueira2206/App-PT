@@ -81,7 +81,7 @@ export function NovaAvaliacaoForm({
 
   if (guardada) {
     return (
-      <div className="mx-auto flex max-w-lg flex-col items-center gap-4 px-4 py-16 text-center">
+      <div className="mx-auto flex max-w-lg md:max-w-2xl lg:max-w-3xl flex-col items-center gap-4 px-4 py-16 text-center">
         <div className="flex h-16 w-16 items-center justify-center rounded-full bg-black text-2xl text-white">✓</div>
         <h1 className="text-xl font-semibold text-neutral-900">Avaliação guardada</h1>
         <p className="text-sm text-neutral-600">
@@ -115,7 +115,7 @@ export function NovaAvaliacaoForm({
     <div className="flex min-h-full flex-col pb-24">
       <StepperNav steps={stepsInfo} currentStep={step} onSelect={setStep} />
 
-      <div className="mx-auto w-full max-w-lg flex-1 px-4 py-4">
+      <div className="mx-auto w-full max-w-lg md:max-w-2xl lg:max-w-3xl flex-1 px-4 py-4">
         {step === STEP_CABECALHO && (
           <CabecalhoStep
             draft={draft}
@@ -144,8 +144,8 @@ export function NovaAvaliacaoForm({
       </div>
 
       <div className="fixed inset-x-0 bottom-0 border-t border-neutral-200 bg-white">
-        {erro && <p className="mx-auto max-w-lg px-4 pt-2 text-xs text-red-600">{erro}</p>}
-        <div className="mx-auto flex max-w-lg items-center justify-between gap-3 px-4 py-3">
+        {erro && <p className="mx-auto max-w-lg md:max-w-2xl lg:max-w-3xl px-4 pt-2 text-xs text-red-600">{erro}</p>}
+        <div className="mx-auto flex max-w-lg md:max-w-2xl lg:max-w-3xl items-center justify-between gap-3 px-4 py-3">
           <button
             type="button"
             disabled={step === STEP_CABECALHO}
@@ -189,7 +189,7 @@ export function NovaAvaliacaoForm({
           )}
         </div>
         {step === STEP_RESUMO && !tudoCompleto && (
-          <p className="mx-auto max-w-lg px-4 pb-3 text-xs text-red-600">
+          <p className="mx-auto max-w-lg md:max-w-2xl lg:max-w-3xl px-4 pb-3 text-xs text-red-600">
             Ainda há respostas por preencher — revê as secções assinaladas sem ✓ no topo.
           </p>
         )}

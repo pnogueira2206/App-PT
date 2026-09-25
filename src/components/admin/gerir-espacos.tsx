@@ -19,7 +19,7 @@ export function GerirEspacos({ itens }: { itens: Item[] }) {
   const [nomeEdicao, setNomeEdicao] = useState("");
 
   return (
-    <div className="mx-auto max-w-lg px-4 py-4">
+    <div className="mx-auto max-w-lg px-4 py-4 md:max-w-2xl lg:max-w-3xl md:px-6 md:py-6">
       <Link href="/admin" className="mb-3 inline-block text-sm font-medium text-neutral-500 underline">
         ← Voltar ao Admin
       </Link>
@@ -48,7 +48,7 @@ export function GerirEspacos({ itens }: { itens: Item[] }) {
         </button>
       </form>
 
-      <ul className="space-y-2">
+      <ul className="space-y-2 md:grid md:grid-cols-2 md:gap-2 md:space-y-0">
         {itens.map((item) => (
           <li key={item.id} className="flex items-center justify-between gap-2 rounded-md border border-neutral-200 px-3 py-2">
             {aEditar === item.id ? (

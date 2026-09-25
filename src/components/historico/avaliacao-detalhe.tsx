@@ -14,7 +14,7 @@ export function AvaliacaoDetalhe({ avaliacao, papel }: { avaliacao: AvaliacaoGua
 
   if (avaliacao === null) {
     return (
-      <div className="mx-auto max-w-lg px-4 py-10 text-center">
+      <div className="mx-auto max-w-lg px-4 py-10 text-center md:max-w-2xl">
         <p className="text-sm font-medium text-neutral-700">Avaliação não encontrada</p>
         <Link href="/historico" className="mt-3 inline-block text-sm font-medium underline">
           Voltar ao histórico
@@ -24,7 +24,7 @@ export function AvaliacaoDetalhe({ avaliacao, papel }: { avaliacao: AvaliacaoGua
   }
 
   return (
-    <div className="mx-auto max-w-lg px-4 py-4">
+    <div className="mx-auto max-w-lg px-4 py-4 md:max-w-2xl lg:max-w-3xl md:px-6 md:py-6">
       <Link href="/historico" className="mb-4 inline-block text-sm font-medium text-neutral-500 underline">
         ← Voltar ao histórico
       </Link>

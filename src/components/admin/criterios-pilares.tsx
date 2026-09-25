@@ -16,7 +16,7 @@ export function CriteriosPilares({ seccoes, atribuicoes }: { seccoes: Seccao[]; 
   const categorizados = criteriosPontuaveis.filter((c) => (atribuicoes[c.id]?.length ?? 0) > 0).length;
 
   return (
-    <div className="mx-auto max-w-lg px-4 py-4">
+    <div className="mx-auto max-w-lg px-4 py-4 md:max-w-2xl lg:max-w-3xl md:px-6 md:py-6">
       <Link href="/admin" className="mb-3 inline-block text-sm font-medium text-neutral-500 underline">
         ← Voltar ao Admin
       </Link>

@@ -28,16 +28,31 @@ enum Pilar {
 }
 
 model Utilizador {
-  id           String   @id @default(cuid())
-  nome         String
-  email        String   @unique
-  passwordHash String
-  papel        Papel
-  ativo        Boolean  @default(true)
-  createdAt    DateTime @default(now())
+  id                 String    @id @default(cuid())
+  nome               String
+  email              String    @unique
+  passwordHash       String
+  papel              Papel
+  ativo              Boolean   @default(true)
+  createdAt          DateTime  @default(now())
+  tentativasFalhadas Int       @default(0)
+  bloqueadoAte       DateTime?
 
-  avaliacoesComoTreinador Avaliacao[] @relation("AvaliacaoTreinador")
-  avaliacoesComoAvaliador Avaliacao[] @relation("AvaliacaoAvaliador")
+  avaliacoesComoTreinador Avaliacao[]        @relation("AvaliacaoTreinador")
+  avaliacoesComoAvaliador Avaliacao[]        @relation("AvaliacaoAvaliador")
+  registosAuditoria      RegistoAuditoria[]
+}
+
+model RegistoAuditoria {
+  id           String      @id @default(cuid())
+  utilizador   Utilizador? @relation(fields: [utilizadorId], references: [id])
+  utilizadorId String?
+  acao         String
+  detalhe      String?
+  criadoEm     DateTime    @default(now())
+
+  @@index([utilizadorId])
+  @@index([criadoEm])
 }
 
 model TipoAula {

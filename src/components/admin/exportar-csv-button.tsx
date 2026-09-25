@@ -1,7 +1,7 @@
 "use client";
 
 import { useTransition } from "react";
-import { listarAvaliacoes } from "@/lib/avaliacoes-actions";
+import { exportarAvaliacoesCsvAction } from "@/lib/avaliacoes-actions";
 import { gerarCsvAvaliacoes, transferirCsv } from "@/lib/csv-export";
 
 export function ExportarCsvButton({ total }: { total: number }) {
@@ -13,7 +13,7 @@ export function ExportarCsvButton({ total }: { total: number }) {
       disabled={total === 0 || pending}
       onClick={() =>
         startTransition(async () => {
-          const avaliacoes = await listarAvaliacoes();
+          const avaliacoes = await exportarAvaliacoesCsvAction();
           const csv = gerarCsvAvaliacoes(avaliacoes);
           const hoje = new Date().toISOString().slice(0, 10);
           transferirCsv(`avaliacoes-cfa-${hoje}.csv`, csv);

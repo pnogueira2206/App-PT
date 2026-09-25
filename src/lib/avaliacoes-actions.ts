@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
+import { registarAuditoria } from "@/lib/auditoria";
 import { Seccao } from "@/data/grelha";
 import { AvaliacaoDraft, AvaliacaoGuardada, PlanoAcaoItem, Respostas } from "@/types/avaliacao";
 
@@ -68,6 +69,7 @@ export async function obterAvaliacao(id: string): Promise<AvaliacaoGuardada | un
   const linha = await prisma.avaliacao.findUnique({ where: { id }, include: INCLUDE });
   if (!linha) return undefined;
   if (session.user.papel === "TREINADOR" && linha.treinadorId !== session.user.id) return undefined;
+  await registarAuditoria(session.user.id, "VIU_AVALIACAO", `${id} (${linha.treinador.nome})`);
   return paraAvaliacaoGuardada(linha);
 }
 
@@ -84,7 +86,7 @@ export async function guardarAvaliacaoAction(draft: AvaliacaoDraft, grelhaSnapsh
   const espaco = await prisma.espaco.findFirst({ where: { nome: draft.cabecalho.espaco } });
   if (!espaco) throw new Error("Espaço não encontrado.");
 
-  await prisma.avaliacao.create({
+  const avaliacao = await prisma.avaliacao.create({
     data: {
       treinadorId: treinador.id,
       avaliadorId: session.user.id,
@@ -103,8 +105,18 @@ export async function guardarAvaliacaoAction(draft: AvaliacaoDraft, grelhaSnapsh
       confirmacaoTreinadorData: draft.confirmacaoTreinador.data || null,
     },
   });
+  await registarAuditoria(session.user.id, "CRIOU_AVALIACAO", `${avaliacao.id} (${treinador.nome})`);
   revalidatePath("/historico");
   revalidatePath("/por-treinador");
+}
+
+export async function exportarAvaliacoesCsvAction(): Promise<AvaliacaoGuardada[]> {
+  const session = await auth();
+  if (!session || session.user.papel !== "ADMIN") throw new Error("Não autorizado.");
+
+  const avaliacoes = await listarAvaliacoes();
+  await registarAuditoria(session.user.id, "EXPORTOU_CSV", `${avaliacoes.length} avaliações`);
+  return avaliacoes;
 }
 
 export async function confirmarComoTreinadorAction(avaliacaoId: string) {
@@ -118,5 +130,6 @@ export async function confirmarComoTreinadorAction(avaliacaoId: string) {
     where: { id: avaliacaoId },
     data: { confirmacaoTreinadorData: new Date().toISOString().slice(0, 10) },
   });
+  await registarAuditoria(session.user.id, "CONFIRMOU_AVALIACAO", avaliacaoId);
   revalidatePath("/historico");
 }

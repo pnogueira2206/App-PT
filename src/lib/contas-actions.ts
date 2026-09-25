@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
+import { registarAuditoria } from "@/lib/auditoria";
 
 export async function reporPasswordAction(id: string, novaPassword: string): Promise<{ erro?: string }> {
   const session = await auth();
@@ -11,7 +12,11 @@ export async function reporPasswordAction(id: string, novaPassword: string): Pro
   if (novaPassword.length < 6) return { erro: "A palavra-passe deve ter pelo menos 6 caracteres." };
 
   const passwordHash = await bcrypt.hash(novaPassword, 10);
-  await prisma.utilizador.update({ where: { id }, data: { passwordHash } });
+  const alvo = await prisma.utilizador.update({
+    where: { id },
+    data: { passwordHash, tentativasFalhadas: 0, bloqueadoAte: null },
+  });
+  await registarAuditoria(session.user.id, "REPOS_PASSWORD", `${alvo.nome} (${alvo.email})`);
   revalidatePath("/admin/treinadores");
   revalidatePath("/admin/avaliadores");
   return {};
@@ -30,5 +35,6 @@ export async function mudarPasswordPropriaAction(passwordAtual: string, novaPass
 
   const passwordHash = await bcrypt.hash(novaPassword, 10);
   await prisma.utilizador.update({ where: { id: utilizador.id }, data: { passwordHash } });
+  await registarAuditoria(utilizador.id, "MUDOU_PASSWORD_PROPRIA");
   return { sucesso: true };
 }

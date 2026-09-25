@@ -16,6 +16,11 @@ const areas = [
     nome: "Critérios & Pilares",
     descricao: "Atribuir os 6 pilares do ensino eficaz a cada critério.",
   },
+  {
+    href: "/admin/auditoria",
+    nome: "Registo de Atividade",
+    descricao: "Logins, avaliações vistas ou criadas, exportações e alterações de conta.",
+  },
 ];
 
 export function AdminMenu({ totalAvaliacoes }: { totalAvaliacoes: number }) {

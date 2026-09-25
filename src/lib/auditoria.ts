@@ -3,8 +3,17 @@
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 
+/** Prazo de retenção do registo de atividade (RGPD — princípio da limitação da conservação). */
+const RETENCAO_AUDITORIA_DIAS = 365;
+
 export async function registarAuditoria(utilizadorId: string | null, acao: string, detalhe?: string) {
   await prisma.registoAuditoria.create({ data: { utilizadorId, acao, detalhe } });
+  try {
+    const limite = new Date(Date.now() - RETENCAO_AUDITORIA_DIAS * 24 * 60 * 60 * 1000);
+    await prisma.registoAuditoria.deleteMany({ where: { criadoEm: { lt: limite } } });
+  } catch {
+    // a limpeza é oportunista — uma falha aqui não pode impedir a ação principal.
+  }
 }
 
 export async function listarAuditoria() {

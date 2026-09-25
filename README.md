@@ -58,6 +58,22 @@ Este projeto usa PostgreSQL desde o início (não SQLite). Para publicar:
 3. Corre `npx prisma migrate deploy` para aplicar as migrações.
 4. Corre `npx prisma db seed` uma vez, se quiseres as contas/dados de exemplo (ou cria as contas reais diretamente pela interface, como Admin).
 
+## RGPD / Proteção de dados
+
+- **Política de privacidade**: `/privacidade`, acessível sem login. Tem dois campos por confirmar antes de publicar
+  (destacados a amarelo na página): o contacto para pedidos de privacidade, e o nome/país do fornecedor de
+  alojamento da base de dados.
+- **Acesso e portabilidade**: qualquer conta pode descarregar tudo o que a app guarda sobre ela própria
+  ("O meu perfil" → "Os meus dados") — dados de conta, avaliações e registo de atividade, em JSON.
+- **Direito ao apagamento**: o Admin pode "Anonimizar" um treinador ou avaliador em vez de o desativar. Substitui o
+  nome e o email por um valor anónimo — é irreversível, e mantém o histórico de avaliações intacto (sem
+  identificar a pessoa).
+- **Retenção do registo de atividade**: apagado automaticamente ao fim de 12 meses (`RETENCAO_AUDITORIA_DIAS` em
+  `src/lib/auditoria.ts`).
+- **Por decidir**: as avaliações em si não têm apagamento automático por prazo — isso é uma decisão de negócio (que
+  prazo, se algum) que ainda falta tomar. Também falta um acordo de subcontratante (DPA) com o fornecedor de
+  alojamento assim que for escolhido, e nomear quem responde a pedidos de privacidade.
+
 ## Notas de produção
 
 - Muda `AUTH_SECRET` para um valor aleatório forte antes de publicar.

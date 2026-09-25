@@ -22,6 +22,30 @@ export async function reporPasswordAction(id: string, novaPassword: string): Pro
   return {};
 }
 
+export async function anonimizarContaAction(id: string): Promise<{ erro?: string }> {
+  const session = await auth();
+  if (session?.user.papel !== "ADMIN") return { erro: "Não autorizado." };
+
+  const alvo = await prisma.utilizador.findUnique({ where: { id } });
+  if (!alvo) return { erro: "Conta não encontrada." };
+
+  const sufixo = alvo.id.slice(-6);
+  await prisma.utilizador.update({
+    where: { id },
+    data: {
+      nome: `Utilizador anonimizado (${sufixo})`,
+      email: `anonimizado-${alvo.id}@removido.invalid`,
+      ativo: false,
+      tentativasFalhadas: 0,
+      bloqueadoAte: null,
+    },
+  });
+  await registarAuditoria(session.user.id, "ANONIMIZOU_CONTA", `${alvo.nome} → anonimizado (${sufixo})`);
+  revalidatePath("/admin/treinadores");
+  revalidatePath("/admin/avaliadores");
+  return {};
+}
+
 export async function mudarPasswordPropriaAction(passwordAtual: string, novaPassword: string): Promise<{ erro?: string; sucesso?: boolean }> {
   const session = await auth();
   if (!session) return { erro: "Não autenticado." };

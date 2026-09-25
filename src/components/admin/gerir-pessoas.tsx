@@ -13,7 +13,7 @@ import {
   alternarAvaliadorAtivoAction,
   editarAvaliadorAction,
 } from "@/lib/avaliadores-actions";
-import { reporPasswordAction } from "@/lib/contas-actions";
+import { anonimizarContaAction, reporPasswordAction } from "@/lib/contas-actions";
 
 interface Item {
   id: string;
@@ -37,6 +37,8 @@ export function GerirPessoas({ itens, tipo }: { itens: Item[]; tipo: "treinadore
   const [aRepor, setARepor] = useState<string | null>(null);
   const [novaPassword, setNovaPassword] = useState("");
   const [erroPassword, setErroPassword] = useState("");
+  const [aAnonimizar, setAAnonimizar] = useState<string | null>(null);
+  const [erroAnonimizar, setErroAnonimizar] = useState("");
 
   const acoes =
     tipo === "treinadores"
@@ -170,15 +172,54 @@ export function GerirPessoas({ itens, tipo }: { itens: Item[]; tipo: "treinadore
                 </div>
                 {erroPassword && <p className="text-xs text-red-600">{erroPassword}</p>}
               </form>
+            ) : aAnonimizar === item.id ? (
+              <div className="space-y-2">
+                <p className="text-xs text-neutral-700">
+                  Tens a certeza? Isto substitui o nome e o email de <strong>{item.nome}</strong> por um valor
+                  anónimo, desativa a conta e não pode ser desfeito. As avaliações já feitas mantêm-se, mas deixam
+                  de identificar esta pessoa.
+                </p>
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      startTransition(async () => {
+                        const resultado = await anonimizarContaAction(item.id);
+                        if (resultado.erro) {
+                          setErroAnonimizar(resultado.erro);
+                          return;
+                        }
+                        setAAnonimizar(null);
+                        setErroAnonimizar("");
+                        router.refresh();
+                      })
+                    }
+                    className="text-xs font-medium text-red-600 underline"
+                  >
+                    Confirmar anonimização
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAAnonimizar(null);
+                      setErroAnonimizar("");
+                    }}
+                    className="text-xs text-neutral-500 underline"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+                {erroAnonimizar && <p className="text-xs text-red-600">{erroAnonimizar}</p>}
+              </div>
             ) : (
-              <div className="flex items-center justify-between gap-2">
+              <div className="flex flex-wrap items-center justify-between gap-2">
                 <div>
                   <p className={`text-sm ${item.ativo ? "text-neutral-900" : "text-neutral-400 line-through"}`}>
                     {item.nome}
                   </p>
                   <p className="text-xs text-neutral-400">{item.email}</p>
                 </div>
-                <div className="flex shrink-0 flex-wrap items-center justify-end gap-x-3 gap-y-1">
+                <div className="flex flex-wrap items-center justify-end gap-x-3 gap-y-1">
                   <button
                     type="button"
                     onClick={() => {
@@ -212,6 +253,16 @@ export function GerirPessoas({ itens, tipo }: { itens: Item[]; tipo: "treinadore
                   >
                     {item.ativo ? "Desativar" : "Reativar"}
                   </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAAnonimizar(item.id);
+                      setErroAnonimizar("");
+                    }}
+                    className="text-xs font-medium text-red-600 underline"
+                  >
+                    Anonimizar (RGPD)
+                  </button>
                 </div>
               </div>
             )}
@@ -221,6 +272,8 @@ export function GerirPessoas({ itens, tipo }: { itens: Item[]; tipo: "treinadore
       <p className="mt-4 text-xs text-neutral-500">
         Nunca se apaga — só se desativa (deixa de conseguir entrar{tipo === "treinadores" ? " e de aparecer na lista de novas avaliações" : ""}), para manter o histórico.
         A reposição de palavra-passe é a forma de recuperação de acesso — define uma nova e partilha-a com a pessoa.
+        &ldquo;Anonimizar&rdquo; é a forma de cumprir um pedido de apagamento de dados (RGPD): substitui o nome e o email por um
+        valor anónimo em vez de apagar a conta, para não quebrar o histórico de avaliações já feitas.
       </p>
     </div>
   );

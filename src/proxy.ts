@@ -6,6 +6,10 @@ export default auth((req) => {
   const isLoggedIn = !!req.auth;
   const papel = req.auth?.user?.papel;
 
+  if (nextUrl.pathname === "/privacidade") {
+    return;
+  }
+
   if (nextUrl.pathname === "/login") {
     if (isLoggedIn) return NextResponse.redirect(new URL("/", nextUrl));
     return;

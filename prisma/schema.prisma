@@ -48,6 +48,14 @@ model TipoAula {
   avaliacoes Avaliacao[]
 }
 
+model Espaco {
+  id    String  @id @default(cuid())
+  nome  String
+  ativo Boolean @default(true)
+
+  avaliacoes Avaliacao[]
+}
+
 model Seccao {
   id          String     @id @default(cuid())
   nome        String
@@ -86,7 +94,8 @@ model Avaliacao {
   treinadorId String
   avaliador   Utilizador @relation("AvaliacaoAvaliador", fields: [avaliadorId], references: [id])
   avaliadorId String
-  espaco      String
+  espaco      Espaco     @relation(fields: [espacoId], references: [id])
+  espacoId    String
   tipoAula    TipoAula   @relation(fields: [tipoAulaId], references: [id])
   tipoAulaId  String
   data        String

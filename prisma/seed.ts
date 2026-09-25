@@ -116,7 +116,12 @@ async function main() {
     tiposAula.push(existente ?? (await prisma.tipoAula.create({ data: { nome } })));
   }
 
-  const espacos = ["CFA Oriente", "CFA Carnaxide"];
+  const nomesEspacos = ["CFA Oriente", "CFA Carnaxide"];
+  const espacos = [];
+  for (const nome of nomesEspacos) {
+    const existente = await prisma.espaco.findFirst({ where: { nome } });
+    espacos.push(existente ?? (await prisma.espaco.create({ data: { nome } })));
+  }
 
   for (let i = 0; i < grelhaInicial.length; i++) {
     const seccao = grelhaInicial[i];
@@ -172,7 +177,7 @@ async function main() {
             id: `seed-${contador}`,
             treinadorId: treinadores[ti].id,
             avaliadorId: avaliador.id,
-            espaco,
+            espacoId: espaco.id,
             tipoAulaId: tipoAula.id,
             data,
             hora,

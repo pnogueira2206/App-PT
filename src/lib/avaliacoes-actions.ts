@@ -6,13 +6,13 @@ import { auth } from "@/lib/auth";
 import { Seccao } from "@/data/grelha";
 import { AvaliacaoDraft, AvaliacaoGuardada, PlanoAcaoItem, Respostas } from "@/types/avaliacao";
 
-const INCLUDE = { treinador: true, avaliador: true, tipoAula: true } as const;
+const INCLUDE = { treinador: true, avaliador: true, espaco: true, tipoAula: true } as const;
 
 type LinhaComRelacoes = {
   id: string;
   treinador: { nome: string };
   avaliador: { nome: string };
-  espaco: string;
+  espaco: { nome: string };
   tipoAula: { nome: string };
   data: string;
   hora: string;
@@ -36,7 +36,7 @@ function paraAvaliacaoGuardada(row: LinhaComRelacoes): AvaliacaoGuardada {
     cabecalho: {
       treinador: row.treinador.nome,
       avaliador: row.avaliador.nome,
-      espaco: row.espaco,
+      espaco: row.espaco.nome,
       data: row.data,
       hora: row.hora,
       tipoAula: row.tipoAula.nome,
@@ -81,12 +81,14 @@ export async function guardarAvaliacaoAction(draft: AvaliacaoDraft, grelhaSnapsh
   if (!treinador) throw new Error("Treinador não encontrado.");
   const tipoAula = await prisma.tipoAula.findFirst({ where: { nome: draft.cabecalho.tipoAula } });
   if (!tipoAula) throw new Error("Tipo de aula não encontrado.");
+  const espaco = await prisma.espaco.findFirst({ where: { nome: draft.cabecalho.espaco } });
+  if (!espaco) throw new Error("Espaço não encontrado.");
 
   await prisma.avaliacao.create({
     data: {
       treinadorId: treinador.id,
       avaliadorId: session.user.id,
-      espaco: draft.cabecalho.espaco,
+      espacoId: espaco.id,
       tipoAulaId: tipoAula.id,
       data: draft.cabecalho.data,
       hora: draft.cabecalho.hora,

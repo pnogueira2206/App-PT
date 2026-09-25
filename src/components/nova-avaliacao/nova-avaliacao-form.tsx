@@ -9,7 +9,6 @@ import { guardarAvaliacaoAction } from "@/lib/avaliacoes-actions";
 import { origensDisponiveis, percentagemPorPilar, sugerirPontosFracos, temPilaresCategorizados } from "@/lib/pilares-notas";
 import type { AtribuicoesPilares } from "@/lib/pilares-actions";
 import { PilaresRadarChart } from "@/components/por-treinador/pilares-radar-chart";
-import { espacos } from "@/data/mock";
 import {
   AvaliacaoDraft,
   agruparPorDimensao,
@@ -33,11 +32,13 @@ export function NovaAvaliacaoForm({
   seccoesIniciais,
   treinadores,
   tiposDeAula,
+  espacos,
   atribuicoes,
 }: {
   seccoesIniciais: Seccao[];
   treinadores: string[];
   tiposDeAula: string[];
+  espacos: string[];
   atribuicoes: AtribuicoesPilares;
 }) {
   const { data: session } = useSession();
@@ -116,7 +117,13 @@ export function NovaAvaliacaoForm({
 
       <div className="mx-auto w-full max-w-lg flex-1 px-4 py-4">
         {step === STEP_CABECALHO && (
-          <CabecalhoStep draft={draft} setDraft={setDraft} treinadores={treinadores} tiposDeAula={tiposDeAula} />
+          <CabecalhoStep
+            draft={draft}
+            setDraft={setDraft}
+            treinadores={treinadores}
+            tiposDeAula={tiposDeAula}
+            espacos={espacos}
+          />
         )}
 
         {step > STEP_CABECALHO && step < STEP_FINAL && (
@@ -208,11 +215,13 @@ function CabecalhoStep({
   setDraft,
   treinadores,
   tiposDeAula,
+  espacos,
 }: {
   draft: AvaliacaoDraft;
   setDraft: React.Dispatch<React.SetStateAction<AvaliacaoDraft>>;
   treinadores: string[];
   tiposDeAula: string[];
+  espacos: string[];
 }) {
   const c = draft.cabecalho;
   const update = (patch: Partial<typeof c>) => setDraft((d) => ({ ...d, cabecalho: { ...d.cabecalho, ...patch } }));

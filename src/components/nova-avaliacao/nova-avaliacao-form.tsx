@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { Seccao } from "@/data/grelha";
 import { PILARES } from "@/data/pilares";
 import { guardarAvaliacaoAction } from "@/lib/avaliacoes-actions";
@@ -27,6 +27,34 @@ import { StepInfo, StepperNav } from "./stepper-nav";
 import { ResumoAvaliacao } from "./resumo-avaliacao";
 
 const STEP_CABECALHO = 0;
+const RASCUNHO_KEY = "cfa-nova-avaliacao-rascunho";
+
+/** Há algo que valha a pena guardar como rascunho ou avisar antes de perder? */
+function temProgresso(draft: AvaliacaoDraft): boolean {
+  return (
+    draft.cabecalho.treinador !== "" ||
+    Object.keys(draft.respostas).length > 0 ||
+    draft.classificacaoGeral !== "" ||
+    draft.comentarioGeral.trim() !== "" ||
+    draft.planoAcao.length > 0
+  );
+}
+
+function inscreverRascunho() {
+  return () => {};
+}
+
+function lerRascunhoBruto(): string | null {
+  try {
+    return window.localStorage.getItem(RASCUNHO_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function lerRascunhoServidor(): string | null {
+  return null;
+}
 
 export function NovaAvaliacaoForm({
   seccoesIniciais,
@@ -55,6 +83,53 @@ export function NovaAvaliacaoForm({
   const [guardada, setGuardada] = useState(false);
   const [aGuardar, setAGuardar] = useState(false);
   const [erro, setErro] = useState("");
+  const [rascunhoRecusado, setRascunhoRecusado] = useState(false);
+
+  // Lê o rascunho deste browser (se houver) de forma segura para SSR/hidratação.
+  const rascunhoBruto = useSyncExternalStore(inscreverRascunho, lerRascunhoBruto, lerRascunhoServidor);
+  const rascunhoDisponivel = useMemo(() => {
+    if (!rascunhoBruto) return null;
+    try {
+      const guardado = JSON.parse(rascunhoBruto) as { draft: AvaliacaoDraft; step: number };
+      if (guardado?.draft && temProgresso(guardado.draft)) return guardado;
+    } catch {
+      // rascunho corrompido — ignora.
+    }
+    return null;
+  }, [rascunhoBruto]);
+
+  const mostrarOfertaRascunho = rascunhoDisponivel !== null && !rascunhoRecusado && !guardada && !temProgresso(draft);
+
+  // Só limpa um rascunho por engano depois de termos mesmo visto progresso nesta instância —
+  // evita apagar o rascunho gravado antes de o `useSyncExternalStore` estabilizar após a hidratação.
+  const teveProgressoRef = useRef(false);
+
+  // Guarda o rascunho a cada alteração, e limpa-o quando é recusado ou o utilizador o esvazia.
+  useEffect(() => {
+    if (guardada) return;
+    try {
+      if (temProgresso(draft)) {
+        teveProgressoRef.current = true;
+        window.localStorage.setItem(RASCUNHO_KEY, JSON.stringify({ draft, step }));
+      } else if (rascunhoRecusado || teveProgressoRef.current) {
+        window.localStorage.removeItem(RASCUNHO_KEY);
+      }
+    } catch {
+      // sem storage disponível (privado, quota, etc.) — ignora.
+    }
+  }, [draft, step, guardada, rascunhoRecusado]);
+
+  // Avisa antes de sair da página se houver progresso por gravar.
+  useEffect(() => {
+    const handler = (e: BeforeUnloadEvent) => {
+      if (!guardada && temProgresso(draft)) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [draft, guardada]);
 
   const stepsInfo: StepInfo[] = useMemo(() => {
     const secoes = seccoes.map((s) => ({ label: s.nome, completo: seccaoCompleta(s, draft.respostas) }));
@@ -114,6 +189,30 @@ export function NovaAvaliacaoForm({
   return (
     <div className="flex min-h-full flex-col pb-24">
       <StepperNav steps={stepsInfo} currentStep={step} onSelect={setStep} />
+
+      {mostrarOfertaRascunho && (
+        <div className="mx-auto w-full max-w-lg md:max-w-2xl lg:max-w-3xl px-4 pt-3">
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-md bg-neutral-100 px-3 py-2 text-xs text-neutral-600">
+            <span>Tens um rascunho por terminar neste dispositivo.</span>
+            <div className="flex shrink-0 gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  if (!rascunhoDisponivel) return;
+                  setDraft(rascunhoDisponivel.draft);
+                  setStep(rascunhoDisponivel.step ?? STEP_CABECALHO);
+                }}
+                className="font-medium underline"
+              >
+                Continuar rascunho
+              </button>
+              <button type="button" onClick={() => setRascunhoRecusado(true)} className="text-neutral-500 underline">
+                Começar do zero
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="mx-auto w-full max-w-lg md:max-w-2xl lg:max-w-3xl flex-1 px-4 py-4">
         {step === STEP_CABECALHO && (
@@ -176,6 +275,11 @@ export function NovaAvaliacaoForm({
                     seccoes
                   );
                   setGuardada(true);
+                  try {
+                    window.localStorage.removeItem(RASCUNHO_KEY);
+                  } catch {
+                    // ignora
+                  }
                 } catch (e) {
                   setErro(e instanceof Error ? e.message : "Não foi possível guardar a avaliação.");
                 } finally {

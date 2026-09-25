@@ -3,16 +3,13 @@ import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { registarAuditoria } from "@/lib/auditoria";
+import { authConfig } from "@/lib/auth.config";
 
 const LIMIAR_TENTATIVAS = 5;
 const DURACAO_BLOQUEIO_MIN = 15;
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  // Necessário fora da Vercel (ex.: Netlify) para o Auth.js confiar no header
-  // Host do pedido ao construir URLs de callback.
-  trustHost: true,
-  session: { strategy: "jwt" },
-  pages: { signIn: "/login" },
+  ...authConfig,
   providers: [
     Credentials({
       credentials: { email: {}, password: {} },
@@ -64,6 +61,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
+    ...authConfig.callbacks,
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id!;
@@ -78,11 +76,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       token.papel = utilizador.papel;
 
       return token;
-    },
-    session({ session, token }) {
-      session.user.id = token.id;
-      session.user.papel = token.papel;
-      return session;
     },
   },
 });

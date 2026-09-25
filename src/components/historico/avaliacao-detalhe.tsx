@@ -15,7 +15,7 @@ export function AvaliacaoDetalhe({ avaliacao, papel }: { avaliacao: AvaliacaoGua
   if (avaliacao === null) {
     return (
       <div className="mx-auto max-w-lg px-4 py-10 text-center md:max-w-2xl">
-        <p className="text-sm font-medium text-neutral-700">Avaliação não encontrada</p>
+        <p className="text-sm font-medium text-neutral-300">Avaliação não encontrada</p>
         <Link href="/historico" className="mt-3 inline-block text-sm font-medium underline">
           Voltar ao histórico
         </Link>
@@ -25,15 +25,15 @@ export function AvaliacaoDetalhe({ avaliacao, papel }: { avaliacao: AvaliacaoGua
 
   return (
     <div className="mx-auto max-w-lg px-4 py-4 md:max-w-2xl lg:max-w-3xl md:px-6 md:py-6">
-      <Link href="/historico" className="mb-4 inline-block text-sm font-medium text-neutral-500 underline">
+      <Link href="/historico" className="mb-4 inline-block text-sm font-medium text-muted underline">
         ← Voltar ao histórico
       </Link>
-      <div className="rounded-md bg-neutral-100 px-3 py-2 text-xs text-neutral-500">Consulta apenas de leitura</div>
+      <div className="rounded-none bg-panel px-3 py-2 text-xs text-muted">Consulta apenas de leitura</div>
 
       {papel === "TREINADOR" && (
-        <div className="mt-3 rounded-md border border-neutral-200 p-3">
+        <div className="mt-3 rounded-none border border-line p-3">
           {avaliacao.confirmacaoTreinador.data ? (
-            <p className="text-sm text-green-700">Confirmaste esta avaliação em {avaliacao.confirmacaoTreinador.data}.</p>
+            <p className="text-sm text-green-400">Confirmaste esta avaliação em {avaliacao.confirmacaoTreinador.data}.</p>
           ) : (
             <button
               type="button"
@@ -44,7 +44,7 @@ export function AvaliacaoDetalhe({ avaliacao, papel }: { avaliacao: AvaliacaoGua
                   router.refresh();
                 })
               }
-              className="w-full rounded-md bg-black px-4 py-2 text-sm font-medium text-white"
+              className="w-full rounded-none bg-white px-4 py-2 text-sm font-medium text-black"
             >
               Confirmar esta avaliação
             </button>

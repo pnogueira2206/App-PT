@@ -17,22 +17,22 @@ export function CriteriosPilares({ seccoes, atribuicoes }: { seccoes: Seccao[]; 
 
   return (
     <div className="mx-auto max-w-lg px-4 py-4 md:max-w-2xl lg:max-w-3xl md:px-6 md:py-6">
-      <Link href="/admin" className="mb-3 inline-block text-sm font-medium text-neutral-500 underline">
+      <Link href="/admin" className="mb-3 inline-block text-sm font-medium text-muted underline">
         ← Voltar ao Admin
       </Link>
-      <h1 className="mb-1 text-lg font-semibold text-neutral-900">Critérios &amp; Pilares</h1>
-      <p className="mb-4 text-sm text-neutral-600">
+      <h1 className="mb-1 text-lg font-semibold text-neutral-100">Critérios &amp; Pilares</h1>
+      <p className="mb-4 text-sm text-muted">
         Atribui a cada critério um ou mais dos 6 pilares do ensino eficaz. Isto vai alimentar a spider web de
         desenvolvimento do treinador, mais à frente em &quot;Por Treinador&quot;.
       </p>
 
       <div className="mb-5">
-        <p className="mb-1 text-xs text-neutral-500">
+        <p className="mb-1 text-xs text-muted">
           {categorizados} de {total} critérios categorizados
         </p>
-        <div className="h-1.5 w-full rounded-full bg-neutral-200">
+        <div className="h-1.5 w-full rounded-none bg-line">
           <div
-            className="h-1.5 rounded-full bg-black transition-all"
+            className="h-1.5 rounded-none bg-white transition-all"
             style={{ width: `${total > 0 ? (categorizados / total) * 100 : 0}%` }}
           />
         </div>
@@ -41,16 +41,16 @@ export function CriteriosPilares({ seccoes, atribuicoes }: { seccoes: Seccao[]; 
       <div className="space-y-6">
         {seccoes.map((seccao) => (
           <section key={seccao.id}>
-            <h2 className="mb-2 text-sm font-semibold text-neutral-900">{seccao.nome}</h2>
+            <h2 className="mb-2 text-sm font-semibold text-neutral-100">{seccao.nome}</h2>
             <div className="space-y-2">
               {seccao.criterios
                 .filter((c) => c.tipoResposta === "PONTOS")
                 .map((c) => {
                   const atuais = atribuicoes[c.id] ?? [];
                   return (
-                    <div key={c.id} className="rounded-md border border-neutral-200 p-3">
-                      <p className="text-sm font-medium text-neutral-900">{c.texto}</p>
-                      {c.dimensao && <p className="text-xs text-neutral-400">{c.dimensao}</p>}
+                    <div key={c.id} className="rounded-none border border-line p-3">
+                      <p className="text-sm font-medium text-neutral-100">{c.texto}</p>
+                      {c.dimensao && <p className="text-xs text-dim">{c.dimensao}</p>}
                       <div className="mt-2 flex flex-wrap gap-1.5">
                         {PILARES.map((p) => {
                           const selecionado = atuais.includes(p);
@@ -64,8 +64,8 @@ export function CriteriosPilares({ seccoes, atribuicoes }: { seccoes: Seccao[]; 
                                   router.refresh();
                                 })
                               }
-                              className={`rounded-full border px-3 py-1.5 text-xs font-medium transition ${
-                                selecionado ? "border-black bg-black text-white" : "border-neutral-300 text-neutral-700"
+                              className={`rounded-none border px-3 py-1.5 text-xs font-medium transition ${
+                                selecionado ? "border-white bg-white text-black" : "border-line text-neutral-300"
                               }`}
                             >
                               {p}

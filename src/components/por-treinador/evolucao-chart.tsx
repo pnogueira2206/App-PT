@@ -29,24 +29,32 @@ export function EvolucaoChart({ pontos }: { pontos: Ponto[] }) {
               x2={LARGURA - MARGEM.direita}
               y1={y(n)}
               y2={y(n)}
-              stroke="#e5e5e5"
+              stroke="#262626"
               strokeWidth={1}
             />
-            <text x={0} y={y(n) + 3} fontSize={10} fill="#a3a3a3">
+            <text x={0} y={y(n) + 3} fontSize={10} fill="#737373" fontFamily="var(--font-jetbrains-mono)">
               {n}
             </text>
           </g>
         ))}
 
-        <path d={linha} fill="none" stroke="#000000" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+        <path d={linha} fill="none" stroke="#ffffff" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
 
         {pontos.map((p, i) => (
           <g key={i}>
-            <circle cx={x(i)} cy={y(p.classificacao)} r={4} fill="#000000" />
-            <text x={x(i)} y={y(p.classificacao) - 10} fontSize={11} fontWeight={600} textAnchor="middle" fill="#171717">
+            <circle cx={x(i)} cy={y(p.classificacao)} r={4} fill="#ffffff" />
+            <text
+              x={x(i)}
+              y={y(p.classificacao) - 10}
+              fontSize={11}
+              fontWeight={700}
+              textAnchor="middle"
+              fill="#ffffff"
+              fontFamily="var(--font-jetbrains-mono)"
+            >
               {p.classificacao}
             </text>
-            <text x={x(i)} y={ALTURA - 8} fontSize={10} textAnchor="middle" fill="#737373">
+            <text x={x(i)} y={ALTURA - 8} fontSize={10} textAnchor="middle" fill="#595959" fontFamily="var(--font-jetbrains-mono)">
               {p.data.slice(5)}
             </text>
           </g>

@@ -31,11 +31,11 @@ export function ExportarMeusDadosButton() {
             }
           })
         }
-        className="w-full rounded-md border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700 disabled:opacity-40"
+        className="w-full rounded-none border border-line px-4 py-2 text-sm font-medium text-neutral-300 disabled:opacity-40"
       >
         {pending ? "A preparar..." : "Descarregar os meus dados (JSON)"}
       </button>
-      {erro && <p className="mt-2 text-xs text-red-600">{erro}</p>}
+      {erro && <p className="mt-2 text-xs text-red-400">{erro}</p>}
     </div>
   );
 }

@@ -27,10 +27,10 @@ export function CriterioField({
   if (criterio.tipoResposta === "TEXTO_LIVRE") {
     const texto = resposta?.tipo === "TEXTO_LIVRE" ? resposta.texto : "";
     return (
-      <div className="py-3 border-b border-neutral-200 last:border-b-0">
-        <p className="text-sm font-medium text-neutral-900">{criterio.texto}</p>
+      <div className="py-3 border-b border-line last:border-b-0">
+        <p className="text-sm font-medium text-neutral-100">{criterio.texto}</p>
         <textarea
-          className="mt-2 w-full rounded-md border border-neutral-300 p-2 text-sm text-neutral-900 focus:border-black focus:outline-none focus:ring-1 focus:ring-black"
+          className="mt-2 w-full rounded-none border border-line bg-transparent p-2 text-sm text-neutral-100 focus:border-white focus:outline-none focus:ring-1 focus:ring-white"
           rows={2}
           placeholder="Escreve livremente..."
           value={texto}
@@ -49,13 +49,13 @@ export function CriterioField({
   };
 
   return (
-    <div className="py-3 border-b border-neutral-200 last:border-b-0">
+    <div className="py-3 border-b border-line last:border-b-0">
       <div className="flex items-baseline justify-between gap-2">
-        <p className="text-sm font-medium text-neutral-900">{criterio.texto}</p>
+        <p className="text-sm font-medium text-neutral-100">{criterio.texto}</p>
         {!semPeso && (
-          <span className="shrink-0 text-xs text-neutral-500">máx. {formatarValor(criterio.pesoMaximo!)}</span>
+          <span className="shrink-0 text-xs text-muted">máx. {formatarValor(criterio.pesoMaximo!)}</span>
         )}
-        {semPeso && <span className="shrink-0 text-xs text-neutral-400">sem peso (por atribuir)</span>}
+        {semPeso && <span className="shrink-0 text-xs text-dim">sem peso (por atribuir)</span>}
       </div>
       <div className="mt-2 flex flex-wrap gap-1.5">
         {semPeso ? (
@@ -63,8 +63,8 @@ export function CriterioField({
             <button
               type="button"
               onClick={() => selecionar(1, false)}
-              className={`rounded-full border px-3 py-1.5 text-xs font-medium transition ${
-                !na && valor === 1 ? "border-black bg-black text-white" : "border-neutral-300 text-neutral-700"
+              className={`rounded-none border px-3 py-1.5 text-xs font-medium transition ${
+                !na && valor === 1 ? "border-white bg-white text-black" : "border-line text-neutral-300"
               }`}
             >
               Cumpriu
@@ -72,8 +72,8 @@ export function CriterioField({
             <button
               type="button"
               onClick={() => selecionar(0, false)}
-              className={`rounded-full border px-3 py-1.5 text-xs font-medium transition ${
-                !na && valor === 0 ? "border-black bg-black text-white" : "border-neutral-300 text-neutral-700"
+              className={`rounded-none border px-3 py-1.5 text-xs font-medium transition ${
+                !na && valor === 0 ? "border-white bg-white text-black" : "border-line text-neutral-300"
               }`}
             >
               Não cumpriu
@@ -81,8 +81,8 @@ export function CriterioField({
             <button
               type="button"
               onClick={() => selecionar(null, true)}
-              className={`rounded-full border px-3 py-1.5 text-xs font-medium transition ${
-                na ? "border-black bg-black text-white" : "border-neutral-300 text-neutral-700"
+              className={`rounded-none border px-3 py-1.5 text-xs font-medium transition ${
+                na ? "border-white bg-white text-black" : "border-line text-neutral-300"
               }`}
             >
               N/A
@@ -95,8 +95,8 @@ export function CriterioField({
                 key={op}
                 type="button"
                 onClick={() => selecionar(op, false)}
-                className={`rounded-full border px-3 py-1.5 text-xs font-medium transition ${
-                  !na && valor === op ? "border-black bg-black text-white" : "border-neutral-300 text-neutral-700"
+                className={`rounded-none border px-3 py-1.5 text-xs font-medium transition ${
+                  !na && valor === op ? "border-white bg-white text-black" : "border-line text-neutral-300"
                 }`}
               >
                 {formatarValor(op)}
@@ -105,8 +105,8 @@ export function CriterioField({
             <button
               type="button"
               onClick={() => selecionar(null, true)}
-              className={`rounded-full border px-3 py-1.5 text-xs font-medium transition ${
-                na ? "border-black bg-black text-white" : "border-neutral-300 text-neutral-700"
+              className={`rounded-none border px-3 py-1.5 text-xs font-medium transition ${
+                na ? "border-white bg-white text-black" : "border-line text-neutral-300"
               }`}
             >
               N/A

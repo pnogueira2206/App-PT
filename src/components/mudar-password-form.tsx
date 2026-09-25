@@ -4,7 +4,7 @@ import { useState } from "react";
 import { mudarPasswordPropriaAction } from "@/lib/contas-actions";
 
 const inputClasses =
-  "w-full rounded-md border border-neutral-300 px-3 py-2 text-sm text-neutral-900 focus:border-black focus:outline-none focus:ring-1 focus:ring-black";
+  "w-full rounded-none border border-line bg-transparent px-3 py-2 text-sm text-neutral-100 focus:border-white focus:outline-none focus:ring-1 focus:ring-white";
 
 export function MudarPasswordForm() {
   const [atual, setAtual] = useState("");
@@ -31,20 +31,20 @@ export function MudarPasswordForm() {
       }}
     >
       <label className="block">
-        <span className="mb-1 block text-sm font-medium text-neutral-700">Palavra-passe atual</span>
+        <span className="mb-1 block text-sm font-medium text-neutral-300">Palavra-passe atual</span>
         <input type="password" className={inputClasses} value={atual} onChange={(e) => setAtual(e.target.value)} required />
       </label>
       <label className="block">
-        <span className="mb-1 block text-sm font-medium text-neutral-700">Nova palavra-passe</span>
+        <span className="mb-1 block text-sm font-medium text-neutral-300">Nova palavra-passe</span>
         <input type="password" className={inputClasses} value={nova} onChange={(e) => setNova(e.target.value)} required />
       </label>
       {mensagem && (
-        <p className={`text-xs ${mensagem.tipo === "erro" ? "text-red-600" : "text-green-700"}`}>{mensagem.texto}</p>
+        <p className={`text-xs ${mensagem.tipo === "erro" ? "text-red-400" : "text-green-400"}`}>{mensagem.texto}</p>
       )}
       <button
         type="submit"
         disabled={aEnviar}
-        className="w-full rounded-md bg-black px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+        className="w-full rounded-none bg-white px-4 py-2 text-sm font-medium text-black disabled:opacity-50"
       >
         {aEnviar ? "A guardar..." : "Alterar palavra-passe"}
       </button>

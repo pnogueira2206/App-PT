@@ -3,15 +3,15 @@ import Link from "next/link";
 function Secao({ titulo, children }: { titulo: string; children: React.ReactNode }) {
   return (
     <section className="space-y-2">
-      <h2 className="text-sm font-semibold text-neutral-900">{titulo}</h2>
-      <div className="space-y-2 text-sm leading-relaxed text-neutral-700">{children}</div>
+      <h2 className="text-sm font-semibold text-neutral-100">{titulo}</h2>
+      <div className="space-y-2 text-sm leading-relaxed text-neutral-300">{children}</div>
     </section>
   );
 }
 
 function APreencher({ children }: { children: React.ReactNode }) {
   return (
-    <span className="rounded bg-amber-50 px-1.5 py-0.5 font-medium text-amber-800 ring-1 ring-amber-200">
+    <span className="rounded-none bg-amber-950 px-1.5 py-0.5 font-medium text-amber-400 ring-1 ring-amber-800">
       [A confirmar: {children}]
     </span>
   );
@@ -20,11 +20,11 @@ function APreencher({ children }: { children: React.ReactNode }) {
 export default function PrivacidadePage() {
   return (
     <div className="mx-auto max-w-lg px-4 py-8 md:max-w-2xl md:px-6 md:py-12">
-      <Link href="/" className="mb-4 inline-block text-sm font-medium text-neutral-500 underline">
+      <Link href="/" className="mb-4 inline-block text-sm font-medium text-muted underline">
         ← Voltar
       </Link>
-      <h1 className="mb-1 text-lg font-semibold text-neutral-900">Política de Privacidade</h1>
-      <p className="mb-6 text-xs text-neutral-500">Última atualização: 25 de setembro de 2026.</p>
+      <h1 className="mb-1 text-lg font-semibold text-neutral-100">Política de Privacidade</h1>
+      <p className="mb-6 text-xs text-muted">Última atualização: 25 de setembro de 2026.</p>
 
       <div className="space-y-6">
         <Secao titulo="Quem trata os teus dados">

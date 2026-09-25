@@ -4,7 +4,7 @@ import { useActionState } from "react";
 import { loginAction } from "@/app/login/actions";
 
 const inputClasses =
-  "w-full rounded-md border border-neutral-300 px-3 py-2 text-sm text-neutral-900 focus:border-black focus:outline-none focus:ring-1 focus:ring-black";
+  "w-full rounded-none border border-line bg-transparent px-3 py-2 text-sm text-neutral-100 focus:border-white focus:outline-none focus:ring-1 focus:ring-white";
 
 export function LoginForm() {
   const [state, formAction, pending] = useActionState(loginAction, {});
@@ -20,11 +20,11 @@ export function LoginForm() {
         className={inputClasses}
         autoComplete="current-password"
       />
-      {state.erro && <p className="text-xs text-red-600">{state.erro}</p>}
+      {state.erro && <p className="text-xs text-red-400">{state.erro}</p>}
       <button
         type="submit"
         disabled={pending}
-        className="w-full rounded-md bg-black px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+        className="w-full rounded-none bg-white px-4 py-2 text-sm font-medium text-black disabled:opacity-50"
       >
         {pending ? "A entrar..." : "Entrar"}
       </button>

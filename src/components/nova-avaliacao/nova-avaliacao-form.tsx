@@ -157,9 +157,9 @@ export function NovaAvaliacaoForm({
   if (guardada) {
     return (
       <div className="mx-auto flex max-w-lg md:max-w-2xl lg:max-w-3xl flex-col items-center gap-4 px-4 py-16 text-center">
-        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-black text-2xl text-white">✓</div>
-        <h1 className="text-xl font-semibold text-neutral-900">Avaliação guardada</h1>
-        <p className="text-sm text-neutral-600">
+        <div className="flex h-16 w-16 items-center justify-center rounded-none bg-white text-2xl text-black">✓</div>
+        <h1 className="text-xl font-semibold text-neutral-100">Avaliação guardada</h1>
+        <p className="text-sm text-muted">
           A avaliação de {draft.cabecalho.treinador} em {draft.cabecalho.data} foi registada e já está visível no
           Histórico.
         </p>
@@ -171,13 +171,13 @@ export function NovaAvaliacaoForm({
               setStep(STEP_CABECALHO);
               setGuardada(false);
             }}
-            className="rounded-md bg-black px-4 py-2 text-sm font-medium text-white"
+            className="rounded-none bg-white px-4 py-2 text-sm font-medium text-black"
           >
             Nova avaliação
           </button>
           <Link
             href="/historico"
-            className="rounded-md border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700"
+            className="rounded-none border border-line px-4 py-2 text-sm font-medium text-neutral-300"
           >
             Ver histórico
           </Link>
@@ -192,7 +192,7 @@ export function NovaAvaliacaoForm({
 
       {mostrarOfertaRascunho && (
         <div className="mx-auto w-full max-w-lg md:max-w-2xl lg:max-w-3xl px-4 pt-3">
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-md bg-neutral-100 px-3 py-2 text-xs text-neutral-600">
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-none bg-panel px-3 py-2 text-xs text-muted">
             <span>Tens um rascunho por terminar neste dispositivo.</span>
             <div className="flex shrink-0 gap-3">
               <button
@@ -206,7 +206,7 @@ export function NovaAvaliacaoForm({
               >
                 Continuar rascunho
               </button>
-              <button type="button" onClick={() => setRascunhoRecusado(true)} className="text-neutral-500 underline">
+              <button type="button" onClick={() => setRascunhoRecusado(true)} className="text-muted underline">
                 Começar do zero
               </button>
             </div>
@@ -242,14 +242,14 @@ export function NovaAvaliacaoForm({
         {step === STEP_RESUMO && <ResumoAvaliacao draft={{ ...draft, cabecalho: { ...draft.cabecalho, avaliador: nomeAvaliador } }} seccoes={seccoes} />}
       </div>
 
-      <div className="fixed inset-x-0 bottom-0 border-t border-neutral-200 bg-white">
-        {erro && <p className="mx-auto max-w-lg md:max-w-2xl lg:max-w-3xl px-4 pt-2 text-xs text-red-600">{erro}</p>}
+      <div className="fixed inset-x-0 bottom-0 border-t border-line bg-panel">
+        {erro && <p className="mx-auto max-w-lg md:max-w-2xl lg:max-w-3xl px-4 pt-2 text-xs text-red-400">{erro}</p>}
         <div className="mx-auto flex max-w-lg md:max-w-2xl lg:max-w-3xl items-center justify-between gap-3 px-4 py-3">
           <button
             type="button"
             disabled={step === STEP_CABECALHO}
             onClick={() => setStep((s) => Math.max(STEP_CABECALHO, s - 1))}
-            className="rounded-md border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700 disabled:opacity-40"
+            className="rounded-none border border-line px-4 py-2 text-sm font-medium text-neutral-300 disabled:opacity-40"
           >
             Anterior
           </button>
@@ -258,7 +258,7 @@ export function NovaAvaliacaoForm({
             <button
               type="button"
               onClick={() => setStep((s) => Math.min(STEP_RESUMO, s + 1))}
-              className="rounded-md bg-black px-4 py-2 text-sm font-medium text-white"
+              className="rounded-none bg-white px-4 py-2 text-sm font-medium text-black"
             >
               Seguinte
             </button>
@@ -286,14 +286,14 @@ export function NovaAvaliacaoForm({
                   setAGuardar(false);
                 }
               }}
-              className="rounded-md bg-black px-4 py-2 text-sm font-medium text-white disabled:opacity-40"
+              className="rounded-none bg-white px-4 py-2 text-sm font-medium text-black disabled:opacity-40"
             >
               {aGuardar ? "A guardar..." : "Guardar avaliação"}
             </button>
           )}
         </div>
         {step === STEP_RESUMO && !tudoCompleto && (
-          <p className="mx-auto max-w-lg md:max-w-2xl lg:max-w-3xl px-4 pb-3 text-xs text-red-600">
+          <p className="mx-auto max-w-lg md:max-w-2xl lg:max-w-3xl px-4 pb-3 text-xs text-red-400">
             Ainda há respostas por preencher — revê as secções assinaladas sem ✓ no topo.
           </p>
         )}
@@ -305,14 +305,14 @@ export function NovaAvaliacaoForm({
 function Campo({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-sm font-medium text-neutral-700">{label}</span>
+      <span className="mb-1 block text-sm font-medium text-neutral-300">{label}</span>
       {children}
     </label>
   );
 }
 
 const inputClasses =
-  "w-full rounded-md border border-neutral-300 px-3 py-2 text-sm text-neutral-900 focus:border-black focus:outline-none focus:ring-1 focus:ring-black";
+  "w-full rounded-none border border-line bg-transparent px-3 py-2 text-sm text-neutral-100 focus:border-white focus:outline-none focus:ring-1 focus:ring-white";
 
 function CabecalhoStep({
   draft,
@@ -332,7 +332,7 @@ function CabecalhoStep({
 
   return (
     <div className="space-y-4">
-      <h1 className="text-lg font-semibold text-neutral-900">Cabeçalho</h1>
+      <h1 className="text-lg font-semibold text-neutral-100">Cabeçalho</h1>
 
       <Campo label="Treinador avaliado">
         <select className={inputClasses} value={c.treinador} onChange={(e) => update({ treinador: e.target.value })}>
@@ -407,17 +407,17 @@ function SeccaoStep({
   return (
     <div>
       <div className="mb-3 flex items-baseline justify-between">
-        <h1 className="text-lg font-semibold text-neutral-900">
+        <h1 className="text-lg font-semibold text-neutral-100">
           {indice}. {seccao.nome}
         </h1>
-        <span className="text-xs text-neutral-500">{seccao.percentagem}% da avaliação</span>
+        <span className="text-xs text-muted">{seccao.percentagem}% da avaliação</span>
       </div>
 
       <div className="space-y-4">
         {grupos.map((grupo, i) => {
           const st = subtotal(grupo.criterios, draft.respostas);
           return (
-            <div key={i} className="rounded-md border border-neutral-200">
+            <div key={i} className="rounded-none border border-line">
               {grupo.dimensao && <DimensaoBadge nome={grupo.dimensao} obtidos={st.obtidos} max={st.max} />}
               <div className="px-3">
                 {grupo.criterios.map((criterio) => (
@@ -435,7 +435,7 @@ function SeccaoStep({
           );
         })}
 
-        <div className="flex items-center justify-between rounded-md bg-black px-3 py-2 text-sm font-semibold text-white">
+        <div className="flex items-center justify-between rounded-none bg-white px-3 py-2 text-sm font-semibold text-black">
           <span>Total</span>
           <span className="tabular-nums">
             {totalSeccao.obtidos} / {totalSeccao.max}
@@ -475,11 +475,11 @@ function FinalStep({
 
   return (
     <div className="space-y-5">
-      <h1 className="text-lg font-semibold text-neutral-900">Classificação e confirmação</h1>
+      <h1 className="text-lg font-semibold text-neutral-100">Classificação e confirmação</h1>
 
-      <div className="rounded-md bg-neutral-100 px-3 py-2 text-xs text-neutral-600">
+      <div className="rounded-none bg-panel px-3 py-2 text-xs text-muted">
         Pontuação calculada pela grelha (informativa, não substitui a classificação do avaliador):{" "}
-        <span className="font-semibold text-neutral-900">
+        <span className="font-semibold text-neutral-100">
           {total.obtidos} / {total.max}
         </span>
       </div>
@@ -505,9 +505,9 @@ function FinalStep({
         />
       </Campo>
 
-      <div className="rounded-md border border-neutral-200 p-3">
-        <p className="mb-2 text-sm font-semibold text-neutral-900">Confirmação do avaliador</p>
-        <p className="mb-2 text-sm text-neutral-700">{nomeAvaliador}</p>
+      <div className="rounded-none border border-line p-3">
+        <p className="mb-2 text-sm font-semibold text-neutral-100">Confirmação do avaliador</p>
+        <p className="mb-2 text-sm text-neutral-300">{nomeAvaliador}</p>
         <Campo label="Data de confirmação">
           <input
             type="date"
@@ -523,10 +523,10 @@ function FinalStep({
         </Campo>
       </div>
 
-      <div className="rounded-md border border-neutral-200 p-3">
-        <p className="mb-2 text-sm font-semibold text-neutral-900">Confirmação do treinador</p>
-        <p className="mb-2 text-sm text-neutral-700">{draft.cabecalho.treinador || "— (define o treinador no cabeçalho)"}</p>
-        <p className="text-xs text-neutral-500">
+      <div className="rounded-none border border-line p-3">
+        <p className="mb-2 text-sm font-semibold text-neutral-100">Confirmação do treinador</p>
+        <p className="mb-2 text-sm text-neutral-300">{draft.cabecalho.treinador || "— (define o treinador no cabeçalho)"}</p>
+        <p className="text-xs text-muted">
           O treinador confirma a avaliação através da própria conta, no Histórico.
         </p>
       </div>
@@ -549,8 +549,8 @@ function SpiderWebStep({
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-lg font-semibold text-neutral-900">Notas por Pilar</h1>
-        <p className="mt-1 text-sm text-neutral-600">
+        <h1 className="text-lg font-semibold text-neutral-100">Notas por Pilar</h1>
+        <p className="mt-1 text-sm text-muted">
           Com base nas respostas desta avaliação, esta é a distribuição pelos 6 pilares do ensino eficaz.
         </p>
       </div>
@@ -558,7 +558,7 @@ function SpiderWebStep({
       {temPilares ? (
         <PilaresRadarChart ultima={notas} anterior={null} />
       ) : (
-        <p className="rounded-md border border-dashed border-neutral-300 px-4 py-10 text-center text-xs text-neutral-500">
+        <p className="rounded-none border border-dashed border-line px-4 py-10 text-center text-xs text-muted">
           Ainda não há critérios categorizados por pilar (Admin &gt; Critérios &amp; Pilares), por isso o plano de
           ação a seguir vai basear-se nas secções mais fracas.
         </p>
@@ -599,8 +599,8 @@ function PlanoAcaoStep({
   return (
     <div className="space-y-5">
       <div>
-        <h1 className="text-lg font-semibold text-neutral-900">Plano de Ação</h1>
-        <p className="mt-1 text-sm text-neutral-600">
+        <h1 className="text-lg font-semibold text-neutral-100">Plano de Ação</h1>
+        <p className="mt-1 text-sm text-muted">
           Passo opcional. Com base na spider web anterior, estes são os pontos menos desenvolvidos — confirma-os,
           ajusta-os ou adiciona outros, e escreve a ação concreta para cada um.
         </p>
@@ -608,7 +608,7 @@ function PlanoAcaoStep({
 
       {sugestoes.length > 0 && (
         <div>
-          <p className="mb-2 text-xs font-medium text-neutral-500">Sugestões desta avaliação</p>
+          <p className="mb-2 text-xs font-medium text-muted">Sugestões desta avaliação</p>
           <div className="flex flex-wrap gap-2">
             {sugestoes.map((s) => (
               <button
@@ -616,7 +616,7 @@ function PlanoAcaoStep({
                 type="button"
                 disabled={origensNoPlano.has(s.origem)}
                 onClick={() => adicionar(s.origem)}
-                className="rounded-full border border-neutral-300 px-3 py-1.5 text-xs font-medium text-neutral-700 disabled:opacity-40"
+                className="rounded-none border border-line px-3 py-1.5 text-xs font-medium text-neutral-300 disabled:opacity-40"
               >
                 {s.origem} ({Math.round(s.percentagem)}%){!origensNoPlano.has(s.origem) && " · adicionar"}
               </button>
@@ -626,16 +626,16 @@ function PlanoAcaoStep({
       )}
 
       {draft.planoAcao.length === 0 ? (
-        <p className="rounded-md border border-dashed border-neutral-300 px-4 py-6 text-center text-xs text-neutral-500">
+        <p className="rounded-none border border-dashed border-line px-4 py-6 text-center text-xs text-muted">
           Ainda não há nenhum ponto no plano de ação.
         </p>
       ) : (
         <div className="space-y-3">
           {draft.planoAcao.map((item) => (
-            <div key={item.origem} className="rounded-md border border-neutral-200 p-3">
+            <div key={item.origem} className="rounded-none border border-line p-3">
               <div className="mb-2 flex items-center justify-between">
-                <p className="text-sm font-semibold text-neutral-900">{item.origem}</p>
-                <button type="button" onClick={() => remover(item.origem)} className="text-xs text-red-600 underline">
+                <p className="text-sm font-semibold text-neutral-100">{item.origem}</p>
+                <button type="button" onClick={() => remover(item.origem)} className="text-xs text-red-400 underline">
                   Remover
                 </button>
               </div>
@@ -677,7 +677,7 @@ function AdicionarPontoForm({ origens, onAdicionar }: { origens: string[]; onAdi
       <button
         type="button"
         onClick={() => onAdicionar(escolha)}
-        className="shrink-0 rounded-md border border-neutral-300 px-3 py-2 text-sm font-medium text-neutral-700"
+        className="shrink-0 rounded-none border border-line px-3 py-2 text-sm font-medium text-neutral-300"
       >
         Adicionar
       </button>

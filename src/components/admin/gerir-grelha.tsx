@@ -16,16 +16,16 @@ import {
 } from "@/lib/grelha-actions";
 
 const inputClasses =
-  "rounded-md border border-neutral-300 px-2 py-1 text-sm text-neutral-900 focus:border-black focus:outline-none focus:ring-1 focus:ring-black";
+  "rounded-none border border-line bg-transparent px-2 py-1 text-sm text-neutral-100 focus:border-white focus:outline-none focus:ring-1 focus:ring-white";
 
 export function GerirGrelha({ seccoes }: { seccoes: Seccao[] }) {
   return (
     <div className="mx-auto max-w-lg px-4 py-4 md:max-w-2xl lg:max-w-3xl md:px-6 md:py-6">
-      <Link href="/admin" className="mb-3 inline-block text-sm font-medium text-neutral-500 underline">
+      <Link href="/admin" className="mb-3 inline-block text-sm font-medium text-muted underline">
         ← Voltar ao Admin
       </Link>
-      <h1 className="mb-2 text-lg font-semibold text-neutral-900">Secções &amp; Critérios</h1>
-      <div className="mb-5 rounded-md bg-neutral-100 px-3 py-2 text-xs text-neutral-600">
+      <h1 className="mb-2 text-lg font-semibold text-neutral-100">Secções &amp; Critérios</h1>
+      <div className="mb-5 rounded-none bg-panel px-3 py-2 text-xs text-muted">
         As alterações aqui feitas <strong>não mudam avaliações já guardadas</strong> — cada avaliação fica com uma
         cópia da grelha tal como estava no momento em que foi preenchida.
       </div>
@@ -50,7 +50,7 @@ function SeccaoCard({ seccao, podeSubir, podeDescer }: { seccao: Seccao; podeSub
   const ativa = seccao.ativa !== false;
 
   return (
-    <section className={`rounded-md border p-3 ${ativa ? "border-neutral-200" : "border-neutral-200 bg-neutral-50"}`}>
+    <section className={`rounded-none border p-3 ${ativa ? "border-line" : "border-line bg-panel"}`}>
       {aEditar ? (
         <form
           className="flex flex-wrap items-center gap-2"
@@ -70,7 +70,7 @@ function SeccaoCard({ seccao, podeSubir, podeDescer }: { seccao: Seccao; podeSub
             value={percentagem}
             onChange={(e) => setPercentagem(e.target.value)}
           />
-          <span className="text-xs text-neutral-500">%</span>
+          <span className="text-xs text-muted">%</span>
           <button type="submit" className="text-xs font-medium underline">
             Guardar
           </button>
@@ -78,10 +78,10 @@ function SeccaoCard({ seccao, podeSubir, podeDescer }: { seccao: Seccao; podeSub
       ) : (
         <div className="flex items-center justify-between gap-2">
           <div>
-            <p className={`text-sm font-semibold ${ativa ? "text-neutral-900" : "text-neutral-400 line-through"}`}>
+            <p className={`text-sm font-semibold ${ativa ? "text-neutral-100" : "text-dim line-through"}`}>
               {seccao.nome}
             </p>
-            <p className="text-xs text-neutral-500">{seccao.percentagem}%</p>
+            <p className="text-xs text-muted">{seccao.percentagem}%</p>
           </div>
           <div className="flex shrink-0 items-center gap-2">
             <button
@@ -100,13 +100,13 @@ function SeccaoCard({ seccao, podeSubir, podeDescer }: { seccao: Seccao; podeSub
             >
               ↓
             </button>
-            <button type="button" onClick={() => setAEditar(true)} className="text-xs font-medium text-neutral-500 underline">
+            <button type="button" onClick={() => setAEditar(true)} className="text-xs font-medium text-muted underline">
               Editar
             </button>
             <button
               type="button"
               onClick={() => startTransition(async () => { await alternarSeccaoAtivaAction(seccao.id, !ativa); router.refresh(); })}
-              className={`text-xs font-medium underline ${ativa ? "text-red-600" : "text-green-700"}`}
+              className={`text-xs font-medium underline ${ativa ? "text-red-400" : "text-green-400"}`}
             >
               {ativa ? "Desativar" : "Reativar"}
             </button>
@@ -114,7 +114,7 @@ function SeccaoCard({ seccao, podeSubir, podeDescer }: { seccao: Seccao; podeSub
         </div>
       )}
 
-      <div className="mt-3 space-y-1.5 border-t border-neutral-100 pt-3">
+      <div className="mt-3 space-y-1.5 border-t border-line pt-3">
         {seccao.criterios.map((c, i) => (
           <CriterioRow
             key={c.id}
@@ -184,9 +184,9 @@ function CriterioRow({
 
   return (
     <div className="flex items-center justify-between gap-2 py-1">
-      <p className={`text-xs ${ativo ? "text-neutral-700" : "text-neutral-400 line-through"}`}>
+      <p className={`text-xs ${ativo ? "text-neutral-300" : "text-dim line-through"}`}>
         {criterio.texto}
-        <span className="text-neutral-400"> ({criterio.pesoMaximo == null ? "sem peso" : criterio.pesoMaximo})</span>
+        <span className="text-dim"> ({criterio.pesoMaximo == null ? "sem peso" : criterio.pesoMaximo})</span>
       </p>
       <div className="flex shrink-0 items-center gap-2">
         <button
@@ -205,13 +205,13 @@ function CriterioRow({
         >
           ↓
         </button>
-        <button type="button" onClick={() => setAEditar(true)} className="text-xs font-medium text-neutral-500 underline">
+        <button type="button" onClick={() => setAEditar(true)} className="text-xs font-medium text-muted underline">
           Editar
         </button>
         <button
           type="button"
           onClick={() => startTransition(async () => { await alternarCriterioAtivoAction(criterio.id, !ativo); router.refresh(); })}
-          className={`text-xs font-medium underline ${ativo ? "text-red-600" : "text-green-700"}`}
+          className={`text-xs font-medium underline ${ativo ? "text-red-400" : "text-green-400"}`}
         >
           {ativo ? "Desativar" : "Reativar"}
         </button>
@@ -238,7 +238,7 @@ function NovoCriterioForm({ seccaoId }: { seccaoId: string }) {
 
   return (
     <form
-      className="mt-2 space-y-2 rounded-md bg-neutral-50 p-2"
+      className="mt-2 space-y-2 rounded-none bg-panel p-2"
       onSubmit={(e) => {
         e.preventDefault();
         if (!texto.trim()) return;
@@ -278,10 +278,10 @@ function NovoCriterioForm({ seccaoId }: { seccaoId: string }) {
             onChange={(e) => setPeso(e.target.value)}
           />
         )}
-        <button type="submit" className="rounded-md bg-black px-3 py-1 text-xs font-medium text-white">
+        <button type="submit" className="rounded-none bg-white px-3 py-1 text-xs font-medium text-black">
           Adicionar
         </button>
-        <button type="button" onClick={() => setAAbrir(false)} className="text-xs text-neutral-500 underline">
+        <button type="button" onClick={() => setAAbrir(false)} className="text-xs text-muted underline">
           Cancelar
         </button>
       </div>
@@ -306,7 +306,7 @@ function NovaSeccaoForm() {
 
   return (
     <form
-      className="mt-5 space-y-2 rounded-md border border-neutral-200 p-3"
+      className="mt-5 space-y-2 rounded-none border border-line p-3"
       onSubmit={(e) => {
         e.preventDefault();
         if (!nome.trim()) return;
@@ -328,10 +328,10 @@ function NovaSeccaoForm() {
           value={percentagem}
           onChange={(e) => setPercentagem(e.target.value)}
         />
-        <button type="submit" className="rounded-md bg-black px-3 py-1 text-xs font-medium text-white">
+        <button type="submit" className="rounded-none bg-white px-3 py-1 text-xs font-medium text-black">
           Adicionar secção
         </button>
-        <button type="button" onClick={() => setAAbrir(false)} className="text-xs text-neutral-500 underline">
+        <button type="button" onClick={() => setAAbrir(false)} className="text-xs text-muted underline">
           Cancelar
         </button>
       </div>

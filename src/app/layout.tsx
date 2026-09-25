@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, JetBrains_Mono } from "next/font/google";
 import Image from "next/image";
 import "./globals.css";
 import { SessionProvider } from "next-auth/react";
@@ -14,8 +14,8 @@ const geistSans = Geist({
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-jetbrains-mono",
   subsets: ["latin"],
 });
 
@@ -49,20 +49,26 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="pt"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-white text-neutral-900">
+      <body className="min-h-full flex flex-col bg-ink text-dim">
         <SessionProvider session={session}>
-          <header className="bg-black px-4 py-3 text-white md:px-6">
+          <header className="bg-panel border-b border-line px-4 py-3 md:px-6">
             <div className="mx-auto flex max-w-5xl items-center gap-3">
-              <Image src="/logo-cfa.jpg" alt="CrossFit Alvalade" width={32} height={32} className="rounded" />
+              <Image
+                src="/logo-cfa.jpg"
+                alt="CrossFit Alvalade"
+                width={32}
+                height={32}
+                className="grayscale contrast-125"
+              />
               <div className="flex-1">
-                <p className="text-sm font-semibold leading-tight">CFA Avaliações</p>
-                <p className="text-xs leading-tight text-neutral-400">Avaliação de desempenho do staff</p>
+                <p className="font-mono text-sm font-bold tracking-wide text-black">CFA AVALIAÇÕES</p>
+                <p className="font-mono text-[10px] tracking-wide text-dim">AVALIAÇÃO DE DESEMPENHO DO STAFF</p>
               </div>
               {session && (
                 <div className="text-right">
-                  <Link href="/perfil" className="block text-xs text-neutral-300 underline">
+                  <Link href="/perfil" className="font-mono block text-xs text-muted underline">
                     {session.user.name}
                   </Link>
                   <SignOutButton />

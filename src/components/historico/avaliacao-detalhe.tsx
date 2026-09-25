@@ -15,7 +15,7 @@ export function AvaliacaoDetalhe({ avaliacao, papel }: { avaliacao: AvaliacaoGua
   if (avaliacao === null) {
     return (
       <div className="mx-auto max-w-lg px-4 py-10 text-center md:max-w-2xl">
-        <p className="text-sm font-medium text-neutral-300">Avaliação não encontrada</p>
+        <p className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Avaliação não encontrada</p>
         <Link href="/historico" className="mt-3 inline-block text-sm font-medium underline">
           Voltar ao histórico
         </Link>
@@ -33,7 +33,7 @@ export function AvaliacaoDetalhe({ avaliacao, papel }: { avaliacao: AvaliacaoGua
       {papel === "TREINADOR" && (
         <div className="mt-3 rounded-none border border-line p-3">
           {avaliacao.confirmacaoTreinador.data ? (
-            <p className="text-sm text-green-400">Confirmaste esta avaliação em {avaliacao.confirmacaoTreinador.data}.</p>
+            <p className="text-sm text-green-700 dark:text-green-400">Confirmaste esta avaliação em {avaliacao.confirmacaoTreinador.data}.</p>
           ) : (
             <button
               type="button"
@@ -44,7 +44,7 @@ export function AvaliacaoDetalhe({ avaliacao, papel }: { avaliacao: AvaliacaoGua
                   router.refresh();
                 })
               }
-              className="w-full rounded-none bg-white px-4 py-2 text-sm font-medium text-black"
+              className="w-full rounded-none bg-black dark:bg-white px-4 py-2 text-sm font-medium text-white dark:text-black"
             >
               Confirmar esta avaliação
             </button>

@@ -42,7 +42,7 @@ export function StepperNav({
         </p>
         <div className="mt-1 h-1.5 w-full rounded-none bg-line">
           <div
-            className="h-1.5 rounded-none bg-white transition-all"
+            className="h-1.5 rounded-none bg-black transition-all dark:bg-white"
             style={{ width: `${(concluidos / steps.length) * 100}%` }}
           />
         </div>
@@ -63,9 +63,9 @@ export function StepperNav({
               onClick={() => onSelect(i)}
               className={`flex shrink-0 items-center gap-1 whitespace-nowrap rounded-none border px-3 py-1.5 text-xs font-medium transition ${
                 i === currentStep
-                  ? "border-white bg-white text-black"
+                  ? "border-black bg-black text-white dark:border-white dark:bg-white dark:text-black"
                   : step.completo
-                    ? "border-line bg-panel text-neutral-300"
+                    ? "border-line bg-panel text-neutral-700 dark:text-neutral-300"
                     : "border-line text-muted"
               }`}
             >

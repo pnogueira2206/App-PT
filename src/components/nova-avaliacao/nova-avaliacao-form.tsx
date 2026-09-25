@@ -157,8 +157,8 @@ export function NovaAvaliacaoForm({
   if (guardada) {
     return (
       <div className="mx-auto flex max-w-lg md:max-w-2xl lg:max-w-3xl flex-col items-center gap-4 px-4 py-16 text-center">
-        <div className="flex h-16 w-16 items-center justify-center rounded-none bg-white text-2xl text-black">✓</div>
-        <h1 className="text-xl font-semibold text-neutral-100">Avaliação guardada</h1>
+        <div className="flex h-16 w-16 items-center justify-center rounded-none bg-black dark:bg-white text-2xl text-white dark:text-black">✓</div>
+        <h1 className="text-xl font-semibold text-neutral-900 dark:text-neutral-100">Avaliação guardada</h1>
         <p className="text-sm text-muted">
           A avaliação de {draft.cabecalho.treinador} em {draft.cabecalho.data} foi registada e já está visível no
           Histórico.
@@ -171,13 +171,13 @@ export function NovaAvaliacaoForm({
               setStep(STEP_CABECALHO);
               setGuardada(false);
             }}
-            className="rounded-none bg-white px-4 py-2 text-sm font-medium text-black"
+            className="rounded-none bg-black dark:bg-white px-4 py-2 text-sm font-medium text-white dark:text-black"
           >
             Nova avaliação
           </button>
           <Link
             href="/historico"
-            className="rounded-none border border-line px-4 py-2 text-sm font-medium text-neutral-300"
+            className="rounded-none border border-line px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300"
           >
             Ver histórico
           </Link>
@@ -243,13 +243,13 @@ export function NovaAvaliacaoForm({
       </div>
 
       <div className="fixed inset-x-0 bottom-0 border-t border-line bg-panel">
-        {erro && <p className="mx-auto max-w-lg md:max-w-2xl lg:max-w-3xl px-4 pt-2 text-xs text-red-400">{erro}</p>}
+        {erro && <p className="mx-auto max-w-lg md:max-w-2xl lg:max-w-3xl px-4 pt-2 text-xs text-red-600 dark:text-red-400">{erro}</p>}
         <div className="mx-auto flex max-w-lg md:max-w-2xl lg:max-w-3xl items-center justify-between gap-3 px-4 py-3">
           <button
             type="button"
             disabled={step === STEP_CABECALHO}
             onClick={() => setStep((s) => Math.max(STEP_CABECALHO, s - 1))}
-            className="rounded-none border border-line px-4 py-2 text-sm font-medium text-neutral-300 disabled:opacity-40"
+            className="rounded-none border border-line px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 disabled:opacity-40"
           >
             Anterior
           </button>
@@ -258,7 +258,7 @@ export function NovaAvaliacaoForm({
             <button
               type="button"
               onClick={() => setStep((s) => Math.min(STEP_RESUMO, s + 1))}
-              className="rounded-none bg-white px-4 py-2 text-sm font-medium text-black"
+              className="rounded-none bg-black dark:bg-white px-4 py-2 text-sm font-medium text-white dark:text-black"
             >
               Seguinte
             </button>
@@ -286,14 +286,14 @@ export function NovaAvaliacaoForm({
                   setAGuardar(false);
                 }
               }}
-              className="rounded-none bg-white px-4 py-2 text-sm font-medium text-black disabled:opacity-40"
+              className="rounded-none bg-black dark:bg-white px-4 py-2 text-sm font-medium text-white dark:text-black disabled:opacity-40"
             >
               {aGuardar ? "A guardar..." : "Guardar avaliação"}
             </button>
           )}
         </div>
         {step === STEP_RESUMO && !tudoCompleto && (
-          <p className="mx-auto max-w-lg md:max-w-2xl lg:max-w-3xl px-4 pb-3 text-xs text-red-400">
+          <p className="mx-auto max-w-lg md:max-w-2xl lg:max-w-3xl px-4 pb-3 text-xs text-red-600 dark:text-red-400">
             Ainda há respostas por preencher — revê as secções assinaladas sem ✓ no topo.
           </p>
         )}
@@ -305,14 +305,14 @@ export function NovaAvaliacaoForm({
 function Campo({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-sm font-medium text-neutral-300">{label}</span>
+      <span className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">{label}</span>
       {children}
     </label>
   );
 }
 
 const inputClasses =
-  "w-full rounded-none border border-line bg-transparent px-3 py-2 text-sm text-neutral-100 focus:border-white focus:outline-none focus:ring-1 focus:ring-white";
+  "w-full rounded-none border border-line bg-transparent px-3 py-2 text-sm text-neutral-900 dark:text-neutral-100 focus:border-black dark:focus:border-white focus:outline-none focus:ring-1 focus:ring-black dark:focus:ring-white";
 
 function CabecalhoStep({
   draft,
@@ -332,7 +332,7 @@ function CabecalhoStep({
 
   return (
     <div className="space-y-4">
-      <h1 className="text-lg font-semibold text-neutral-100">Cabeçalho</h1>
+      <h1 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">Cabeçalho</h1>
 
       <Campo label="Treinador avaliado">
         <select className={inputClasses} value={c.treinador} onChange={(e) => update({ treinador: e.target.value })}>
@@ -407,7 +407,7 @@ function SeccaoStep({
   return (
     <div>
       <div className="mb-3 flex items-baseline justify-between">
-        <h1 className="text-lg font-semibold text-neutral-100">
+        <h1 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
           {indice}. {seccao.nome}
         </h1>
         <span className="text-xs text-muted">{seccao.percentagem}% da avaliação</span>
@@ -435,7 +435,7 @@ function SeccaoStep({
           );
         })}
 
-        <div className="flex items-center justify-between rounded-none bg-white px-3 py-2 text-sm font-semibold text-black">
+        <div className="flex items-center justify-between rounded-none bg-black dark:bg-white px-3 py-2 text-sm font-semibold text-white dark:text-black">
           <span>Total</span>
           <span className="tabular-nums">
             {totalSeccao.obtidos} / {totalSeccao.max}
@@ -475,11 +475,11 @@ function FinalStep({
 
   return (
     <div className="space-y-5">
-      <h1 className="text-lg font-semibold text-neutral-100">Classificação e confirmação</h1>
+      <h1 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">Classificação e confirmação</h1>
 
       <div className="rounded-none bg-panel px-3 py-2 text-xs text-muted">
         Pontuação calculada pela grelha (informativa, não substitui a classificação do avaliador):{" "}
-        <span className="font-semibold text-neutral-100">
+        <span className="font-semibold text-neutral-900 dark:text-neutral-100">
           {total.obtidos} / {total.max}
         </span>
       </div>
@@ -506,8 +506,8 @@ function FinalStep({
       </Campo>
 
       <div className="rounded-none border border-line p-3">
-        <p className="mb-2 text-sm font-semibold text-neutral-100">Confirmação do avaliador</p>
-        <p className="mb-2 text-sm text-neutral-300">{nomeAvaliador}</p>
+        <p className="mb-2 text-sm font-semibold text-neutral-900 dark:text-neutral-100">Confirmação do avaliador</p>
+        <p className="mb-2 text-sm text-neutral-700 dark:text-neutral-300">{nomeAvaliador}</p>
         <Campo label="Data de confirmação">
           <input
             type="date"
@@ -524,8 +524,8 @@ function FinalStep({
       </div>
 
       <div className="rounded-none border border-line p-3">
-        <p className="mb-2 text-sm font-semibold text-neutral-100">Confirmação do treinador</p>
-        <p className="mb-2 text-sm text-neutral-300">{draft.cabecalho.treinador || "— (define o treinador no cabeçalho)"}</p>
+        <p className="mb-2 text-sm font-semibold text-neutral-900 dark:text-neutral-100">Confirmação do treinador</p>
+        <p className="mb-2 text-sm text-neutral-700 dark:text-neutral-300">{draft.cabecalho.treinador || "— (define o treinador no cabeçalho)"}</p>
         <p className="text-xs text-muted">
           O treinador confirma a avaliação através da própria conta, no Histórico.
         </p>
@@ -549,7 +549,7 @@ function SpiderWebStep({
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-lg font-semibold text-neutral-100">Notas por Pilar</h1>
+        <h1 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">Notas por Pilar</h1>
         <p className="mt-1 text-sm text-muted">
           Com base nas respostas desta avaliação, esta é a distribuição pelos 6 pilares do ensino eficaz.
         </p>
@@ -599,7 +599,7 @@ function PlanoAcaoStep({
   return (
     <div className="space-y-5">
       <div>
-        <h1 className="text-lg font-semibold text-neutral-100">Plano de Ação</h1>
+        <h1 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">Plano de Ação</h1>
         <p className="mt-1 text-sm text-muted">
           Passo opcional. Com base na spider web anterior, estes são os pontos menos desenvolvidos — confirma-os,
           ajusta-os ou adiciona outros, e escreve a ação concreta para cada um.
@@ -616,7 +616,7 @@ function PlanoAcaoStep({
                 type="button"
                 disabled={origensNoPlano.has(s.origem)}
                 onClick={() => adicionar(s.origem)}
-                className="rounded-none border border-line px-3 py-1.5 text-xs font-medium text-neutral-300 disabled:opacity-40"
+                className="rounded-none border border-line px-3 py-1.5 text-xs font-medium text-neutral-700 dark:text-neutral-300 disabled:opacity-40"
               >
                 {s.origem} ({Math.round(s.percentagem)}%){!origensNoPlano.has(s.origem) && " · adicionar"}
               </button>
@@ -634,8 +634,8 @@ function PlanoAcaoStep({
           {draft.planoAcao.map((item) => (
             <div key={item.origem} className="rounded-none border border-line p-3">
               <div className="mb-2 flex items-center justify-between">
-                <p className="text-sm font-semibold text-neutral-100">{item.origem}</p>
-                <button type="button" onClick={() => remover(item.origem)} className="text-xs text-red-400 underline">
+                <p className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">{item.origem}</p>
+                <button type="button" onClick={() => remover(item.origem)} className="text-xs text-red-600 dark:text-red-400 underline">
                   Remover
                 </button>
               </div>
@@ -677,7 +677,7 @@ function AdicionarPontoForm({ origens, onAdicionar }: { origens: string[]; onAdi
       <button
         type="button"
         onClick={() => onAdicionar(escolha)}
-        className="shrink-0 rounded-none border border-line px-3 py-2 text-sm font-medium text-neutral-300"
+        className="shrink-0 rounded-none border border-line px-3 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300"
       >
         Adicionar
       </button>

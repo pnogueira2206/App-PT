@@ -19,7 +19,7 @@ export function ExportarCsvButton({ total }: { total: number }) {
           transferirCsv(`avaliacoes-cfa-${hoje}.csv`, csv);
         })
       }
-      className="w-full rounded-none bg-white px-4 py-2 text-sm font-medium text-black disabled:opacity-40"
+      className="w-full rounded-none bg-black dark:bg-white px-4 py-2 text-sm font-medium text-white dark:text-black disabled:opacity-40"
     >
       {pending ? "A preparar..." : `Exportar ${total} avaliações para CSV`}
     </button>

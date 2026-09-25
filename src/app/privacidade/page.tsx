@@ -3,15 +3,15 @@ import Link from "next/link";
 function Secao({ titulo, children }: { titulo: string; children: React.ReactNode }) {
   return (
     <section className="space-y-2">
-      <h2 className="text-sm font-semibold text-neutral-100">{titulo}</h2>
-      <div className="space-y-2 text-sm leading-relaxed text-neutral-300">{children}</div>
+      <h2 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">{titulo}</h2>
+      <div className="space-y-2 text-sm leading-relaxed text-neutral-700 dark:text-neutral-300">{children}</div>
     </section>
   );
 }
 
 function APreencher({ children }: { children: React.ReactNode }) {
   return (
-    <span className="rounded-none bg-amber-950 px-1.5 py-0.5 font-medium text-amber-400 ring-1 ring-amber-800">
+    <span className="rounded-none bg-amber-50 dark:bg-amber-950 px-1.5 py-0.5 font-medium text-amber-700 dark:text-amber-400 ring-1 ring-amber-200 dark:ring-amber-800">
       [A confirmar: {children}]
     </span>
   );
@@ -23,7 +23,7 @@ export default function PrivacidadePage() {
       <Link href="/" className="mb-4 inline-block text-sm font-medium text-muted underline">
         ← Voltar
       </Link>
-      <h1 className="mb-1 text-lg font-semibold text-neutral-100">Política de Privacidade</h1>
+      <h1 className="mb-1 text-lg font-semibold text-neutral-900 dark:text-neutral-100">Política de Privacidade</h1>
       <p className="mb-6 text-xs text-muted">Última atualização: 25 de setembro de 2026.</p>
 
       <div className="space-y-6">

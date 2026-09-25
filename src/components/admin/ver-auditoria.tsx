@@ -23,9 +23,9 @@ const ROTULOS_ACAO: Record<string, string> = {
 };
 
 function corAcao(acao: string): string {
-  if (acao === "LOGIN_FALHOU" || acao === "LOGIN_BLOQUEADO") return "text-red-400";
-  if (acao === "EXPORTOU_CSV" || acao === "REPOS_PASSWORD" || acao === "ANONIMIZOU_CONTA") return "text-amber-400";
-  return "text-neutral-100";
+  if (acao === "LOGIN_FALHOU" || acao === "LOGIN_BLOQUEADO") return "text-red-600 dark:text-red-400";
+  if (acao === "EXPORTOU_CSV" || acao === "REPOS_PASSWORD" || acao === "ANONIMIZOU_CONTA") return "text-amber-700 dark:text-amber-400";
+  return "text-neutral-900 dark:text-neutral-100";
 }
 
 export function VerAuditoria({ registos }: { registos: Registo[] }) {
@@ -34,7 +34,7 @@ export function VerAuditoria({ registos }: { registos: Registo[] }) {
       <Link href="/admin" className="mb-3 inline-block text-sm font-medium text-muted underline">
         ← Voltar ao Admin
       </Link>
-      <h1 className="mb-1 text-lg font-semibold text-neutral-100">Registo de Atividade</h1>
+      <h1 className="mb-1 text-lg font-semibold text-neutral-900 dark:text-neutral-100">Registo de Atividade</h1>
       <p className="mb-4 text-xs text-muted">
         Últimas {registos.length} ações — logins, avaliações vistas ou criadas, exportações e alterações de conta.
         Apagado automaticamente ao fim de 12 meses.

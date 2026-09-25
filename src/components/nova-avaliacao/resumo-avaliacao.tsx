@@ -5,7 +5,7 @@ function Linha({ label, valor }: { label: string; valor: string }) {
   return (
     <div className="flex justify-between gap-3 py-1 text-sm">
       <span className="text-muted">{label}</span>
-      <span className="text-right font-medium text-neutral-100">{valor}</span>
+      <span className="text-right font-medium text-neutral-900 dark:text-neutral-100">{valor}</span>
     </div>
   );
 }
@@ -15,10 +15,10 @@ export function ResumoAvaliacao({ draft, seccoes }: { draft: AvaliacaoDraft; sec
 
   return (
     <div className="space-y-6">
-      <h1 className="text-lg font-semibold text-neutral-100">Resumo</h1>
+      <h1 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">Resumo</h1>
 
       <section className="rounded-none border border-line p-3">
-        <p className="mb-1 text-sm font-semibold text-neutral-100">Cabeçalho</p>
+        <p className="mb-1 text-sm font-semibold text-neutral-900 dark:text-neutral-100">Cabeçalho</p>
         <Linha label="Treinador" valor={draft.cabecalho.treinador || "—"} />
         <Linha label="Avaliador" valor={draft.cabecalho.avaliador || "—"} />
         <Linha label="Espaço" valor={draft.cabecalho.espaco || "—"} />
@@ -34,7 +34,7 @@ export function ResumoAvaliacao({ draft, seccoes }: { draft: AvaliacaoDraft; sec
         return (
           <section key={seccao.id} className="rounded-none border border-line p-3">
             <div className="mb-1 flex items-baseline justify-between">
-              <p className="text-sm font-semibold text-neutral-100">{seccao.nome}</p>
+              <p className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">{seccao.nome}</p>
               <span className="text-xs text-muted">
                 {st.obtidos} / {st.max}
               </span>
@@ -51,7 +51,7 @@ export function ResumoAvaliacao({ draft, seccoes }: { draft: AvaliacaoDraft; sec
       })}
 
       <section className="rounded-none border border-line p-3">
-        <p className="mb-1 text-sm font-semibold text-neutral-100">Classificação</p>
+        <p className="mb-1 text-sm font-semibold text-neutral-900 dark:text-neutral-100">Classificação</p>
         <Linha label="Pontuação calculada (informativa)" valor={`${total.obtidos} / ${total.max}`} />
         <Linha label="Classificação geral do avaliador" valor={draft.classificacaoGeral ? `${draft.classificacaoGeral} / 100` : "—"} />
         {draft.comentarioGeral.trim() && (
@@ -61,11 +61,11 @@ export function ResumoAvaliacao({ draft, seccoes }: { draft: AvaliacaoDraft; sec
 
       {draft.planoAcao.length > 0 && (
         <section className="rounded-none border border-line p-3">
-          <p className="mb-2 text-sm font-semibold text-neutral-100">Plano de Ação</p>
+          <p className="mb-2 text-sm font-semibold text-neutral-900 dark:text-neutral-100">Plano de Ação</p>
           <div className="space-y-2">
             {draft.planoAcao.map((item) => (
               <div key={item.origem}>
-                <p className="text-xs font-medium text-neutral-300">{item.origem}</p>
+                <p className="text-xs font-medium text-neutral-700 dark:text-neutral-300">{item.origem}</p>
                 <p className="text-sm text-muted">{item.texto}</p>
               </div>
             ))}
@@ -74,7 +74,7 @@ export function ResumoAvaliacao({ draft, seccoes }: { draft: AvaliacaoDraft; sec
       )}
 
       <section className="rounded-none border border-line p-3">
-        <p className="mb-1 text-sm font-semibold text-neutral-100">Confirmações</p>
+        <p className="mb-1 text-sm font-semibold text-neutral-900 dark:text-neutral-100">Confirmações</p>
         <Linha
           label="Avaliador"
           valor={draft.confirmacaoAvaliador.data ? `${draft.confirmacaoAvaliador.nome} — ${draft.confirmacaoAvaliador.data}` : "—"}

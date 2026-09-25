@@ -25,7 +25,9 @@ export function NavTabs({ papel }: { papel: Papel }) {
               key={tab.href}
               href={tab.href}
               className={`font-mono border-b-2 px-3 py-2.5 text-xs font-bold tracking-wide uppercase transition ${
-                ativo ? "border-line text-black" : "border-transparent text-faint"
+                ativo
+                  ? "border-black text-black dark:border-white dark:text-white"
+                  : "border-transparent text-faint"
               }`}
             >
               {tab.label}

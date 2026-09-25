@@ -16,7 +16,7 @@ import {
 } from "@/lib/grelha-actions";
 
 const inputClasses =
-  "rounded-none border border-line bg-transparent px-2 py-1 text-sm text-neutral-100 focus:border-white focus:outline-none focus:ring-1 focus:ring-white";
+  "rounded-none border border-line bg-transparent px-2 py-1 text-sm text-neutral-900 dark:text-neutral-100 focus:border-black dark:focus:border-white focus:outline-none focus:ring-1 focus:ring-black dark:focus:ring-white";
 
 export function GerirGrelha({ seccoes }: { seccoes: Seccao[] }) {
   return (
@@ -24,7 +24,7 @@ export function GerirGrelha({ seccoes }: { seccoes: Seccao[] }) {
       <Link href="/admin" className="mb-3 inline-block text-sm font-medium text-muted underline">
         ← Voltar ao Admin
       </Link>
-      <h1 className="mb-2 text-lg font-semibold text-neutral-100">Secções &amp; Critérios</h1>
+      <h1 className="mb-2 text-lg font-semibold text-neutral-900 dark:text-neutral-100">Secções &amp; Critérios</h1>
       <div className="mb-5 rounded-none bg-panel px-3 py-2 text-xs text-muted">
         As alterações aqui feitas <strong>não mudam avaliações já guardadas</strong> — cada avaliação fica com uma
         cópia da grelha tal como estava no momento em que foi preenchida.
@@ -78,7 +78,7 @@ function SeccaoCard({ seccao, podeSubir, podeDescer }: { seccao: Seccao; podeSub
       ) : (
         <div className="flex items-center justify-between gap-2">
           <div>
-            <p className={`text-sm font-semibold ${ativa ? "text-neutral-100" : "text-dim line-through"}`}>
+            <p className={`text-sm font-semibold ${ativa ? "text-neutral-900 dark:text-neutral-100" : "text-dim line-through"}`}>
               {seccao.nome}
             </p>
             <p className="text-xs text-muted">{seccao.percentagem}%</p>
@@ -106,7 +106,7 @@ function SeccaoCard({ seccao, podeSubir, podeDescer }: { seccao: Seccao; podeSub
             <button
               type="button"
               onClick={() => startTransition(async () => { await alternarSeccaoAtivaAction(seccao.id, !ativa); router.refresh(); })}
-              className={`text-xs font-medium underline ${ativa ? "text-red-400" : "text-green-400"}`}
+              className={`text-xs font-medium underline ${ativa ? "text-red-600 dark:text-red-400" : "text-green-700 dark:text-green-400"}`}
             >
               {ativa ? "Desativar" : "Reativar"}
             </button>
@@ -184,7 +184,7 @@ function CriterioRow({
 
   return (
     <div className="flex items-center justify-between gap-2 py-1">
-      <p className={`text-xs ${ativo ? "text-neutral-300" : "text-dim line-through"}`}>
+      <p className={`text-xs ${ativo ? "text-neutral-700 dark:text-neutral-300" : "text-dim line-through"}`}>
         {criterio.texto}
         <span className="text-dim"> ({criterio.pesoMaximo == null ? "sem peso" : criterio.pesoMaximo})</span>
       </p>
@@ -211,7 +211,7 @@ function CriterioRow({
         <button
           type="button"
           onClick={() => startTransition(async () => { await alternarCriterioAtivoAction(criterio.id, !ativo); router.refresh(); })}
-          className={`text-xs font-medium underline ${ativo ? "text-red-400" : "text-green-400"}`}
+          className={`text-xs font-medium underline ${ativo ? "text-red-600 dark:text-red-400" : "text-green-700 dark:text-green-400"}`}
         >
           {ativo ? "Desativar" : "Reativar"}
         </button>
@@ -278,7 +278,7 @@ function NovoCriterioForm({ seccaoId }: { seccaoId: string }) {
             onChange={(e) => setPeso(e.target.value)}
           />
         )}
-        <button type="submit" className="rounded-none bg-white px-3 py-1 text-xs font-medium text-black">
+        <button type="submit" className="rounded-none bg-black dark:bg-white px-3 py-1 text-xs font-medium text-white dark:text-black">
           Adicionar
         </button>
         <button type="button" onClick={() => setAAbrir(false)} className="text-xs text-muted underline">
@@ -328,7 +328,7 @@ function NovaSeccaoForm() {
           value={percentagem}
           onChange={(e) => setPercentagem(e.target.value)}
         />
-        <button type="submit" className="rounded-none bg-white px-3 py-1 text-xs font-medium text-black">
+        <button type="submit" className="rounded-none bg-black dark:bg-white px-3 py-1 text-xs font-medium text-white dark:text-black">
           Adicionar secção
         </button>
         <button type="button" onClick={() => setAAbrir(false)} className="text-xs text-muted underline">

@@ -26,23 +26,23 @@ const areas = [
 export function AdminMenu({ totalAvaliacoes }: { totalAvaliacoes: number }) {
   return (
     <div className="mx-auto max-w-lg px-4 py-4 md:max-w-2xl lg:max-w-3xl md:px-6 md:py-6">
-      <h1 className="mb-4 text-lg font-semibold text-neutral-100">Admin</h1>
+      <h1 className="mb-4 text-lg font-semibold text-neutral-900 dark:text-neutral-100">Admin</h1>
 
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         {areas.map((a) => (
           <Link
             key={a.href}
             href={a.href}
-            className="block rounded-none border border-line px-3 py-3 transition hover:border-white"
+            className="block rounded-none border border-line px-3 py-3 transition hover:border-black dark:hover:border-white"
           >
-            <p className="text-sm font-semibold text-neutral-100">{a.nome}</p>
+            <p className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">{a.nome}</p>
             <p className="mt-0.5 text-xs text-muted">{a.descricao}</p>
           </Link>
         ))}
       </div>
 
       <div className="mt-6 rounded-none border border-line p-3">
-        <p className="mb-1 text-sm font-semibold text-neutral-100">Exportar dados</p>
+        <p className="mb-1 text-sm font-semibold text-neutral-900 dark:text-neutral-100">Exportar dados</p>
         <p className="mb-3 text-xs text-muted">
           Descarrega todas as avaliações guardadas num ficheiro CSV (abre no Excel).
         </p>

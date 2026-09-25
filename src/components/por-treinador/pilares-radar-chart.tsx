@@ -36,31 +36,31 @@ export function PilaresRadarChart({
             key={n}
             points={poligono(PILARES.map(() => n))}
             fill="none"
-            stroke="#262626"
+            stroke="var(--color-line)"
             strokeWidth={1}
           />
         ))}
 
         {PILARES.map((_, i) => {
           const p = ponto(i, 100);
-          return <line key={i} x1={CENTER} y1={CENTER} x2={p.x} y2={p.y} stroke="#262626" strokeWidth={1} />;
+          return <line key={i} x1={CENTER} y1={CENTER} x2={p.x} y2={p.y} stroke="var(--color-line)" strokeWidth={1} />;
         })}
 
         {anterior && (
           <polygon
             points={poligono(anterior)}
             fill="none"
-            stroke="#595959"
+            stroke="var(--color-dim)"
             strokeWidth={2}
             strokeDasharray="4 3"
             strokeLinejoin="round"
           />
         )}
 
-        <polygon points={poligono(ultima)} fill="#ffffff" fillOpacity={0.1} stroke="#ffffff" strokeWidth={2} strokeLinejoin="round" />
+        <polygon points={poligono(ultima)} fill="var(--foreground)" fillOpacity={0.1} stroke="var(--foreground)" strokeWidth={2} strokeLinejoin="round" />
         {ultima.map((v, i) => {
           const p = ponto(i, v);
-          return <circle key={i} cx={p.x} cy={p.y} r={3.5} fill="#ffffff" />;
+          return <circle key={i} cx={p.x} cy={p.y} r={3.5} fill="var(--foreground)" />;
         })}
 
         {PILARES.map((nome, i) => {
@@ -74,7 +74,7 @@ export function PilaresRadarChart({
               fontSize={10.5}
               fontWeight={600}
               textAnchor="middle"
-              fill="#a3a3a3"
+              fill="var(--color-dim)"
               fontFamily="var(--font-jetbrains-mono)"
             >
               {partes.map((parte, li) => (
@@ -89,7 +89,7 @@ export function PilaresRadarChart({
 
       <div className="mt-2 flex items-center justify-center gap-5 text-xs text-muted">
         <span className="flex items-center gap-1.5">
-          <span className="inline-block h-2.5 w-2.5 rounded-none bg-white" /> Última avaliação
+          <span className="inline-block h-2.5 w-2.5 rounded-none bg-black dark:bg-white" /> Última avaliação
         </span>
         {anterior && (
           <span className="flex items-center gap-1.5">

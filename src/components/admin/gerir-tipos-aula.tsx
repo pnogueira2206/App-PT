@@ -27,7 +27,7 @@ export function GerirTiposAula({ itens }: { itens: Item[] }) {
       <Link href="/admin" className="mb-3 inline-block text-sm font-medium text-muted underline">
         ← Voltar ao Admin
       </Link>
-      <h1 className="mb-4 text-lg font-semibold text-neutral-100">Tipos de Aula</h1>
+      <h1 className="mb-4 text-lg font-semibold text-neutral-900 dark:text-neutral-100">Tipos de Aula</h1>
 
       <form
         onSubmit={(e) => {
@@ -42,12 +42,12 @@ export function GerirTiposAula({ itens }: { itens: Item[] }) {
         className="mb-5 flex gap-2"
       >
         <input
-          className="flex-1 rounded-none border border-line bg-transparent px-3 py-2 text-sm text-neutral-100 focus:border-white focus:outline-none focus:ring-1 focus:ring-white"
+          className="flex-1 rounded-none border border-line bg-transparent px-3 py-2 text-sm text-neutral-900 dark:text-neutral-100 focus:border-black dark:focus:border-white focus:outline-none focus:ring-1 focus:ring-black dark:focus:ring-white"
           placeholder="Novo tipo de aula"
           value={novoNome}
           onChange={(e) => setNovoNome(e.target.value)}
         />
-        <button type="submit" className="rounded-none bg-white px-4 py-2 text-sm font-medium text-black">
+        <button type="submit" className="rounded-none bg-black dark:bg-white px-4 py-2 text-sm font-medium text-white dark:text-black">
           Adicionar
         </button>
       </form>
@@ -81,7 +81,7 @@ export function GerirTiposAula({ itens }: { itens: Item[] }) {
               </form>
             ) : (
               <>
-                <span className={`text-sm ${item.ativo ? "text-neutral-100" : "text-dim line-through"}`}>
+                <span className={`text-sm ${item.ativo ? "text-neutral-900 dark:text-neutral-100" : "text-dim line-through"}`}>
                   {item.nome}
                 </span>
                 <div className="flex shrink-0 items-center gap-3">
@@ -103,7 +103,7 @@ export function GerirTiposAula({ itens }: { itens: Item[] }) {
                         router.refresh();
                       })
                     }
-                    className={`text-xs font-medium underline ${item.ativo ? "text-red-400" : "text-green-400"}`}
+                    className={`text-xs font-medium underline ${item.ativo ? "text-red-600 dark:text-red-400" : "text-green-700 dark:text-green-400"}`}
                   >
                     {item.ativo ? "Desativar" : "Reativar"}
                   </button>

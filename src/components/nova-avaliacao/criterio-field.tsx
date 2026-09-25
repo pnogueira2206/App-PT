@@ -28,9 +28,9 @@ export function CriterioField({
     const texto = resposta?.tipo === "TEXTO_LIVRE" ? resposta.texto : "";
     return (
       <div className="py-3 border-b border-line last:border-b-0">
-        <p className="text-sm font-medium text-neutral-100">{criterio.texto}</p>
+        <p className="text-sm font-medium text-neutral-900 dark:text-neutral-100">{criterio.texto}</p>
         <textarea
-          className="mt-2 w-full rounded-none border border-line bg-transparent p-2 text-sm text-neutral-100 focus:border-white focus:outline-none focus:ring-1 focus:ring-white"
+          className="mt-2 w-full rounded-none border border-line bg-transparent p-2 text-sm text-neutral-900 dark:text-neutral-100 focus:border-black dark:focus:border-white focus:outline-none focus:ring-1 focus:ring-black dark:focus:ring-white"
           rows={2}
           placeholder="Escreve livremente..."
           value={texto}
@@ -51,7 +51,7 @@ export function CriterioField({
   return (
     <div className="py-3 border-b border-line last:border-b-0">
       <div className="flex items-baseline justify-between gap-2">
-        <p className="text-sm font-medium text-neutral-100">{criterio.texto}</p>
+        <p className="text-sm font-medium text-neutral-900 dark:text-neutral-100">{criterio.texto}</p>
         {!semPeso && (
           <span className="shrink-0 text-xs text-muted">máx. {formatarValor(criterio.pesoMaximo!)}</span>
         )}
@@ -64,7 +64,7 @@ export function CriterioField({
               type="button"
               onClick={() => selecionar(1, false)}
               className={`rounded-none border px-3 py-1.5 text-xs font-medium transition ${
-                !na && valor === 1 ? "border-white bg-white text-black" : "border-line text-neutral-300"
+                !na && valor === 1 ? "border-black dark:border-white bg-black dark:bg-white text-white dark:text-black" : "border-line text-neutral-700 dark:text-neutral-300"
               }`}
             >
               Cumpriu
@@ -73,7 +73,7 @@ export function CriterioField({
               type="button"
               onClick={() => selecionar(0, false)}
               className={`rounded-none border px-3 py-1.5 text-xs font-medium transition ${
-                !na && valor === 0 ? "border-white bg-white text-black" : "border-line text-neutral-300"
+                !na && valor === 0 ? "border-black dark:border-white bg-black dark:bg-white text-white dark:text-black" : "border-line text-neutral-700 dark:text-neutral-300"
               }`}
             >
               Não cumpriu
@@ -82,7 +82,7 @@ export function CriterioField({
               type="button"
               onClick={() => selecionar(null, true)}
               className={`rounded-none border px-3 py-1.5 text-xs font-medium transition ${
-                na ? "border-white bg-white text-black" : "border-line text-neutral-300"
+                na ? "border-black dark:border-white bg-black dark:bg-white text-white dark:text-black" : "border-line text-neutral-700 dark:text-neutral-300"
               }`}
             >
               N/A
@@ -96,7 +96,7 @@ export function CriterioField({
                 type="button"
                 onClick={() => selecionar(op, false)}
                 className={`rounded-none border px-3 py-1.5 text-xs font-medium transition ${
-                  !na && valor === op ? "border-white bg-white text-black" : "border-line text-neutral-300"
+                  !na && valor === op ? "border-black dark:border-white bg-black dark:bg-white text-white dark:text-black" : "border-line text-neutral-700 dark:text-neutral-300"
                 }`}
               >
                 {formatarValor(op)}
@@ -106,7 +106,7 @@ export function CriterioField({
               type="button"
               onClick={() => selecionar(null, true)}
               className={`rounded-none border px-3 py-1.5 text-xs font-medium transition ${
-                na ? "border-white bg-white text-black" : "border-line text-neutral-300"
+                na ? "border-black dark:border-white bg-black dark:bg-white text-white dark:text-black" : "border-line text-neutral-700 dark:text-neutral-300"
               }`}
             >
               N/A

@@ -23,7 +23,7 @@ interface Item {
 }
 
 const inputClasses =
-  "w-full rounded-none border border-line bg-transparent px-3 py-2 text-sm text-neutral-100 focus:border-white focus:outline-none focus:ring-1 focus:ring-white";
+  "w-full rounded-none border border-line bg-transparent px-3 py-2 text-sm text-neutral-900 dark:text-neutral-100 focus:border-black dark:focus:border-white focus:outline-none focus:ring-1 focus:ring-black dark:focus:ring-white";
 
 export function GerirPessoas({ itens, tipo }: { itens: Item[]; tipo: "treinadores" | "avaliadores" }) {
   const router = useRouter();
@@ -53,7 +53,7 @@ export function GerirPessoas({ itens, tipo }: { itens: Item[]; tipo: "treinadore
       <Link href="/admin" className="mb-3 inline-block text-sm font-medium text-muted underline">
         ← Voltar ao Admin
       </Link>
-      <h1 className="mb-4 text-lg font-semibold text-neutral-100">{titulo}</h1>
+      <h1 className="mb-4 text-lg font-semibold text-neutral-900 dark:text-neutral-100">{titulo}</h1>
 
       <form
         onSubmit={(e) => {
@@ -92,8 +92,8 @@ export function GerirPessoas({ itens, tipo }: { itens: Item[]; tipo: "treinadore
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
-        {erro && <p className="text-xs text-red-400">{erro}</p>}
-        <button type="submit" className="w-full rounded-none bg-white px-4 py-2 text-sm font-medium text-black">
+        {erro && <p className="text-xs text-red-600 dark:text-red-400">{erro}</p>}
+        <button type="submit" className="w-full rounded-none bg-black dark:bg-white px-4 py-2 text-sm font-medium text-white dark:text-black">
           Adicionar {singular}
         </button>
       </form>
@@ -170,11 +170,11 @@ export function GerirPessoas({ itens, tipo }: { itens: Item[]; tipo: "treinadore
                     Cancelar
                   </button>
                 </div>
-                {erroPassword && <p className="text-xs text-red-400">{erroPassword}</p>}
+                {erroPassword && <p className="text-xs text-red-600 dark:text-red-400">{erroPassword}</p>}
               </form>
             ) : aAnonimizar === item.id ? (
               <div className="space-y-2">
-                <p className="text-xs text-neutral-300">
+                <p className="text-xs text-neutral-700 dark:text-neutral-300">
                   Tens a certeza? Isto substitui o nome e o email de <strong>{item.nome}</strong> por um valor
                   anónimo, desativa a conta e não pode ser desfeito. As avaliações já feitas mantêm-se, mas deixam
                   de identificar esta pessoa.
@@ -194,7 +194,7 @@ export function GerirPessoas({ itens, tipo }: { itens: Item[]; tipo: "treinadore
                         router.refresh();
                       })
                     }
-                    className="text-xs font-medium text-red-400 underline"
+                    className="text-xs font-medium text-red-600 dark:text-red-400 underline"
                   >
                     Confirmar anonimização
                   </button>
@@ -209,12 +209,12 @@ export function GerirPessoas({ itens, tipo }: { itens: Item[]; tipo: "treinadore
                     Cancelar
                   </button>
                 </div>
-                {erroAnonimizar && <p className="text-xs text-red-400">{erroAnonimizar}</p>}
+                {erroAnonimizar && <p className="text-xs text-red-600 dark:text-red-400">{erroAnonimizar}</p>}
               </div>
             ) : (
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div>
-                  <p className={`text-sm ${item.ativo ? "text-neutral-100" : "text-dim line-through"}`}>
+                  <p className={`text-sm ${item.ativo ? "text-neutral-900 dark:text-neutral-100" : "text-dim line-through"}`}>
                     {item.nome}
                   </p>
                   <p className="text-xs text-dim">{item.email}</p>
@@ -249,7 +249,7 @@ export function GerirPessoas({ itens, tipo }: { itens: Item[]; tipo: "treinadore
                         router.refresh();
                       })
                     }
-                    className={`text-xs font-medium underline ${item.ativo ? "text-red-400" : "text-green-400"}`}
+                    className={`text-xs font-medium underline ${item.ativo ? "text-red-600 dark:text-red-400" : "text-green-700 dark:text-green-400"}`}
                   >
                     {item.ativo ? "Desativar" : "Reativar"}
                   </button>
@@ -259,7 +259,7 @@ export function GerirPessoas({ itens, tipo }: { itens: Item[]; tipo: "treinadore
                       setAAnonimizar(item.id);
                       setErroAnonimizar("");
                     }}
-                    className="text-xs font-medium text-red-400 underline"
+                    className="text-xs font-medium text-red-600 dark:text-red-400 underline"
                   >
                     Anonimizar (RGPD)
                   </button>

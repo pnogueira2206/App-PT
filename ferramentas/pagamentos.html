@@ -1,0 +1,770 @@
+<title>Caderno de Treinos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --bg: #EEF1F4;
+    --surface: #FFFFFF;
+    --surface-2: #F6F8FA;
+    --ink: #16202A;
+    --muted: #5B6875;
+    --line: #D5DCE3;
+    --accent: #2346B0;
+    --accent-ink: #FFFFFF;
+    --accent-soft: #E3E9FA;
+    --paid: #1E8A4C;
+    --paid-soft: #DDF2E5;
+    --due: #C8322B;
+    --due-soft: #FBE3E1;
+    --partial: #9A6D00;
+    --partial-soft: #FBF0CF;
+    --shadow: 0 1px 2px rgba(22, 32, 42, .06), 0 4px 14px rgba(22, 32, 42, .05);
+    --display: "Barlow Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
+    --body: "Barlow", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --bg: #0F151B;
+      --surface: #18212A;
+      --surface-2: #1E2833;
+      --ink: #E8EDF2;
+      --muted: #93A1AE;
+      --line: #2A3642;
+      --accent: #7C9BFF;
+      --accent-ink: #0F151B;
+      --accent-soft: #1F2A4A;
+      --paid: #4CC27F;
+      --paid-soft: #16301F;
+      --due: #FF6B61;
+      --due-soft: #3A1A18;
+      --partial: #F2C14E;
+      --partial-soft: #372C12;
+      --shadow: none;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #0F151B;
+    --surface: #18212A;
+    --surface-2: #1E2833;
+    --ink: #E8EDF2;
+    --muted: #93A1AE;
+    --line: #2A3642;
+    --accent: #7C9BFF;
+    --accent-ink: #0F151B;
+    --accent-soft: #1F2A4A;
+    --paid: #4CC27F;
+    --paid-soft: #16301F;
+    --due: #FF6B61;
+    --due-soft: #3A1A18;
+    --partial: #F2C14E;
+    --partial-soft: #372C12;
+    --shadow: none;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 16px;
+    line-height: 1.45;
+    padding-inline: 16px;
+    padding-block: 0 96px;
+  }
+  .wrap { max-width: 640px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+  h1, h2, h3 { font-family: var(--display); font-weight: 700; margin: 0; text-wrap: balance; letter-spacing: .01em; }
+  .num { font-variant-numeric: tabular-nums; }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* Header */
+  .top {
+    position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+    background: var(--bg);
+    padding-block: 14px 10px;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  }
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .plate {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: var(--accent);
+    box-shadow: inset 0 0 0 5px var(--accent), inset 0 0 0 7px var(--surface), inset 0 0 0 30px var(--accent);
+    position: relative; flex: none;
+  }
+  .plate::after { content: ""; position: absolute; inset: 11px; border-radius: 50%; background: var(--bg); }
+  .brand h1 { font-size: 24px; text-transform: uppercase; letter-spacing: .04em; }
+  .mode { font-size: 12px; color: var(--muted); }
+
+  .month-nav { display: flex; align-items: center; gap: 4px; }
+  .month-nav h2 { font-size: 22px; min-width: 9ch; text-align: center; text-transform: capitalize; white-space: nowrap; }
+  .icon-btn {
+    width: 40px; height: 40px; border-radius: 10px; border: 1px solid var(--line);
+    background: var(--surface); display: grid; place-items: center; font-size: 18px; line-height: 1;
+  }
+
+  /* Summary */
+  .summary {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
+    padding: 16px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; box-shadow: var(--shadow);
+  }
+  .stat { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .stat .lbl { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+  .stat .val { font-family: var(--display); font-size: 28px; font-weight: 700; line-height: 1.05; font-variant-numeric: tabular-nums; }
+  .stat.ok .val { color: var(--paid); }
+  .stat.bad .val { color: var(--due); }
+  .bar { grid-column: 1 / -1; height: 8px; border-radius: 4px; background: var(--due-soft); overflow: hidden; }
+  .bar i { display: block; height: 100%; background: var(--paid); border-radius: 4px; }
+  .sub { grid-column: 1 / -1; font-size: 13px; color: var(--muted); }
+
+  /* Filters */
+  .chips { display: flex; gap: 8px; flex-wrap: wrap; }
+  .chip {
+    border: 1px solid var(--line); background: var(--surface); border-radius: 999px;
+    padding: 6px 14px; font-size: 14px; font-weight: 500;
+  }
+  .chip[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+
+  /* Student card in month */
+  .list { display: flex; flex-direction: column; gap: 10px; }
+  .card {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
+    box-shadow: var(--shadow); overflow: hidden;
+  }
+  .row { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; padding: 14px 14px 12px 16px; }
+  .who { min-width: 0; display: flex; flex-direction: column; gap: 2px; background: none; border: 0; padding: 0; text-align: left; }
+  .who strong { font-size: 17px; font-weight: 600; overflow-wrap: anywhere; }
+  .who span { font-size: 13px; color: var(--muted); }
+  .count { display: flex; align-items: center; gap: 8px; }
+  .tally {
+    font-family: var(--display); font-size: 30px; font-weight: 700; min-width: 2ch; text-align: right;
+    font-variant-numeric: tabular-nums; line-height: 1;
+  }
+  .tally small { display: block; font-family: var(--body); font-size: 11px; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+  .plus {
+    width: 48px; height: 48px; border-radius: 12px; border: 0;
+    background: var(--accent); color: var(--accent-ink); font-size: 26px; font-weight: 600; line-height: 1;
+  }
+  .plus:active { transform: scale(.96); }
+  .money {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;
+    padding: 10px 14px 12px 16px; border-top: 1px dashed var(--line);
+  }
+  .amount { font-family: var(--display); font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .amount .rest { font-family: var(--body); font-size: 13px; font-weight: 500; color: var(--muted); margin-left: 6px; }
+  .pill {
+    display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; padding: 4px 10px;
+    font-size: 13px; font-weight: 600; border: 0;
+  }
+  .pill::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+  .pill.pago { background: var(--paid-soft); color: var(--paid); }
+  .pill.devido { background: var(--due-soft); color: var(--due); }
+  .pill.parcial { background: var(--partial-soft); color: var(--partial); }
+  .pill.zero { background: var(--surface-2); color: var(--muted); }
+  .money-right { display: flex; align-items: center; gap: 8px; }
+
+  .detail { border-top: 1px solid var(--line); background: var(--surface-2); padding: 14px 16px; display: flex; flex-direction: column; gap: 14px; }
+  .detail h3 { font-size: 15px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+  .sect { display: flex; flex-direction: column; gap: 8px; }
+  .dates { display: flex; flex-wrap: wrap; gap: 6px; }
+  .date {
+    display: inline-flex; align-items: center; gap: 4px; border: 1px solid var(--line); background: var(--surface);
+    border-radius: 8px; padding: 3px 4px 3px 9px; font-size: 14px; font-variant-numeric: tabular-nums;
+  }
+  .date button { border: 0; background: none; color: var(--muted); width: 24px; height: 24px; border-radius: 6px; font-size: 16px; line-height: 1; }
+  .date button:hover { background: var(--due-soft); color: var(--due); }
+  .inline { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .pay-line { display: flex; justify-content: space-between; gap: 8px; font-size: 14px; font-variant-numeric: tabular-nums; }
+  .pay-line span:first-child { color: var(--muted); }
+  .muted { color: var(--muted); font-size: 14px; }
+
+  input[type="text"], input[type="tel"], input[type="number"], input[type="date"], select, textarea {
+    border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 9px 11px; min-width: 0;
+  }
+  input[type="number"] { width: 7.5em; }
+  textarea { width: 100%; resize: vertical; min-height: 60px; }
+  .btn {
+    border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 9px 14px; font-weight: 600; font-size: 15px;
+    display: inline-flex; align-items: center; gap: 6px; text-decoration: none; color: var(--ink);
+  }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  .btn.good { background: var(--paid); border-color: var(--paid); color: var(--surface); }
+  .btn.danger { color: var(--due); border-color: var(--due); background: transparent; }
+  .btn.ghost { border-color: transparent; background: transparent; color: var(--muted); }
+  .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; flex-wrap: wrap; }
+  .seg button { border: 0; background: var(--surface); padding: 8px 12px; font-size: 14px; font-weight: 500; }
+  .seg button + button { border-left: 1px solid var(--line); }
+  .seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+
+  /* Forms */
+  .form { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 14px; box-shadow: var(--shadow); }
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field > label, .field > .lbl { font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+  .field input[type="text"], .field input[type="tel"] { width: 100%; }
+  .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
+  .hint { font-size: 13px; color: var(--muted); }
+  .actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+
+  /* Students tab */
+  .srow { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 14px 16px; }
+  .srow .info { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  .srow .info strong { font-weight: 600; overflow-wrap: anywhere; }
+  .srow .info span { font-size: 13px; color: var(--muted); }
+  .tag { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); border: 1px solid var(--line); border-radius: 6px; padding: 1px 6px; }
+
+  .empty { background: var(--surface); border: 1px dashed var(--line); border-radius: 14px; padding: 22px 18px; display: flex; flex-direction: column; gap: 12px; }
+  .empty ol { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; }
+  .note { font-size: 13px; color: var(--muted); background: var(--surface-2); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+
+  /* Bottom nav */
+  .tabs {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
+    background: var(--surface); border-top: 1px solid var(--line);
+    padding: 8px 16px calc(8px + env(safe-area-inset-bottom, 0px));
+    display: flex; justify-content: center; gap: 8px;
+  }
+  .tabs button {
+    flex: 1; max-width: 220px; border: 0; background: none; border-radius: 10px; padding: 10px;
+    font-family: var(--display); font-size: 18px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted);
+  }
+  .tabs button[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent); }
+
+  .toast {
+    position: fixed; left: 50%; bottom: calc(80px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%);
+    background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 10px; font-size: 14px; z-index: 20;
+    max-width: calc(100% - 32px); box-shadow: var(--shadow);
+  }
+  @media (max-width: 420px) {
+    .stat .val { font-size: 22px; }
+    .month-nav h2 { font-size: 17px; }
+    .brand h1 { font-size: 20px; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <span class="plate" aria-hidden="true"></span>
+      <div>
+        <h1>Caderno</h1>
+        <div class="mode" id="mode">A carregar…</div>
+      </div>
+    </div>
+    <div class="month-nav" id="monthNav">
+      <button class="icon-btn" id="prevMonth" aria-label="Mês anterior">‹</button>
+      <h2 id="monthLabel" class="num"></h2>
+      <button class="icon-btn" id="nextMonth" aria-label="Mês seguinte">›</button>
+    </div>
+  </header>
+  <main id="app" class="wrap" aria-live="polite"></main>
+</div>
+
+<nav class="tabs">
+  <button id="tabMes" data-tab="mes" aria-pressed="true">Mês</button>
+  <button id="tabAlunos" data-tab="alunos" aria-pressed="false">Alunos</button>
+</nav>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(() => {
+  // ---------- helpers ----------
+  const $ = (s) => document.querySelector(s);
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const eur = new Intl.NumberFormat("pt-PT", { style: "currency", currency: "EUR", minimumFractionDigits: 0, maximumFractionDigits: 2 });
+  const money = (v) => eur.format(Math.round((v || 0) * 100) / 100);
+  const pad = (n) => String(n).padStart(2, "0");
+  const todayISO = () => { const d = new Date(); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; };
+  const monthOf = (iso) => iso.slice(0, 7);
+  const shiftMonth = (key, n) => { const [y, m] = key.split("-").map(Number); const d = new Date(y, m - 1 + n, 1); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}`; };
+  const monthName = (key, withYear = true) => {
+    const [y, m] = key.split("-").map(Number);
+    const s = new Date(y, m - 1, 1).toLocaleDateString("pt-PT", withYear ? { month: "long", year: "numeric" } : { month: "long" });
+    return s.replace(" de ", " ");
+  };
+  const dayLabel = (iso) => {
+    const [y, m, d] = iso.split("-").map(Number);
+    return new Date(y, m - 1, d).toLocaleDateString("pt-PT", { weekday: "short", day: "numeric" }).replace(".", "").replace(",", "");
+  };
+  const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+  const firstName = (n) => String(n || "").split(/[\s(]/)[0];
+  const clone = (o) => JSON.parse(JSON.stringify(o ?? {}));
+
+  const TARIFAS = {
+    treino: "Por treino",
+    pacote: "Pacote mensal",
+    mensal: "Mensalidade fixa",
+  };
+  const METODOS = ["MB Way", "Dinheiro", "Transferência"];
+
+  function tarifaTexto(a) {
+    if (a.tipo === "pacote") return `${money(a.preco)} / ${a.incluidas || 0} treinos` + (a.extra ? ` · extra ${money(a.extra)}` : "");
+    if (a.tipo === "mensal") return `${money(a.preco)} / mês`;
+    return `${money(a.preco)} / treino`;
+  }
+  function devido(a, n) {
+    const preco = Number(a.preco) || 0;
+    if (a.tipo === "pacote") return n === 0 ? 0 : preco + Math.max(0, n - (Number(a.incluidas) || 0)) * (Number(a.extra) || 0);
+    if (a.tipo === "mensal") return preco;
+    return n * preco;
+  }
+  function estado(dev, pago) {
+    if (dev <= 0 && pago <= 0) return { k: "zero", t: "Sem valor" };
+    if (pago >= dev - 0.005) return { k: "pago", t: "Pago" };
+    if (pago > 0) return { k: "parcial", t: "Parcial" };
+    return { k: "devido", t: "Por pagar" };
+  }
+
+  // ---------- storage: shared db when available, this device otherwise ----------
+  const LS_KEY = "caderno-treinos-v1";
+  const lsRead = () => { try { return JSON.parse(localStorage.getItem(LS_KEY)) || { alunos: {}, meses: {} }; } catch { return { alunos: {}, meses: {} }; } };
+  const lsWrite = (d) => { try { localStorage.setItem(LS_KEY, JSON.stringify(d)); } catch {} };
+
+  function localStore() {
+    const subsA = new Set(); const subsM = new Map();
+    const emitA = () => { const d = lsRead(); const list = Object.entries(d.alunos).map(([id, v]) => ({ id, ...v })); subsA.forEach((cb) => cb(list)); };
+    const emitM = (key) => { const d = lsRead(); (subsM.get(key) || new Set()).forEach((cb) => cb(clone(d.meses[key]))); };
+    return {
+      mode: "local",
+      onAlunos(cb) { subsA.add(cb); setTimeout(emitA); return () => subsA.delete(cb); },
+      onMes(key, cb) { if (!subsM.has(key)) subsM.set(key, new Set()); subsM.get(key).add(cb); setTimeout(() => emitM(key)); return () => subsM.get(key).delete(cb); },
+      async saveAluno(a) { const d = lsRead(); const { id, ...body } = a; d.alunos[id] = body; lsWrite(d); emitA(); },
+      async delAluno(id) { const d = lsRead(); delete d.alunos[id]; lsWrite(d); emitA(); },
+      async saveMes(key, body) { const d = lsRead(); d.meses[key] = body; lsWrite(d); emitM(key); },
+    };
+  }
+
+  function dbStore(db) {
+    const queues = new Map();
+    const serial = (key, fn) => { const p = (queues.get(key) || Promise.resolve()).catch(() => {}).then(fn); queues.set(key, p); return p; };
+    return {
+      mode: "db",
+      onAlunos(cb) {
+        return db.collection("alunos").onSnapshot(
+          (s) => cb(s.docs.map((d) => ({ id: d.id, ...d.data() }))),
+          (e) => fail(e)
+        );
+      },
+      onMes(key, cb) {
+        return db.doc("meses/" + key).onSnapshot((s) => cb(s.exists ? clone(s.data()) : {}), (e) => fail(e));
+      },
+      saveAluno(a) { const { id, ...body } = a; return serial("a:" + id, () => db.doc("alunos/" + id).set(body)); },
+      delAluno(id) { return serial("a:" + id, () => db.doc("alunos/" + id).delete()); },
+      saveMes(key, body) { return serial("m:" + key, () => db.doc("meses/" + key).set(body)); },
+    };
+  }
+
+  // ---------- state ----------
+  let store = null;
+  let readOnly = false;
+  let alunos = [];
+  let mesKey = monthOf(todayISO());
+  let mes = {};
+  let unsubMes = null;
+  const ui = { tab: "mes", filtro: "todos", aberto: null, pagar: null, editar: null, apagar: null, metodo: METODOS[0], ready: false };
+  let pendingRender = false;
+
+  function fail(e) {
+    const code = e && e.code;
+    if (code === "invalid_argument" && store && store.mode === "db") { readOnly = true; toast("Só tens acesso de leitura a este caderno."); render(); return; }
+    if (code === "quota_exceeded") { toast("O caderno está cheio. Apaga alunos antigos para libertar espaço."); return; }
+    toast("Não foi possível guardar. Verifica a ligação e tenta outra vez.");
+  }
+  function guard(p) { return Promise.resolve(p).catch(fail); }
+
+  let toastTimer;
+  function toast(msg) {
+    const t = $("#toast"); t.textContent = msg; t.hidden = false;
+    clearTimeout(toastTimer); toastTimer = setTimeout(() => (t.hidden = true), 2800);
+  }
+
+  // month doc shape: { sessoes: { alunoId: ["YYYY-MM-DD", ...] }, pagamentos: { alunoId: [{ valor, metodo, data }] } }
+  function mesBody() { const b = clone(mes); b.sessoes = b.sessoes || {}; b.pagamentos = b.pagamentos || {}; return b; }
+  function saveMes(b) { mes = b; render(); return guard(store.saveMes(mesKey, b)); }
+
+  function subscribeMes() {
+    if (unsubMes) unsubMes();
+    mes = {};
+    unsubMes = store.onMes(mesKey, (d) => { mes = d || {}; scheduleRender(); });
+  }
+
+  // ---------- actions ----------
+  function addSessao(id, iso) {
+    if (readOnly) return;
+    const b = mesBody();
+    (b.sessoes[id] = b.sessoes[id] || []).push(iso);
+    b.sessoes[id].sort();
+    saveMes(b);
+    const a = alunos.find((x) => x.id === id);
+    toast(`Treino registado: ${a ? firstName(a.nome) : ""}, ${dayLabel(iso)}`);
+  }
+  function delSessao(id, idx) {
+    const b = mesBody(); const arr = b.sessoes[id] || [];
+    arr.splice(idx, 1); b.sessoes[id] = arr; saveMes(b);
+  }
+  function addPagamento(id, valor, metodo) {
+    const b = mesBody();
+    (b.pagamentos[id] = b.pagamentos[id] || []).push({ valor, metodo, data: todayISO() });
+    ui.pagar = null; saveMes(b); toast(`Pagamento de ${money(valor)} registado`);
+  }
+  function delPagamento(id, idx) {
+    const b = mesBody(); const arr = b.pagamentos[id] || [];
+    arr.splice(idx, 1); b.pagamentos[id] = arr; saveMes(b);
+  }
+
+  async function carregarExemplos() {
+    const hoje = todayISO(); const [y, m] = hoje.split("-");
+    const ex = [
+      { id: newId(), nome: "Ana Costa (exemplo)", tel: "912345678", tipo: "pacote", preco: 120, incluidas: 8, extra: 15, ativo: true, notas: "" },
+      { id: newId(), nome: "Bruno Lima (exemplo)", tel: "", tipo: "treino", preco: 25, ativo: true, notas: "" },
+      { id: newId(), nome: "Carla Reis (exemplo)", tel: "", tipo: "mensal", preco: 60, ativo: true, notas: "Treino de grupo, 2x por semana" },
+    ];
+    for (const a of ex) await store.saveAluno(a);
+    const dias = (arr) => arr.filter((d) => d <= Number(hoje.slice(8))).map((d) => `${y}-${m}-${pad(d)}`);
+    const b = mesBody();
+    b.sessoes[ex[0].id] = dias([2, 4, 9, 11, 16, 18, 23, 25, 26]);
+    b.sessoes[ex[1].id] = dias([3, 10, 17, 24]);
+    b.sessoes[ex[2].id] = dias([1, 8, 15, 22]);
+    b.pagamentos[ex[2].id] = [{ valor: 60, metodo: "MB Way", data: hoje }];
+    b.pagamentos[ex[1].id] = [{ valor: 50, metodo: "Dinheiro", data: hoje }];
+    mesKey = monthOf(hoje); subscribeMes();
+    await saveMes(b);
+    toast("Exemplos carregados. Apaga-os em Alunos quando quiseres.");
+  }
+
+  function mensagem(a, n, dev, pago, datas) {
+    const nomeMes = monthName(mesKey, false);
+    const lista = datas.map((d) => Number(d.slice(8))).join(", ");
+    let txt = `Olá ${firstName(a.nome)}! Resumo de ${nomeMes}: ${n} ${n === 1 ? "treino" : "treinos"}` + (n ? ` (dias ${lista})` : "") + `. Valor: ${money(dev)}.`;
+    if (pago >= dev - 0.005 && dev > 0) txt += " Já está pago, obrigado!";
+    else if (pago > 0) txt += ` Já recebi ${money(pago)}, falta ${money(dev - pago)}.`;
+    return txt + " 💪";
+  }
+  function waLink(tel, txt) {
+    let d = String(tel || "").replace(/\D/g, "");
+    if (!d) return null;
+    if (d.length === 9) d = "351" + d;
+    return `https://wa.me/${d}?text=${encodeURIComponent(txt)}`;
+  }
+  async function copiar(txt) {
+    try { await navigator.clipboard.writeText(txt); toast("Mensagem copiada"); }
+    catch { toast("Não deu para copiar. Seleciona o texto à mão."); }
+  }
+
+  // ---------- render ----------
+  function scheduleRender() {
+    const f = document.activeElement;
+    if (f && f.closest && f.closest("form") && $("#app").contains(f)) { pendingRender = true; return; }
+    render();
+  }
+  document.addEventListener("focusout", () => setTimeout(() => {
+    if (!pendingRender) return;
+    const f = document.activeElement;
+    if (f && f.closest && f.closest("form")) return;
+    pendingRender = false; render();
+  }));
+
+  function linhasMes() {
+    const sess = mes.sessoes || {}; const pags = mes.pagamentos || {};
+    const ids = new Set(alunos.filter((a) => a.ativo !== false).map((a) => a.id));
+    Object.keys(sess).forEach((id) => { if ((sess[id] || []).length) ids.add(id); });
+    Object.keys(pags).forEach((id) => { if ((pags[id] || []).length) ids.add(id); });
+    return [...ids].map((id) => {
+      const a = alunos.find((x) => x.id === id);
+      if (!a) return null;
+      const datas = sess[id] || [];
+      const p = pags[id] || [];
+      const pago = p.reduce((s, x) => s + (Number(x.valor) || 0), 0);
+      const dev = devido(a, datas.length);
+      return { a, datas, p, pago, dev, est: estado(dev, pago) };
+    }).filter(Boolean).sort((x, y) => x.a.nome.localeCompare(y.a.nome, "pt"));
+  }
+
+  function render() {
+    pendingRender = false;
+    $("#monthLabel").textContent = monthName(mesKey);
+    $("#monthNav").hidden = ui.tab !== "mes";
+    document.querySelectorAll(".tabs button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.tab === ui.tab)));
+    $("#mode").textContent = !store ? "A carregar…" : store.mode === "db" ? (readOnly ? "Só leitura" : "Guardado na nuvem") : "Guardado só neste dispositivo";
+    if (!ui.ready) { $("#app").innerHTML = `<p class="muted">A abrir o caderno…</p>`; return; }
+    $("#app").innerHTML = ui.tab === "mes" ? viewMes() : viewAlunos();
+  }
+
+  function viewMes() {
+    if (!alunos.length) return viewVazio();
+    const linhas = linhasMes();
+    const total = linhas.reduce((s, l) => s + l.dev, 0);
+    const recebido = linhas.reduce((s, l) => s + Math.min(l.pago, Math.max(l.dev, l.pago)), 0);
+    const falta = Math.max(0, linhas.reduce((s, l) => s + Math.max(0, l.dev - l.pago), 0));
+    const treinos = linhas.reduce((s, l) => s + l.datas.length, 0);
+    const porPagar = linhas.filter((l) => l.est.k === "devido" || l.est.k === "parcial").length;
+    const pct = total > 0 ? Math.min(100, Math.round(((total - falta) / total) * 100)) : 0;
+
+    const filtradas = linhas.filter((l) =>
+      ui.filtro === "todos" ? true : ui.filtro === "pagar" ? (l.est.k === "devido" || l.est.k === "parcial") : l.est.k === "pago");
+
+    return `
+      <section class="summary" aria-label="Resumo do mês">
+        <div class="stat"><span class="lbl">A receber</span><span class="val">${money(total)}</span></div>
+        <div class="stat ok"><span class="lbl">Recebido</span><span class="val">${money(recebido)}</span></div>
+        <div class="stat bad"><span class="lbl">Em falta</span><span class="val">${money(falta)}</span></div>
+        <div class="bar" role="img" aria-label="${pct}% recebido"><i style="width:${pct}%"></i></div>
+        <div class="sub num">${treinos} ${treinos === 1 ? "treino dado" : "treinos dados"} · ${porPagar} ${porPagar === 1 ? "aluno por pagar" : "alunos por pagar"}</div>
+      </section>
+      <div class="chips" role="group" aria-label="Filtrar">
+        ${[["todos", "Todos"], ["pagar", "Por pagar"], ["pagos", "Pagos"]].map(([k, t]) =>
+          `<button class="chip" data-filtro="${k}" aria-pressed="${ui.filtro === k}">${t}</button>`).join("")}
+      </div>
+      <div class="list">
+        ${filtradas.length ? filtradas.map(cardAluno).join("") : `<p class="muted">Ninguém nesta lista em ${esc(monthName(mesKey, false))}.</p>`}
+      </div>`;
+  }
+
+  function cardAluno(l) {
+    const { a, datas, p, pago, dev, est } = l;
+    const aberto = ui.aberto === a.id;
+    const esteMes = mesKey === monthOf(todayISO());
+    const resto = dev - pago;
+    return `
+      <article class="card">
+        <div class="row">
+          <button class="who" data-abrir="${a.id}" aria-expanded="${aberto}">
+            <strong>${esc(a.nome)}</strong>
+            <span>${esc(TARIFAS[a.tipo] || TARIFAS.treino)} · ${tarifaTexto(a)}</span>
+          </button>
+          <div class="count">
+            <div class="tally">${datas.length}<small>treinos</small></div>
+            ${readOnly ? "" : `<button class="plus" data-mais="${a.id}" aria-label="${esteMes ? "Registar treino de hoje" : "Registar treino"} para ${esc(a.nome)}">+</button>`}
+          </div>
+        </div>
+        <div class="money">
+          <div class="amount">${money(dev)}${est.k === "parcial" ? `<span class="rest">falta ${money(resto)}</span>` : ""}${a.tipo === "pacote" && datas.length > (Number(a.incluidas) || 0) && a.extra ? `<span class="rest">+${datas.length - a.incluidas} extra</span>` : ""}</div>
+          <div class="money-right">
+            <button class="pill ${est.k}" data-abrir="${a.id}">${est.t}</button>
+          </div>
+        </div>
+        ${aberto ? detalhe(l, esteMes) : ""}
+      </article>`;
+  }
+
+  function detalhe(l, esteMes) {
+    const { a, datas, p, pago, dev } = l;
+    const resto = Math.max(0, dev - pago);
+    const msg = mensagem(a, datas.length, dev, pago, datas);
+    const wa = waLink(a.tel, msg);
+    const [y, m] = mesKey.split("-");
+    const ultimo = new Date(Number(y), Number(m), 0).getDate();
+    const hoje = todayISO();
+    const defData = esteMes ? hoje : `${mesKey}-01`;
+    return `
+      <div class="detail">
+        <div class="sect">
+          <h3>Treinos em ${esc(monthName(mesKey, false))}</h3>
+          ${datas.length ? `<div class="dates">${datas.map((d, i) =>
+            `<span class="date">${esc(dayLabel(d))}${readOnly ? "" : `<button data-delsess="${a.id}" data-i="${i}" aria-label="Apagar treino de ${esc(dayLabel(d))}">×</button>`}</span>`).join("")}</div>`
+            : `<p class="muted">Ainda sem treinos este mês.</p>`}
+          ${readOnly ? "" : `<form class="inline" data-sessform="${a.id}">
+            <input type="date" id="d-${a.id}" name="data" value="${defData}" min="${mesKey}-01" max="${mesKey}-${pad(ultimo)}" required aria-label="Data do treino">
+            <button class="btn" type="submit">Adicionar treino neste dia</button>
+          </form>`}
+        </div>
+        <div class="sect">
+          <h3>Pagamentos</h3>
+          ${p.length ? p.map((x, i) => `<div class="pay-line"><span>${esc(dayLabel(x.data))} · ${esc(x.metodo)}</span><span>${money(x.valor)} ${readOnly ? "" : `<button class="btn ghost" data-delpag="${a.id}" data-i="${i}" aria-label="Anular pagamento">Anular</button>`}</span></div>`).join("")
+            : `<p class="muted">Nada recebido este mês.</p>`}
+          ${readOnly ? "" : ui.pagar === a.id ? `
+            <form class="sect" data-pagform="${a.id}">
+              <div class="inline">
+                <input type="number" id="v-${a.id}" name="valor" min="0" step="0.01" inputmode="decimal" value="${resto ? Math.round(resto * 100) / 100 : ""}" required aria-label="Valor recebido em euros"> <span class="muted">€</span>
+              </div>
+              <div class="seg" role="group" aria-label="Forma de pagamento">
+                ${METODOS.map((mt) => `<button type="button" data-metodo="${mt}" aria-pressed="${ui.metodo === mt}">${mt}</button>`).join("")}
+              </div>
+              <div class="actions">
+                <button type="button" class="btn ghost" data-cancelpag>Cancelar</button>
+                <button type="submit" class="btn good">Guardar pagamento</button>
+              </div>
+            </form>` : `<div class="inline">
+              ${resto > 0 ? `<button class="btn good" data-pagar="${a.id}">Registar pagamento</button>` : `<button class="btn" data-pagar="${a.id}">Registar outro valor</button>`}
+            </div>`}
+        </div>
+        <div class="sect">
+          <h3>Mensagem para o aluno</h3>
+          <p class="note">${esc(msg)}</p>
+          <div class="inline">
+            ${wa ? `<a class="btn primary" href="${esc(wa)}" target="_blank" rel="noopener">Abrir no WhatsApp</a>` : ""}
+            <button class="btn" data-copiar="${a.id}">Copiar mensagem</button>
+            ${wa ? "" : `<span class="hint">Junta o telemóvel em Alunos para abrir no WhatsApp.</span>`}
+          </div>
+        </div>
+      </div>`;
+  }
+
+  function viewVazio() {
+    return `
+      <section class="empty">
+        <h2>Treinos e pagamentos, num só sítio</h2>
+        <ol>
+          <li>Adiciona os teus alunos e quanto cobras a cada um (por treino, pacote ou mensalidade).</li>
+          <li>Depois de cada treino, carrega no <strong>+</strong> ao lado do nome.</li>
+          <li>No fim do mês vês quanto cada um deve e marcas quem já pagou.</li>
+        </ol>
+        ${readOnly ? "" : `<div class="inline">
+          <button class="btn primary" data-novo>Adicionar primeiro aluno</button>
+          <button class="btn" data-exemplos>Experimentar com exemplos</button>
+        </div>`}
+      </section>`;
+  }
+
+  function viewAlunos() {
+    const ativos = alunos.filter((a) => a.ativo !== false).sort((x, y) => x.nome.localeCompare(y.nome, "pt"));
+    const inativos = alunos.filter((a) => a.ativo === false).sort((x, y) => x.nome.localeCompare(y.nome, "pt"));
+    const linha = (a) => ui.editar === a.id ? formAluno(a) : `
+      <article class="card"><div class="srow">
+        <div class="info">
+          <strong>${esc(a.nome)} ${a.ativo === false ? `<span class="tag">Parado</span>` : ""}</strong>
+          <span>${esc(TARIFAS[a.tipo] || TARIFAS.treino)} · ${tarifaTexto(a)}${a.tel ? ` · ${esc(a.tel)}` : ""}</span>
+          ${a.notas ? `<span>${esc(a.notas)}</span>` : ""}
+        </div>
+        ${readOnly ? "" : `<button class="btn" data-editar="${a.id}">Editar</button>`}
+      </div></article>`;
+    return `
+      ${readOnly ? "" : ui.editar === "novo" ? formAluno(null) : `<div class="actions" style="justify-content:flex-start"><button class="btn primary" data-novo>+ Novo aluno</button></div>`}
+      ${alunos.length ? "" : viewVazio()}
+      <div class="list">${ativos.map(linha).join("")}</div>
+      ${inativos.length ? `<h3 class="muted" style="font-size:15px;text-transform:uppercase;letter-spacing:.06em">Parados</h3><div class="list">${inativos.map(linha).join("")}</div>` : ""}
+      <p class="hint">Mudar o preço de um aluno recalcula todos os meses dele. Se o preço mudar a meio do ano, cria antes um novo aluno com o preço novo e marca o antigo como parado.</p>`;
+  }
+
+  function formAluno(a) {
+    const x = a || { id: "novo", nome: "", tel: "", tipo: "treino", preco: "", incluidas: 8, extra: "", ativo: true, notas: "" };
+    const t = ui.tipoForm || x.tipo || "treino";
+    const pid = x.id;
+    return `
+      <form class="form" data-alunoform="${pid}">
+        <h2>${a ? "Editar aluno" : "Novo aluno"}</h2>
+        <div class="grid2">
+          <div class="field"><label for="n-${pid}">Nome</label><input type="text" id="n-${pid}" name="nome" value="${esc(x.nome)}" required autocomplete="off"></div>
+          <div class="field"><label for="t-${pid}">Telemóvel</label><input type="tel" id="t-${pid}" name="tel" value="${esc(x.tel)}" placeholder="912 345 678" autocomplete="off"></div>
+        </div>
+        <div class="field">
+          <span class="lbl">Como paga</span>
+          <div class="seg" role="group" aria-label="Como paga">
+            ${Object.entries(TARIFAS).map(([k, v]) => `<button type="button" data-tipo="${k}" aria-pressed="${t === k}">${v}</button>`).join("")}
+          </div>
+          <input type="hidden" name="tipo" value="${t}">
+        </div>
+        <div class="grid2">
+          <div class="field"><label for="p-${pid}">${t === "treino" ? "Preço por treino (€)" : t === "pacote" ? "Preço do pacote (€)" : "Mensalidade (€)"}</label>
+            <input type="number" id="p-${pid}" name="preco" min="0" step="0.01" inputmode="decimal" value="${esc(x.preco)}" required></div>
+          ${t === "pacote" ? `
+          <div class="field"><label for="i-${pid}">Treinos incluídos</label><input type="number" id="i-${pid}" name="incluidas" min="1" step="1" value="${esc(x.incluidas ?? 8)}" required></div>
+          <div class="field"><label for="e-${pid}">Treino extra (€)</label><input type="number" id="e-${pid}" name="extra" min="0" step="0.01" inputmode="decimal" value="${esc(x.extra ?? "")}" placeholder="0"></div>` : ""}
+        </div>
+        <p class="hint">${t === "treino" ? "Paga cada treino que faz no mês." : t === "pacote" ? "Paga o pacote se treinar pelo menos uma vez no mês; cada treino acima do pacote paga o valor extra." : "Paga sempre o mesmo valor, faça quantos treinos fizer."}</p>
+        <div class="field"><label for="o-${pid}">Notas</label><textarea id="o-${pid}" name="notas" rows="2">${esc(x.notas)}</textarea></div>
+        ${a ? `<label class="inline"><input type="checkbox" id="a-${pid}" name="ativo" ${x.ativo !== false ? "checked" : ""}> Aluno ativo (aparece no mês)</label>` : ""}
+        <div class="actions">
+          ${a ? (ui.apagar === a.id
+            ? `<span class="hint">Apagar ${esc(firstName(a.nome))} e esconder os treinos dele?</span><button type="button" class="btn danger" data-apagarok="${a.id}">Sim, apagar</button><button type="button" class="btn ghost" data-apagarnao>Não</button>`
+            : `<button type="button" class="btn danger" data-apagar="${a.id}">Apagar</button>`) : ""}
+          <button type="button" class="btn ghost" data-cancelar>Cancelar</button>
+          <button type="submit" class="btn primary">Guardar</button>
+        </div>
+      </form>`;
+  }
+
+  // ---------- events ----------
+  document.addEventListener("click", (ev) => {
+    const b = ev.target.closest("button, a");
+    if (!b) return;
+    const d = b.dataset;
+    if (d.tab) { ui.tab = d.tab; ui.editar = null; ui.apagar = null; ui.tipoForm = null; render(); window.scrollTo(0, 0); return; }
+    if (b.id === "prevMonth" || b.id === "nextMonth") { mesKey = shiftMonth(mesKey, b.id === "prevMonth" ? -1 : 1); ui.aberto = null; ui.pagar = null; subscribeMes(); render(); return; }
+    if (d.filtro) { ui.filtro = d.filtro; render(); return; }
+    if (d.abrir) { ui.aberto = ui.aberto === d.abrir ? null : d.abrir; ui.pagar = null; render(); return; }
+    if (d.mais) {
+      if (mesKey === monthOf(todayISO())) addSessao(d.mais, todayISO());
+      else { ui.aberto = d.mais; render(); const i = document.getElementById("d-" + d.mais); if (i) i.focus(); }
+      return;
+    }
+    if (d.delsess) { delSessao(d.delsess, Number(d.i)); return; }
+    if (d.pagar) { ui.pagar = d.pagar; ui.metodo = METODOS[0]; render(); const i = document.getElementById("v-" + d.pagar); if (i) i.focus(); return; }
+    if ("cancelpag" in d) { ui.pagar = null; render(); return; }
+    if (d.metodo) { ui.metodo = d.metodo; b.parentElement.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b))); return; }
+    if (d.delpag) { delPagamento(d.delpag, Number(d.i)); return; }
+    if (d.copiar) {
+      const l = linhasMes().find((x) => x.a.id === d.copiar);
+      if (l) copiar(mensagem(l.a, l.datas.length, l.dev, l.pago, l.datas));
+      return;
+    }
+    if ("novo" in d) { ui.tab = "alunos"; ui.editar = "novo"; ui.tipoForm = null; render(); const i = document.getElementById("n-novo"); if (i) i.focus(); return; }
+    if ("exemplos" in d) { guard(carregarExemplos()); return; }
+    if (d.editar) { ui.editar = d.editar; ui.apagar = null; ui.tipoForm = null; render(); return; }
+    if ("cancelar" in d) { ui.editar = null; ui.apagar = null; ui.tipoForm = null; render(); return; }
+    if (d.tipo) {
+      // keep typed values while switching tariff type
+      const f = b.closest("form"); const fd = new FormData(f);
+      const id = f.dataset.alunoform; const base = alunos.find((a) => a.id === id);
+      ui.tipoForm = d.tipo;
+      const draft = { ...(base || { id: "novo", ativo: true }), nome: fd.get("nome"), tel: fd.get("tel"), preco: fd.get("preco"), notas: fd.get("notas"), incluidas: fd.get("incluidas") ?? base?.incluidas, extra: fd.get("extra") ?? base?.extra };
+      f.outerHTML = formAluno(base ? draft : null);
+      const nf = document.querySelector(`form[data-alunoform="${id}"]`);
+      if (nf) { nf.nome.value = draft.nome || ""; nf.tel.value = draft.tel || ""; nf.preco.value = draft.preco || ""; nf.notas.value = draft.notas || ""; }
+      return;
+    }
+    if (d.apagar) { ui.apagar = d.apagar; render(); return; }
+    if ("apagarnao" in d) { ui.apagar = null; render(); return; }
+    if (d.apagarok) { guard(store.delAluno(d.apagarok)); ui.editar = null; ui.apagar = null; toast("Aluno apagado"); render(); return; }
+  });
+
+  document.addEventListener("submit", (ev) => {
+    const f = ev.target; ev.preventDefault();
+    const fd = new FormData(f);
+    if (f.dataset.sessform) { const v = fd.get("data"); if (v && monthOf(v) === mesKey) addSessao(f.dataset.sessform, v); else toast("Escolhe um dia deste mês."); return; }
+    if (f.dataset.pagform) {
+      const v = Number(String(fd.get("valor")).replace(",", "."));
+      if (!(v > 0)) { toast("Escreve o valor recebido."); return; }
+      addPagamento(f.dataset.pagform, v, ui.metodo); return;
+    }
+    if (f.dataset.alunoform) {
+      const id = f.dataset.alunoform === "novo" ? newId() : f.dataset.alunoform;
+      const tipo = fd.get("tipo") || "treino";
+      const a = {
+        id, nome: String(fd.get("nome") || "").trim(), tel: String(fd.get("tel") || "").trim(), tipo,
+        preco: Number(fd.get("preco")) || 0,
+        incluidas: tipo === "pacote" ? Number(fd.get("incluidas")) || 0 : null,
+        extra: tipo === "pacote" ? Number(fd.get("extra")) || 0 : null,
+        notas: String(fd.get("notas") || "").trim(),
+        ativo: f.dataset.alunoform === "novo" ? true : fd.get("ativo") === "on",
+      };
+      if (!a.nome) { toast("Falta o nome."); return; }
+      const idx = alunos.findIndex((x) => x.id === id);
+      if (idx >= 0) alunos[idx] = a; else alunos.push(a);
+      ui.editar = null; ui.tipoForm = null; render();
+      guard(store.saveAluno(a)); toast("Aluno guardado");
+    }
+  });
+
+  // ---------- boot ----------
+  function start(s) {
+    store = s;
+    store.onAlunos((list) => { alunos = list; ui.ready = true; scheduleRender(); });
+    subscribeMes();
+    render();
+  }
+  render();
+  (async () => {
+    let db = null;
+    try { db = window.claude && window.claude.use ? await window.claude.use("db") : null; } catch { db = null; }
+    try {
+      const u = window.claude && window.claude.use ? await window.claude.use("user") : null;
+      if (u && db) { const can = await u.can("data.write"); if (can === false) readOnly = true; }
+    } catch {}
+    start(db ? dbStore(db) : localStore());
+  })();
+})();
+</script>

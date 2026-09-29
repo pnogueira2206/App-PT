@@ -80,7 +80,9 @@ const styles = StyleSheet.create({
   campoCabecalho: { width: "50%", paddingVertical: 3, paddingRight: 8 },
   classificacaoGrande: { fontSize: 28, fontWeight: "bold" },
   classificacaoLabel: { fontSize: 8, color: MUTED, marginTop: 2 },
-  comentario: { fontSize: 8, color: MUTED, marginTop: 6, fontStyle: "italic" },
+  // Sem fontStyle: "italic" — o react-pdf só consegue itálico com um ficheiro
+  // de fonte itálica registado, e só temos Regular/Bold do JetBrains Mono.
+  comentario: { fontSize: 8, color: MUTED, marginTop: 6 },
   prioridade: { marginBottom: 8, paddingBottom: 8, borderBottomWidth: 1, borderBottomColor: LINE },
   prioridadeOrigem: { fontSize: 9, fontWeight: "bold", marginBottom: 2 },
   prioridadeTexto: { fontSize: 9 },
@@ -219,7 +221,9 @@ export function RelatorioAvaliacaoDocument({
           <View style={[styles.secao, { flex: 1 }]}>
             <Text style={styles.secaoTitulo}>Classificação Geral</Text>
             <Text style={styles.classificacaoGrande}>{avaliacao.classificacaoGeral || "—"}/100</Text>
-            {avaliacao.comentarioGeral.trim() && <Text style={styles.comentario}>&quot;{avaliacao.comentarioGeral}&quot;</Text>}
+            {avaliacao.comentarioGeral.trim() !== "" && (
+              <Text style={styles.comentario}>&quot;{avaliacao.comentarioGeral}&quot;</Text>
+            )}
           </View>
           {temPilares && (
             <View style={[styles.secao, { alignItems: "center" }]}>
@@ -241,7 +245,7 @@ export function RelatorioAvaliacaoDocument({
                     {st.obtidos} / {st.max}
                   </Text>
                 </View>
-                {avaliacao.observacoes[seccao.id]?.trim() && (
+                {(avaliacao.observacoes[seccao.id]?.trim() ?? "") !== "" && (
                   <Text style={styles.comentario}>&quot;{avaliacao.observacoes[seccao.id]}&quot;</Text>
                 )}
               </View>

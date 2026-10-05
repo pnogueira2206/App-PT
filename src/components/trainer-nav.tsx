@@ -9,6 +9,7 @@ const links = [
   { href: "/trainer/students", label: "Alunos" },
   { href: "/trainer/groups", label: "Grupos" },
   { href: "/trainer/workouts", label: "Treinos" },
+  { href: "/trainer/candidaturas", label: "Candidaturas" },
 ];
 
 export function TrainerNav() {

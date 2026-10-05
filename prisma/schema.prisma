@@ -139,3 +139,14 @@ model PersonalRecord {
   recordDate  DateTime @default(now())
   createdAt   DateTime @default(now())
 }
+
+model CoachingApplication {
+  id                 String   @id @default(cuid())
+  fullName           String
+  email              String
+  goal               String
+  competitionLevel   String?
+  lookingFor         String?
+  trainingBackground String?
+  createdAt          DateTime @default(now())
+}

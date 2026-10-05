@@ -29,7 +29,7 @@ export function CoachingApplicationForm() {
 
   if (state?.success) {
     return (
-      <div className="px-6 py-10 text-center">
+      <div className="px-6 py-10 text-center sm:px-8 sm:py-16">
         <h2 className="text-lg font-semibold text-neutral-100">Obrigado!</h2>
         <p className="mt-2 text-sm text-neutral-400">
           Recebi a tua candidatura e respondo-te em até dois dias.
@@ -48,7 +48,7 @@ export function CoachingApplicationForm() {
         const formData = new FormData(e.currentTarget);
         startTransition(() => formAction(formData));
       }}
-      className="space-y-5 px-6 py-6"
+      className="grid gap-5 px-6 py-6 sm:grid-cols-2 sm:px-8 sm:py-8"
     >
       {/* Honeypot against spam bots */}
       <input
@@ -89,7 +89,7 @@ export function CoachingApplicationForm() {
         <FieldError state={state} name="email" />
       </div>
 
-      <div>
+      <div className={levels ? "" : "sm:col-span-2"}>
         <label htmlFor="goal" className={labelClass}>
           Objetivo
         </label>
@@ -138,7 +138,7 @@ export function CoachingApplicationForm() {
         </div>
       )}
 
-      <div>
+      <div className="sm:col-span-2">
         <label htmlFor="lookingFor" className={labelClass}>
           O que procuras num coach?
         </label>
@@ -152,7 +152,7 @@ export function CoachingApplicationForm() {
         <FieldError state={state} name="lookingFor" />
       </div>
 
-      <div>
+      <div className="sm:col-span-2">
         <label htmlFor="trainingBackground" className={labelClass}>
           Experiência de treino
         </label>
@@ -166,12 +166,12 @@ export function CoachingApplicationForm() {
         <FieldError state={state} name="trainingBackground" />
       </div>
 
-      {state?.error && <p className="text-sm text-red-400">{state.error}</p>}
+      {state?.error && <p className="text-sm text-red-400 sm:col-span-2">{state.error}</p>}
 
       <button
         type="submit"
         disabled={isPending}
-        className="w-full rounded-md bg-[#c9b37e] px-4 py-4 text-xs font-semibold uppercase tracking-[0.2em] text-neutral-950 transition hover:bg-[#d6c290] disabled:opacity-60"
+        className="w-full rounded-md bg-[#c9b37e] sm:col-span-2 px-4 py-4 text-xs font-semibold uppercase tracking-[0.2em] text-neutral-950 transition hover:bg-[#d6c290] disabled:opacity-60"
       >
         {isPending ? "A enviar..." : "Enviar candidatura"}
       </button>

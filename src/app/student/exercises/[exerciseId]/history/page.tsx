@@ -2,6 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireStudent } from "@/lib/require-session";
+import { formatDate } from "@/lib/dates";
+import { formatResult } from "@/lib/blocks";
 
 export default async function ExerciseHistoryPage({
   params,
@@ -21,8 +23,8 @@ export default async function ExerciseHistoryPage({
   const [results, records] = await Promise.all([
     prisma.blockResult.findMany({
       where: { studentId: session.user.id, block: { exerciseId } },
-      include: { block: { include: { workout: true } } },
-      orderBy: { completedAt: "desc" },
+      include: { block: { include: { workout: true } }, sets: true },
+      orderBy: { block: { workout: { date: "desc" } } },
     }),
     prisma.personalRecord.findMany({
       where: { studentId: session.user.id, exerciseId },
@@ -37,6 +39,17 @@ export default async function ExerciseHistoryPage({
           ← Voltar
         </Link>
         <h1 className="mt-1 text-xl font-bold text-slate-900">{exercise.name}</h1>
+        {exercise.videoUrl && (
+          <a
+            href={exercise.videoUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm font-medium text-red-600 hover:text-red-800"
+          >
+            ▶ Ver vídeo de demonstração
+          </a>
+        )}
+        {exercise.notes && <p className="mt-1 text-sm text-slate-600">{exercise.notes}</p>}
       </div>
 
       {records.length > 0 && (
@@ -75,12 +88,10 @@ export default async function ExerciseHistoryPage({
                     {r.block.workout.title}
                   </span>
                   <span className="text-xs text-slate-400">
-                    {new Date(r.completedAt).toLocaleDateString("pt-PT")}
+                    {formatDate(r.block.workout.date)}
                   </span>
                 </div>
-                {r.scoreText && (
-                  <p className="mt-1 text-sm text-slate-600">{r.scoreText}</p>
-                )}
+                <p className="mt-1 text-sm text-slate-600">{formatResult(r.block, r)}</p>
                 {r.studentNotes && (
                   <p className="mt-1 text-xs italic text-slate-400">{r.studentNotes}</p>
                 )}

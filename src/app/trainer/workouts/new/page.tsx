@@ -1,11 +1,12 @@
 import { prisma } from "@/lib/prisma";
 import { requireTrainer } from "@/lib/require-session";
 import { NewWorkoutForm } from "@/components/new-workout-form";
+import { parseDateKey, todayKey } from "@/lib/dates";
 
 export default async function NewWorkoutPage({
   searchParams,
 }: {
-  searchParams: Promise<{ groupId?: string; studentId?: string }>;
+  searchParams: Promise<{ target?: string; date?: string; groupId?: string; studentId?: string }>;
 }) {
   const session = await requireTrainer();
   const params = await searchParams;
@@ -21,16 +22,24 @@ export default async function NewWorkoutPage({
     }),
   ]);
 
-  const defaultTarget = params.groupId
-    ? `group:${params.groupId}`
-    : params.studentId
-      ? `student:${params.studentId}`
-      : undefined;
+  const defaultTarget =
+    params.target ??
+    (params.groupId
+      ? `group:${params.groupId}`
+      : params.studentId
+        ? `student:${params.studentId}`
+        : undefined);
+  const defaultDate = params.date && parseDateKey(params.date) ? params.date : todayKey();
 
   return (
     <div className="space-y-6">
       <h1 className="text-xl font-bold text-slate-900">Novo treino</h1>
-      <NewWorkoutForm groups={groups} students={students} defaultTarget={defaultTarget} />
+      <NewWorkoutForm
+        groups={groups}
+        students={students}
+        defaultTarget={defaultTarget}
+        defaultDate={defaultDate}
+      />
     </div>
   );
 }

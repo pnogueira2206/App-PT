@@ -1,7 +1,15 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, type Prisma } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
+
+// Monday of the current week, as UTC midnight (same convention as src/lib/dates.ts).
+function weekDay(offset: number): Date {
+  const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Lisbon" }).format(new Date());
+  const date = new Date(`${today}T00:00:00.000Z`);
+  const monday = date.getTime() - ((date.getUTCDay() + 6) % 7) * 86400000;
+  return new Date(monday + offset * 86400000);
+}
 
 async function main() {
   const trainerPasswordHash = await bcrypt.hash("treinador123", 10);
@@ -46,121 +54,205 @@ async function main() {
   });
 
   const group = await prisma.group.upsert({
-    where: { id: "seed-group-manha" },
+    where: { id: "seed-group-pt" },
     update: {},
-    create: {
-      id: "seed-group-manha",
-      name: "Turma da manhã",
-      trainerId: trainer.id,
-    },
+    create: { id: "seed-group-pt", name: "PT Ana + Bruno", trainerId: trainer.id },
   });
+  for (const student of [ana, bruno]) {
+    await prisma.groupMember.upsert({
+      where: { groupId_studentId: { groupId: group.id, studentId: student.id } },
+      update: {},
+      create: { groupId: group.id, studentId: student.id },
+    });
+  }
 
-  await prisma.groupMember.upsert({
-    where: { groupId_studentId: { groupId: group.id, studentId: ana.id } },
-    update: {},
-    create: { groupId: group.id, studentId: ana.id },
-  });
-  await prisma.groupMember.upsert({
-    where: { groupId_studentId: { groupId: group.id, studentId: bruno.id } },
-    update: {},
-    create: { groupId: group.id, studentId: bruno.id },
-  });
+  const exerciseData: Prisma.ExerciseCreateWithoutTrainerInput[] = [
+    { name: "Back Squat", category: "STRENGTH", videoUrl: "https://www.youtube.com/watch?v=ultWZbUMPL8" },
+    { name: "Deadlift", category: "STRENGTH", videoUrl: "https://www.youtube.com/watch?v=op9kVnSso6Q" },
+    { name: "Power Clean", category: "WEIGHTLIFTING", videoUrl: "https://www.youtube.com/watch?v=GVt4uQ0sDJE" },
+    { name: "Pull-up", category: "GYMNASTICS" },
+    { name: "Remo", category: "CARDIO" },
+    { name: "Fran", category: "OTHER", notes: "21-15-9 Thrusters 43/30kg + Pull-ups" },
+  ];
+  const exercises: Record<string, string> = {};
+  for (const data of exerciseData) {
+    const exercise = await prisma.exercise.upsert({
+      where: { trainerId_name: { trainerId: trainer.id, name: data.name } },
+      update: {},
+      create: { ...data, trainerId: trainer.id },
+    });
+    exercises[data.name] = exercise.id;
+  }
 
-  const agachamento = await prisma.exercise.upsert({
-    where: { trainerId_name: { trainerId: trainer.id, name: "Agachamento" } },
-    update: {},
-    create: { name: "Agachamento", trainerId: trainer.id },
-  });
-  const supino = await prisma.exercise.upsert({
-    where: { trainerId_name: { trainerId: trainer.id, name: "Supino" } },
-    update: {},
-    create: { name: "Supino", trainerId: trainer.id },
-  });
+  // Seeded workouts are recreated on each run so they always sit in the current week.
+  await prisma.workout.deleteMany({ where: { id: { startsWith: "seed-" } } });
 
-  const workout = await prisma.workout.upsert({
-    where: { id: "seed-workout-1" },
-    update: {},
-    create: {
-      id: "seed-workout-1",
-      title: "Treino de força - Semana 1",
-      description: "Foco em técnica e progressão de carga.",
-      date: new Date(),
+  await prisma.workout.create({
+    data: {
+      id: "seed-group-mon",
+      title: "Força + Metcon",
+      description: "Semana 1 do ciclo de força.",
+      date: weekDay(0),
+      status: "PUBLISHED",
       trainerId: trainer.id,
       groupId: group.id,
+      blocks: {
+        create: [
+          {
+            order: 1,
+            type: "STRENGTH",
+            title: "A. Back Squat",
+            exerciseId: exercises["Back Squat"],
+            prescribedSets: 5,
+            prescribedReps: "5",
+            percent1RM: 75,
+            tempo: "30X1",
+            restSeconds: 120,
+            trainerNotes: "Peito alto, desce até abaixo da paralela.",
+          },
+          {
+            order: 2,
+            type: "METCON",
+            title: "B. Metcon",
+            exerciseId: exercises["Fran"],
+            metconFormat: "FOR_TIME",
+            timeCapSeconds: 600,
+            description: "21-15-9\nThrusters 43/30kg\nPull-ups",
+          },
+        ],
+      },
     },
   });
 
-  const blockA = await prisma.workoutBlock.upsert({
-    where: { id: "seed-block-a" },
-    update: {},
-    create: {
-      id: "seed-block-a",
-      workoutId: workout.id,
-      order: 1,
-      title: "Bloco A",
-      exerciseId: agachamento.id,
-      prescribedSets: 4,
-      prescribedReps: "8-10",
-      prescribedWeight: "60kg",
-      restSeconds: 90,
-      trainerNotes: "Desce até à paralela, mantém o peito alto.",
-    },
-  });
-
-  await prisma.workoutBlock.upsert({
-    where: { id: "seed-block-b" },
-    update: {},
-    create: {
-      id: "seed-block-b",
-      workoutId: workout.id,
-      order: 2,
-      title: "Bloco B",
-      exerciseId: supino.id,
-      prescribedSets: 3,
-      prescribedReps: "10",
-      prescribedWeight: "40kg",
-      restSeconds: 75,
-      trainerNotes: "Controla a descida, não trancar os cotovelos no topo.",
-    },
-  });
-
-  await prisma.blockResult.upsert({
-    where: { blockId_studentId: { blockId: blockA.id, studentId: ana.id } },
-    update: {},
-    create: {
-      blockId: blockA.id,
-      studentId: ana.id,
-      scoreText: "4x9 @ 55kg, RPE 8",
-      studentNotes: "Senti-me forte hoje!",
-    },
-  });
-
-  await prisma.personalRecord.create({
+  // Individual version for Bruno (shoulder): same day, scaled metcon.
+  await prisma.workout.create({
     data: {
-      studentId: ana.id,
-      exerciseId: agachamento.id,
-      type: "WEIGHT",
-      value: "70",
-      unit: "kg",
-      notes: "1RM testado em ginásio",
+      id: "seed-group-mon-bruno",
+      title: "Força + Metcon",
+      description: "Semana 1 do ciclo de força.",
+      date: weekDay(0),
+      status: "PUBLISHED",
+      trainerId: trainer.id,
+      studentId: bruno.id,
+      sourceWorkoutId: "seed-group-mon",
+      blocks: {
+        create: [
+          {
+            order: 1,
+            type: "STRENGTH",
+            title: "A. Back Squat",
+            exerciseId: exercises["Back Squat"],
+            prescribedSets: 5,
+            prescribedReps: "5",
+            percent1RM: 70,
+            restSeconds: 120,
+          },
+          {
+            order: 2,
+            type: "METCON",
+            title: "B. Metcon (ombro)",
+            metconFormat: "FOR_TIME",
+            timeCapSeconds: 600,
+            description: "21-15-9\nFront Squat 40kg\nRing rows",
+            trainerNotes: "Sem pull-ups esta semana por causa do ombro.",
+          },
+        ],
+      },
     },
   });
 
-  const fran = await prisma.exercise.upsert({
-    where: { trainerId_name: { trainerId: trainer.id, name: "Fran" } },
-    update: {},
-    create: { name: "Fran", trainerId: trainer.id },
-  });
-
-  await prisma.personalRecord.create({
+  const anaWednesday = await prisma.workout.create({
     data: {
+      id: "seed-ana-wed",
+      title: "Engine + Acessórios",
+      date: weekDay(2),
+      status: "PUBLISHED",
+      trainerId: trainer.id,
       studentId: ana.id,
-      exerciseId: fran.id,
-      type: "TIME",
-      value: "4:12",
-      notes: "21-15-9 thrusters/pull-ups",
+      blocks: {
+        create: [
+          {
+            order: 1,
+            type: "CARDIO",
+            title: "A. Remo",
+            exerciseId: exercises["Remo"],
+            cardioModality: "ROW",
+            targetDistanceM: 2000,
+            targetPace: "2:05/500m",
+          },
+          {
+            order: 2,
+            type: "METCON",
+            title: "B. AMRAP 12'",
+            metconFormat: "AMRAP",
+            timeCapSeconds: 720,
+            description: "10 Power Cleans 40kg\n15 Wall Balls 6kg\n200m Run",
+          },
+          {
+            order: 3,
+            type: "ACCESSORY",
+            title: "C. Core",
+            prescribedSets: 3,
+            description: "3 rondas:\n30s Hollow hold\n10 Dead bugs / lado",
+          },
+        ],
+      },
+    },
+    include: { blocks: true },
+  });
+
+  await prisma.workout.create({
+    data: {
+      id: "seed-ana-fri",
+      title: "Deadlift",
+      date: weekDay(4),
+      status: "DRAFT",
+      trainerId: trainer.id,
+      studentId: ana.id,
+      blocks: {
+        create: [
+          {
+            order: 1,
+            type: "STRENGTH",
+            title: "A. Deadlift",
+            exerciseId: exercises["Deadlift"],
+            prescribedSets: 4,
+            prescribedReps: "4",
+            percent1RM: 80,
+            restSeconds: 150,
+          },
+        ],
+      },
     },
   });
+
+  // Ana's results for Wednesday.
+  const [row, amrap] = anaWednesday.blocks.sort((a, b) => a.order - b.order);
+  await prisma.blockResult.create({
+    data: { blockId: row.id, studentId: ana.id, timeSeconds: 508, distanceM: 2000, rpe: 7 },
+  });
+  await prisma.blockResult.create({
+    data: {
+      blockId: amrap.id,
+      studentId: ana.id,
+      rounds: 5,
+      reps: 12,
+      rx: true,
+      rpe: 9,
+      studentNotes: "As wall balls custaram!",
+    },
+  });
+
+  if ((await prisma.personalRecord.count({ where: { studentId: ana.id } })) === 0) {
+    await prisma.personalRecord.createMany({
+      data: [
+        { studentId: ana.id, exerciseId: exercises["Back Squat"], type: "WEIGHT", value: "80", unit: "kg" },
+        { studentId: ana.id, exerciseId: exercises["Deadlift"], type: "WEIGHT", value: "105", unit: "kg" },
+        { studentId: ana.id, exerciseId: exercises["Fran"], type: "TIME", value: "4:12" },
+        { studentId: bruno.id, exerciseId: exercises["Back Squat"], type: "WEIGHT", value: "120", unit: "kg" },
+      ],
+    });
+  }
 
   console.log("Seed concluído.");
   console.log("Treinador: treinador@exemplo.com / treinador123");

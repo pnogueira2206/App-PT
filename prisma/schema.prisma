@@ -3,8 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 enum Role {
@@ -15,6 +16,43 @@ enum Role {
 enum RecordType {
   WEIGHT
   TIME
+}
+
+enum WorkoutStatus {
+  DRAFT
+  PUBLISHED
+}
+
+enum BlockType {
+  STRENGTH
+  METCON
+  ACCESSORY
+  CARDIO
+}
+
+enum MetconFormat {
+  FOR_TIME
+  AMRAP
+  EMOM
+  FOR_REPS
+  MAX_LOAD
+}
+
+enum CardioModality {
+  ROW
+  RUN
+  BIKE
+  SKI
+  OTHER
+}
+
+enum ExerciseCategory {
+  STRENGTH
+  WEIGHTLIFTING
+  GYMNASTICS
+  CARDIO
+  MOBILITY
+  OTHER
 }
 
 model User {
@@ -43,6 +81,7 @@ model User {
   assignedWorkouts  Workout[]      @relation("StudentWorkouts")
   blockResults      BlockResult[]
   personalRecords   PersonalRecord[]
+  completions       WorkoutCompletion[]
 }
 
 model Group {
@@ -70,6 +109,9 @@ model GroupMember {
 model Exercise {
   id        String   @id @default(cuid())
   name      String
+  category  ExerciseCategory @default(OTHER)
+  videoUrl  String?
+  notes     String?
   trainer   User     @relation("TrainerExercises", fields: [trainerId], references: [id])
   trainerId String
   createdAt DateTime @default(now())
@@ -81,19 +123,42 @@ model Exercise {
 }
 
 model Workout {
-  id          String    @id @default(cuid())
+  id          String        @id @default(cuid())
   title       String
   description String?
-  date        DateTime?
+  // Calendar day, stored as UTC midnight (see src/lib/dates.ts)
+  date        DateTime
+  status      WorkoutStatus @default(DRAFT)
   trainer     User      @relation("TrainerWorkouts", fields: [trainerId], references: [id])
   trainerId   String
   group       Group?    @relation(fields: [groupId], references: [id])
   groupId     String?
   student     User?     @relation("StudentWorkouts", fields: [studentId], references: [id])
   studentId   String?
+  // Set when this workout is an individual adjustment of a group workout
+  sourceWorkout   Workout?  @relation("WorkoutOverrides", fields: [sourceWorkoutId], references: [id], onDelete: SetNull)
+  sourceWorkoutId String?
+  overrides       Workout[] @relation("WorkoutOverrides")
   createdAt   DateTime  @default(now())
 
   blocks      WorkoutBlock[]
+  completions WorkoutCompletion[]
+
+  @@index([studentId, date])
+  @@index([groupId, date])
+}
+
+model WorkoutCompletion {
+  id          String   @id @default(cuid())
+  workout     Workout  @relation(fields: [workoutId], references: [id], onDelete: Cascade)
+  workoutId   String
+  student     User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  studentId   String
+  sessionRpe  Int?
+  notes       String?
+  completedAt DateTime @default(now())
+
+  @@unique([workoutId, studentId])
 }
 
 model WorkoutBlock {
@@ -101,13 +166,33 @@ model WorkoutBlock {
   workout           Workout  @relation(fields: [workoutId], references: [id], onDelete: Cascade)
   workoutId         String
   order             Int
+  type              BlockType @default(STRENGTH)
   title             String
   exercise          Exercise? @relation(fields: [exerciseId], references: [id])
   exerciseId        String?
+  // Free description (WOD, circuit, cardio intervals...)
+  description       String?
+
+  // Strength
   prescribedSets    Int?
   prescribedReps    String?
   prescribedWeight  String?
+  percent1RM        Float?
+  tempo             String?
   restSeconds       Int?
+
+  // Metcon
+  metconFormat      MetconFormat?
+  // Time cap (For Time) or duration (AMRAP/EMOM)
+  timeCapSeconds    Int?
+
+  // Cardio
+  cardioModality    CardioModality?
+  targetDistanceM   Int?
+  targetTimeSeconds Int?
+  targetCalories    Int?
+  targetPace        String?
+
   trainerNotes      String?
 
   results           BlockResult[]
@@ -119,11 +204,33 @@ model BlockResult {
   blockId        String
   student        User         @relation(fields: [studentId], references: [id], onDelete: Cascade)
   studentId      String
+  done           Boolean      @default(true)
+  timeSeconds    Int?
+  rounds         Int?
+  reps           Int?
+  loadKg         Float?
+  distanceM      Float?
+  calories       Int?
+  rx             Boolean?
+  rpe            Int?
+  // Free-text alternative to the structured score
   scoreText      String?
   studentNotes   String?
   completedAt    DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  sets           SetLog[]
 
   @@unique([blockId, studentId])
+}
+
+model SetLog {
+  id        String      @id @default(cuid())
+  result    BlockResult @relation(fields: [resultId], references: [id], onDelete: Cascade)
+  resultId  String
+  setNumber Int
+  reps      Int?
+  loadKg    Float?
 }
 
 model PersonalRecord {

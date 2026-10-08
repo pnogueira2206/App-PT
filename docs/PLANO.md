@@ -19,12 +19,12 @@ Plano de evolução da app atual (Next.js + Prisma, PWA) para uma ferramenta de 
 
 ## Fases
 
-### Fase 0 — Fundações (curta)
+### Fase 0 — Fundações ✅ implementada
 - Mudar a base de dados de SQLite para **Postgres** (necessário para alojar na Vercel).
 - Configurar o deploy (Vercel + Neon/Supabase) e variáveis de ambiente.
 - Biblioteca de exercícios: página para gerir exercícios com nome, categoria (força, ginástica, halterofilia, cardio, mobilidade) e **link de vídeo**. O aluno vê o link no treino.
 
-### Fase 1 — Programação em calendário (prioridade)
+### Fase 1 — Programação em calendário ✅ implementada
 **Treinador**
 - Vista **semanal do calendário de cada aluno** (seg–dom), com os treinos de cada dia e o estado (por fazer / feito / falhado).
 - Criar ou editar um treino diretamente num dia do calendário.
@@ -99,5 +99,12 @@ Plano de evolução da app atual (Next.js + Prisma, PWA) para uma ferramenta de 
 - Os scores podem ser editados pelo aluno depois de submetidos (o treinador vê a data da última alteração).
 - Os resultados de um treino de grupo são sempre individuais. Não há ranking entre colegas até ao módulo de competição.
 
-## Próximo passo sugerido
-Implementar a **Fase 0** e a **Fase 1** (Postgres, biblioteca de exercícios com vídeo, calendário semanal, blocos por tipo e scores estruturados) e depois validar com 2–3 alunos reais antes da Fase 2.
+## Estado
+
+- **Fases 0 e 1 implementadas.** Notas de implementação:
+  - O deploy em produção (Vercel + Neon) está preparado (scripts e instruções no README) mas tem de ser feito com as tuas contas.
+  - A conta de treinador em produção cria-se com `npm run create-trainer`.
+  - Ao passar de SQLite para Postgres, as migrações foram recomeçadas: dados de teste numa `dev.db` antiga não são migrados.
+  - Os treinos colados ficam sempre em rascunho. "Publicar semana" num aluno publica só os treinos dele; os de grupo publicam-se no calendário do grupo.
+  - "Copiar semana/dia" no calendário de um aluno copia os treinos individuais dele (incluindo versões ajustadas); os treinos de grupo copiam-se a partir do calendário do grupo.
+- **Próximo passo:** validar com 2–3 alunos reais e depois avançar para a Fase 2 (painel "Novidades", comentários aos resultados, adesão, PRs automáticos e gráficos).

@@ -9,10 +9,12 @@ export function NewWorkoutForm({
   groups,
   students,
   defaultTarget,
+  defaultDate,
 }: {
   groups: Option[];
   students: Option[];
   defaultTarget?: string;
+  defaultDate: string;
 }) {
   const [state, formAction, isPending] = useActionState(
     createWorkoutAction,
@@ -29,7 +31,7 @@ export function NewWorkoutForm({
         <input
           name="title"
           required
-          placeholder="ex: Treino de pernas - Semana 1"
+          placeholder="ex: Força + Metcon"
           className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
         />
       </div>
@@ -47,10 +49,12 @@ export function NewWorkoutForm({
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
-          <label className="block text-sm font-medium text-slate-700">Data</label>
+          <label className="block text-sm font-medium text-slate-700">Dia</label>
           <input
             name="date"
             type="date"
+            required
+            defaultValue={defaultDate}
             className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
           />
         </div>
@@ -88,6 +92,11 @@ export function NewWorkoutForm({
           </select>
         </div>
       </div>
+
+      <p className="text-xs text-slate-500">
+        O treino é criado como <strong>rascunho</strong>: o aluno só o vê depois de o publicares.
+        Num grupo, o treino aparece no calendário de cada membro e cada um reporta o seu resultado.
+      </p>
 
       {state?.error && <p className="text-sm text-red-600">{state.error}</p>}
 

@@ -82,7 +82,9 @@ Igual ao Netlify, mas não precisas do `netlify.toml`: o script `vercel-build` a
 
 ### Conta de treinador
 
-Depois do primeiro deploy, cria a tua conta a partir do teu computador, com o `.env` a apontar para a base de dados de produção:
+Depois do primeiro deploy, abre o endereço do site: enquanto não existir nenhum treinador, a app mostra o ecrã **"Bem-vindo à App PT"** (`/setup`) para criares a tua conta. Assim que a conta existe, esse ecrã deixa de estar disponível.
+
+Em alternativa (ou para repor a palavra-passe do treinador), a partir do teu computador com o `.env` a apontar para a base de dados de produção:
 
 ```bash
 npm run create-trainer -- "O teu nome" o-teu@email.com uma-palavra-passe-forte

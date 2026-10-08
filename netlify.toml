@@ -3,8 +3,6 @@
   publish = ".next"
 
 [build.environment]
-  # Auth.js only trusts the request host automatically on Vercel.
-  AUTH_TRUST_HOST = "true"
   # Turbopack's build cache stores a snapshot of env vars (AUTH_SECRET
   # included) to know when to rebuild. It is never published, so the secrets
   # scan skips it; the published output is still scanned.

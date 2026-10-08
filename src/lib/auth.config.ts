@@ -5,6 +5,9 @@ import type { NextAuthConfig } from "next-auth";
 // in middleware). The full config with the Credentials provider is in auth.ts.
 export const authConfig = {
   session: { strategy: "jwt" },
+  // Hosting platforms (Netlify, Vercel) set the Host header behind their proxy.
+  // Set in code because Netlify's netlify.toml env vars only reach the build.
+  trustHost: true,
   pages: {
     signIn: "/login",
   },

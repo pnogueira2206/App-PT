@@ -48,8 +48,6 @@ npm run dev
 
 Abre http://localhost:3000
 
-> Para testar a build de produção localmente (`npm run build && npm run start`), define também `AUTH_TRUST_HOST=true` no `.env`. Na Vercel não é necessário.
-
 ### Contas de exemplo (após `npm run db:seed`)
 
 | Papel      | Email                  | Palavra-passe  |

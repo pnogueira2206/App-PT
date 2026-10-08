@@ -58,20 +58,37 @@ Abre http://localhost:3000
 | Aluna      | ana@exemplo.com         | aluno123       |
 | Aluno      | bruno@exemplo.com       | aluno123       |
 
-## Publicar online (Vercel + Neon)
+## Publicar online
 
-1. Cria uma base de dados Postgres gratuita em [Neon](https://neon.tech) (ou Supabase). Copia a ligação *pooled* e a ligação *direta*.
-2. Importa o repositório na [Vercel](https://vercel.com/new).
-3. Em *Settings → Environment Variables* define:
-   - `DATABASE_URL` — ligação *pooled* do Neon
-   - `DIRECT_URL` — ligação direta do Neon (usada pelas migrações)
+A app precisa de duas coisas: **alojamento** (Netlify ou Vercel) e uma **base de dados Postgres** (Neon, gratuito).
+
+### Netlify + Neon
+
+1. Cria a base de dados Postgres:
+   - no Netlify, em *Extensions → Neon* (Netlify DB), ou
+   - diretamente em [neon.tech](https://neon.tech).
+
+   Precisas de duas ligações: a *pooled* e a direta (*unpooled*).
+2. Importa o repositório no Netlify (*Add new site → Import an existing project*). O `netlify.toml` já define o comando de build, que aplica as migrações antes de compilar.
+3. Em *Site configuration → Environment variables* define:
+   - `DATABASE_URL` — ligação *pooled*
+   - `DIRECT_URL` — ligação direta/unpooled (usada pelas migrações)
    - `AUTH_SECRET` — um valor aleatório longo (`openssl rand -hex 32`)
-4. Faz deploy. O script `vercel-build` aplica as migrações (`prisma migrate deploy`) antes de compilar.
-5. Cria a tua conta de treinador, a partir do teu computador, com o `.env` a apontar para a base de dados de produção:
-   ```bash
-   npm run create-trainer -- "O teu nome" o-teu@email.com uma-palavra-passe-forte
-   ```
-   Os alunos são criados por ti dentro da app (*Alunos*). Não corras o `db:seed` em produção.
+4. Faz deploy.
+
+### Vercel + Neon (alternativa)
+
+Igual ao Netlify, mas não precisas do `netlify.toml`: o script `vercel-build` aplica as migrações.
+
+### Conta de treinador
+
+Depois do primeiro deploy, cria a tua conta a partir do teu computador, com o `.env` a apontar para a base de dados de produção:
+
+```bash
+npm run create-trainer -- "O teu nome" o-teu@email.com uma-palavra-passe-forte
+```
+
+Os alunos são criados por ti dentro da app (*Alunos*). Não corras o `db:seed` em produção.
 
 ## Notas de produção
 

@@ -12,7 +12,7 @@ Plano de evolução da app atual (Next.js + Prisma, PWA) para uma ferramenta de 
 | Tipos de bloco | Força, Metcon (For Time / AMRAP / EMOM…), Acessórios/mobilidade e Cardio/endurance. |
 | Feedback | Tudo: scores estruturados, check-in de prontidão, vídeos de técnica e comentários/chat. |
 | Alertas | Painel "novidades" + notificações push, que se podem **desativar** (por tipo). |
-| Escala/alojamento | Até ~50 alunos: Vercel + Postgres gerido (Neon ou Supabase) + armazenamento de ficheiros para vídeos. |
+| Escala/alojamento | Até ~50 alunos: Netlify (ou Vercel) + Postgres gerido (Neon) + armazenamento de ficheiros para vídeos. |
 | Biblioteca de exercícios | Cada exercício tem um link de vídeo (YouTube/Instagram) com a demonstração. |
 | **Prioridade da 1.ª versão** | **Calendário + programação + scores estruturados.** Comunicação, vídeos e notificações ficam para depois. |
 | Mais tarde | Módulo saúde/bem-estar e módulo competição (ver Fase 5). |
@@ -102,7 +102,7 @@ Plano de evolução da app atual (Next.js + Prisma, PWA) para uma ferramenta de 
 ## Estado
 
 - **Fases 0 e 1 implementadas.** Notas de implementação:
-  - O deploy em produção (Vercel + Neon) está preparado (scripts e instruções no README) mas tem de ser feito com as tuas contas.
+  - O deploy em produção (Netlify + Neon, ou Vercel) está preparado (scripts e instruções no README) mas tem de ser feito com as tuas contas.
   - A conta de treinador em produção cria-se com `npm run create-trainer`.
   - Ao passar de SQLite para Postgres, as migrações foram recomeçadas: dados de teste numa `dev.db` antiga não são migrados.
   - Os treinos colados ficam sempre em rascunho. "Publicar semana" num aluno publica só os treinos dele; os de grupo publicam-se no calendário do grupo.

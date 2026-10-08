@@ -3,16 +3,14 @@
 import { Criterio } from "@/data/grelha";
 import { Resposta } from "@/types/avaliacao";
 
+/** Sempre 3 hipóteses por critério: zero, metade ou o valor total do peso. */
 function opcoesPontos(pesoMaximo: number): number[] {
-  const opcoes: number[] = [];
-  for (let i = 0; i <= Math.round(pesoMaximo * 2); i++) {
-    opcoes.push(i / 2);
-  }
-  return opcoes;
+  return [0, pesoMaximo / 2, pesoMaximo];
 }
 
 function formatarValor(v: number): string {
-  return Number.isInteger(v) ? String(v) : v.toFixed(1);
+  if (Number.isInteger(v)) return String(v);
+  return v.toFixed(2).replace(/0$/, "").replace(/\.$/, "");
 }
 
 export function CriterioField({

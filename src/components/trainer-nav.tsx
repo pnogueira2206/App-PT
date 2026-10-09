@@ -10,15 +10,24 @@ import type { MessageKey } from "@/i18n/translator";
 
 const links: { href: string; label: MessageKey }[] = [
   { href: "/trainer", label: "nav.dashboard" },
+  { href: "/trainer/feed", label: "nav.feed" },
   { href: "/trainer/students", label: "nav.students" },
   { href: "/trainer/groups", label: "nav.groups" },
   { href: "/trainer/workouts", label: "nav.workouts" },
   { href: "/trainer/exercises", label: "nav.exercises" },
 ];
 
-export function TrainerNav() {
+export function TrainerNav({ unseenCount }: { unseenCount: number }) {
   const pathname = usePathname();
   const { t } = useI18n();
+
+  const badge = (href: string) =>
+    href === "/trainer/feed" && unseenCount > 0 ? (
+      <span className="ml-1.5 rounded-full bg-red-500 px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">
+        {unseenCount > 99 ? "99+" : unseenCount}
+      </span>
+    ) : null;
+
 
   return (
     <header className="sticky top-0 z-10 border-b border-slate-200 bg-white/90 backdrop-blur">
@@ -44,6 +53,7 @@ export function TrainerNav() {
                   }`}
                 >
                   {t(link.label)}
+                  {badge(link.href)}
                 </Link>
               );
             })}
@@ -72,6 +82,7 @@ export function TrainerNav() {
               }`}
             >
               {t(link.label)}
+                  {badge(link.href)}
             </Link>
           );
         })}

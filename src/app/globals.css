@@ -21,6 +21,8 @@
   --color-brand-hover: #b9a06a;
   --color-brand-ink: #0a0a0a;
   --color-brand-text: #7d6838;
+  /* Chart line: brand gold with enough chroma/contrast for data (validated for each theme). */
+  --color-chart: #9a7a24;
 
   --color-slate-50: #fafafa;
   --color-slate-100: #f4f4f5;
@@ -44,6 +46,7 @@
   --color-white: #171717;
   --color-field: #0a0a0a;
   --color-brand-text: #c9b37e;
+  --color-chart: #b08a32;
   --color-slate-50: #0a0a0a;
   --color-slate-100: #262626;
   --color-slate-200: #262626;
@@ -126,6 +129,7 @@
     --color-white: #171717;
     --color-field: #0a0a0a;
     --color-brand-text: #c9b37e;
+  --color-chart: #b08a32;
     --color-slate-50: #0a0a0a;
     --color-slate-100: #262626;
     --color-slate-200: #262626;

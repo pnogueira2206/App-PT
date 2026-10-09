@@ -9,6 +9,10 @@ import { findStudentWorkout, getOneRepMaxes } from "@/lib/workouts";
 import { BlockView } from "@/components/block-view";
 import { ResultForm } from "@/components/result-form";
 import { CompleteWorkoutForm } from "@/components/complete-workout-form";
+import { CommentThread } from "@/components/comment-thread";
+import { RecordSuggestion } from "@/components/record-suggestion";
+import { detectRecord } from "@/lib/records";
+
 
 export default async function StudentWorkoutPage({ params }: PageProps<"/student/workouts/[id]">) {
   const { id } = await params;
@@ -36,16 +40,42 @@ export default async function StudentWorkoutPage({ params }: PageProps<"/student
         orderBy: { order: "asc" },
         include: {
           exercise: true,
-          results: { where: { studentId }, include: { sets: true } },
+          results: {
+            where: { studentId },
+            include: {
+              sets: true,
+              records: { select: { id: true } },
+              comments: {
+                orderBy: { createdAt: "asc" },
+                include: { author: { select: { name: true, role: true } } },
+              },
+            },
+          },
         },
       },
     },
   });
 
-  const oneRepMaxes = await getOneRepMaxes(
-    studentId,
-    workout.blocks.filter((b) => b.percent1RM && b.exerciseId).map((b) => b.exerciseId!)
-  );
+  const exerciseIds = workout.blocks.map((b) => b.exerciseId).filter((e): e is string => !!e);
+  const [oneRepMaxes, records] = await Promise.all([
+    getOneRepMaxes(
+      studentId,
+      workout.blocks.filter((b) => b.percent1RM && b.exerciseId).map((b) => b.exerciseId!)
+    ),
+    prisma.personalRecord.findMany({
+      where: { studentId, exerciseId: { in: exerciseIds } },
+      select: { exerciseId: true, type: true, value: true, unit: true },
+    }),
+  ]);
+
+  // Opening the workout counts as reading the coach's comments on it.
+  const resultIds = workout.blocks.flatMap((b) => b.results.map((r) => r.id));
+  if (resultIds.length > 0) {
+    await prisma.resultComment.updateMany({
+      where: { resultId: { in: resultIds }, readAt: null, authorId: { not: studentId } },
+      data: { readAt: new Date() },
+    });
+  }
 
   return (
     <div className="space-y-4 pb-4">
@@ -70,6 +100,7 @@ export default async function StudentWorkoutPage({ params }: PageProps<"/student
       <div className="space-y-3">
         {workout.blocks.map((block, idx) => {
           const oneRepMax = block.exerciseId ? oneRepMaxes.get(block.exerciseId) : undefined;
+          const result = block.results[0] ?? null;
           return (
             <div key={block.id} className="rounded-xl border border-slate-200 bg-white p-4">
               <BlockView
@@ -82,11 +113,40 @@ export default async function StudentWorkoutPage({ params }: PageProps<"/student
               />
               <ResultForm
                 block={block}
-                existing={block.results[0] ?? null}
+                existing={result}
                 suggestedLoadKg={
                   block.percent1RM && oneRepMax ? loadFromPercent(oneRepMax, block.percent1RM) : undefined
                 }
               />
+              {result && (
+                <div className="mt-3 space-y-2 border-t border-slate-100 pt-3">
+                  <RecordSuggestion
+                    resultId={result.id}
+                    saved={result.records.length > 0}
+                    candidate={
+                      result.records.length > 0
+                        ? null
+                        : detectRecord(
+                            block,
+                            result,
+                            records.filter((r) => r.exerciseId === block.exerciseId)
+                          )
+                    }
+                    i18n={i18n}
+                  />
+                  <CommentThread
+                    resultId={result.id}
+                    viewer="student"
+                    comments={result.comments.map((c) => ({
+                      id: c.id,
+                      body: c.body,
+                      createdAt: c.createdAt,
+                      authorName: c.author.name,
+                      fromTrainer: c.author.role === "TRAINER",
+                    }))}
+                  />
+                </div>
+              )}
             </div>
           );
         })}

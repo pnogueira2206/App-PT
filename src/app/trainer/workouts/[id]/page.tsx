@@ -10,6 +10,10 @@ import { AddBlockForm } from "@/components/add-block-form";
 import { BlockEditor } from "@/components/block-editor";
 import { BlockView } from "@/components/block-view";
 import { WorkoutDetailsForm } from "@/components/workout-details-form";
+import { CommentThread } from "@/components/comment-thread";
+import { RecordSuggestion } from "@/components/record-suggestion";
+import { detectRecord } from "@/lib/records";
+
 import {
   createOverrideAction,
   deleteBlockAction,
@@ -44,12 +48,29 @@ export default async function WorkoutDetailPage({ params }: PageProps<"/trainer/
         orderBy: { order: "asc" },
         include: {
           exercise: true,
-          results: { include: { sets: true } },
+          results: {
+            include: {
+              sets: true,
+              records: { select: { id: true } },
+              comments: {
+                orderBy: { createdAt: "asc" },
+                include: { author: { select: { name: true, role: true } } },
+              },
+            },
+          },
         },
       },
     },
   });
   if (!workout) notFound();
+
+  const records = await prisma.personalRecord.findMany({
+    where: {
+      studentId: { in: workout.blocks.flatMap((b) => b.results.map((r) => r.studentId)) },
+      exerciseId: { in: workout.blocks.map((b) => b.exerciseId).filter((e): e is string => !!e) },
+    },
+    select: { studentId: true, exerciseId: true, type: true, value: true, unit: true },
+  });
 
   const exercises = await prisma.exercise.findMany({
     where: { trainerId: session.user.id },
@@ -219,17 +240,55 @@ export default async function WorkoutDetailPage({ params }: PageProps<"/trainer/
                 {reportingStudents.map((student) => {
                   const result = block.results.find((r) => r.studentId === student.id);
                   return (
-                    <div key={student.id} className="flex flex-wrap items-baseline justify-between gap-1 text-sm">
-                      <span className="font-medium text-slate-700">{student.name}</span>
-                      {result ? (
-                        <span className="text-right text-slate-700">
-                          {formatResult(block, result, i18n)}
-                          {result.studentNotes && (
-                            <span className="block text-xs italic text-slate-400">{result.studentNotes}</span>
-                          )}
-                        </span>
-                      ) : (
-                        <span className="text-slate-300">{t("workouts.noResult")}</span>
+                    <div key={student.id} className="text-sm">
+                      <div className="flex flex-wrap items-baseline justify-between gap-1">
+                        <span className="font-medium text-slate-700">{student.name}</span>
+                        {result ? (
+                          <span className="text-right text-slate-700">
+                            {formatResult(block, result, i18n)}
+                            {result.studentNotes && (
+                              <span className="block text-xs italic text-slate-400">{result.studentNotes}</span>
+                            )}
+                          </span>
+                        ) : (
+                          <span className="text-slate-300">{t("workouts.noResult")}</span>
+                        )}
+                      </div>
+                      {result && (
+                        <details className="mt-1 [&_summary]:cursor-pointer">
+                          <summary className="text-xs text-slate-500">
+                            💬 {result.comments.length}
+                          </summary>
+                          <div className="mt-2 space-y-2">
+                            <RecordSuggestion
+                              resultId={result.id}
+                              saved={result.records.length > 0}
+                              candidate={
+                                result.records.length > 0
+                                  ? null
+                                  : detectRecord(
+                                      block,
+                                      result,
+                                      records.filter(
+                                        (r) => r.studentId === student.id && r.exerciseId === block.exerciseId
+                                      )
+                                    )
+                              }
+                              i18n={i18n}
+                            />
+                            <CommentThread
+                              resultId={result.id}
+                              viewer="trainer"
+                              comments={result.comments.map((c) => ({
+                                id: c.id,
+                                body: c.body,
+                                createdAt: c.createdAt,
+                                authorName: c.author.name,
+                                fromTrainer: c.author.role === "TRAINER",
+                              }))}
+                            />
+                          </div>
+                        </details>
                       )}
                     </div>
                   );

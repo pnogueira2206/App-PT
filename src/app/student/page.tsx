@@ -47,7 +47,16 @@ export default async function StudentHomePage({ searchParams }: PageProps<"/stud
       include: {
         completions: { where: { studentId } },
         blocks: {
-          select: { _count: { select: { results: { where: { studentId } } } } },
+          select: {
+            results: {
+              where: { studentId },
+              select: {
+                _count: {
+                  select: { comments: { where: { readAt: null, author: { role: "TRAINER" } } } },
+                },
+              },
+            },
+          },
         },
       },
       orderBy: { createdAt: "asc" },
@@ -105,9 +114,13 @@ export default async function StudentHomePage({ searchParams }: PageProps<"/stud
               ) : (
                 <div className="mt-2 space-y-2">
                   {dayWorkouts.map((w) => {
+                    const unread = w.blocks.reduce(
+                      (n, b) => n + b.results.reduce((m, r) => m + r._count.comments, 0),
+                      0
+                    );
                     const state = completionState(w, today, {
                       completed: w.completions.length > 0,
-                      resultsCount: w.blocks.reduce((n, b) => n + b._count.results, 0),
+                      resultsCount: w.blocks.reduce((n, b) => n + b.results.length, 0),
                     });
                     return (
                       <Link
@@ -119,6 +132,12 @@ export default async function StudentHomePage({ searchParams }: PageProps<"/stud
                           <p className="font-medium text-slate-900">{w.title}</p>
                           <p className="text-xs text-slate-500">
                             {t("common.blocks", { count: w.blocks.length })}
+                            {unread > 0 && (
+                              <span className="ml-2 font-medium text-brand-text">
+                                💬 {t("comments.unreadFromCoach", { count: unread })}
+                              </span>
+                            )}
+
                           </p>
                         </div>
                         <span

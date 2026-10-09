@@ -15,6 +15,10 @@ Plataforma web (instalável como PWA), inspirada no CoachRx, para um treinador d
   - **Acessórios/mobilidade**: descrição livre, séries/reps opcionais → feito/não feito + notas.
   - **Cardio/endurance**: remo, corrida, bike, ski; distância, tempo, calorias, pace alvo → tempo, distância, calorias (pace calculado) + RPE.
   - Reordenar, duplicar, editar e remover blocos. Texto livre continua disponível como alternativa ao score estruturado.
+- **Painel do treinador**: resumo da semana, alertas (faltas seguidas, adesão baixa, alunos sem treinos marcados, rascunhos), novidades por ver, treinos de hoje com o estado de cada aluno e cartões dos alunos com adesão.
+- **Novidades** com contador na navegação: o que os alunos registaram, por sessão, com marcar como visto e **comentários** nos resultados (treinador ↔ aluno).
+- **Recordes automáticos** (🏆): o app deteta quando um resultado bate o recorde e permite guardá-lo com um clique.
+- **Gráficos de evolução** por exercício (carga máxima e tempo por sessão), para o aluno e para o treinador.
 - **Conclusão do treino**: o aluno marca a sessão como concluída com RPE da sessão e notas; o treinador vê tudo no treino e no calendário.
 - **Biblioteca de exercícios** (*Exercícios*): categoria, notas de técnica e **link de vídeo** (YouTube/Instagram) mostrado ao aluno em cada bloco.
 - **Perfil do aluno**: dados pessoais e recordes pessoais (Levantamentos / Treinos para tempo), editáveis pelo aluno e pelo treinador.

@@ -243,7 +243,74 @@ async function main() {
     },
   });
 
+  // Three past weeks for Ana, so the charts and adherence have history.
+  const history = [
+    { week: -3, squat: [70, 72.5, 72.5], fran: 290 },
+    { week: -2, squat: [72.5, 75, 75], fran: 275 },
+    { week: -1, squat: [75, 77.5, 80], fran: 262 },
+  ];
+  for (const [i, h] of history.entries()) {
+    const workout = await prisma.workout.create({
+      data: {
+        id: `seed-ana-past-${i + 1}`,
+        title: "Força + Fran",
+        date: weekDay(h.week * 7 + 1),
+        status: "PUBLISHED",
+        trainerId: trainer.id,
+        studentId: ana.id,
+        blocks: {
+          create: [
+            {
+              order: 1,
+              type: "STRENGTH",
+              title: "A. Back Squat",
+              exerciseId: exercises["Back Squat"],
+              prescribedSets: 3,
+              prescribedReps: "3",
+            },
+            {
+              order: 2,
+              type: "METCON",
+              title: "B. Fran",
+              exerciseId: exercises["Fran"],
+              metconFormat: "FOR_TIME",
+              timeCapSeconds: 600,
+              description: "21-15-9\nThrusters 43/30kg\nPull-ups",
+            },
+          ],
+        },
+      },
+      include: { blocks: true },
+    });
+    const [squat, fran] = workout.blocks.sort((a, b) => a.order - b.order);
+    const seenAt = new Date();
+    await prisma.blockResult.create({
+      data: {
+        blockId: squat.id,
+        studentId: ana.id,
+        rpe: 8,
+        seenAt,
+        sets: { create: h.squat.map((loadKg, n) => ({ setNumber: n + 1, reps: 3, loadKg })) },
+      },
+    });
+    await prisma.blockResult.create({
+      data: { blockId: fran.id, studentId: ana.id, timeSeconds: h.fran, rx: true, rpe: 9, seenAt },
+    });
+    await prisma.workoutCompletion.create({
+      data: { workoutId: workout.id, studentId: ana.id, sessionRpe: 8, seenAt },
+    });
+  }
+
+  // A coach comment on Wednesday's AMRAP, still unread by Ana.
+  const amrapResult = await prisma.blockResult.findFirstOrThrow({
+    where: { blockId: amrap.id, studentId: ana.id },
+  });
+  await prisma.resultComment.create({
+    data: { resultId: amrapResult.id, authorId: trainer.id, body: "Grande ritmo! Na próxima tenta 6 rondas." },
+  });
+
   if ((await prisma.personalRecord.count({ where: { studentId: ana.id } })) === 0) {
+
     await prisma.personalRecord.createMany({
       data: [
         { studentId: ana.id, exerciseId: exercises["Back Squat"], type: "WEIGHT", value: "80", unit: "kg" },

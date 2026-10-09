@@ -3,6 +3,9 @@ import { prisma } from "@/lib/prisma";
 import { requireTrainer } from "@/lib/require-session";
 import { NewStudentForm } from "@/components/new-student-form";
 import { getI18n } from "@/i18n/server";
+import { getStudentStats } from "@/lib/adherence";
+import { AdherencePills } from "@/components/adherence";
+
 
 export default async function StudentsPage() {
   const session = await requireTrainer();
@@ -15,6 +18,8 @@ export default async function StudentsPage() {
       memberships: { include: { group: true } },
     },
   });
+
+  const stats = await getStudentStats(session.user.id);
 
   return (
     <div className="space-y-6">
@@ -39,6 +44,11 @@ export default async function StudentsPage() {
                     {student.name}
                   </p>
                   <p className="text-sm text-slate-500">{student.email}</p>
+                  {stats.get(student.id) && (
+                    <div className="mt-1">
+                      <AdherencePills stats={stats.get(student.id)!} t={t} />
+                    </div>
+                  )}
                 </div>
                 <div className="flex flex-wrap justify-end gap-1">
                   {student.memberships.map((m) => (

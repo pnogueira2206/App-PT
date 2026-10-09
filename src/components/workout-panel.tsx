@@ -3,9 +3,8 @@
 import Link from "next/link";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import type { BlockType, MetconFormat } from "@prisma/client";
+import type { BlockType } from "@prisma/client";
 import { useI18n } from "@/i18n/client";
-import { BLOCK_TYPES, METCON_FORMATS } from "@/lib/blocks";
 import type { CalendarOwner } from "@/lib/workouts";
 import { deleteWorkoutAction, saveWorkoutEditorAction } from "@/app/trainer/workouts/actions";
 
@@ -13,13 +12,11 @@ export type PanelBlock = {
   /** Present for blocks already saved. */
   id?: string;
   key: string;
+  /** Only used when creating ("+ Exercício" → STRENGTH, "+ Condicionamento" → METCON). */
   type: BlockType;
-  metconFormat: MetconFormat | null;
   title: string;
+  /** Free-text prescription ("3x5 @ 65%; rest 2'"). */
   description: string;
-  trainerNotes: string;
-  /** Extra prescription set in the full editor (sets, %1RM...), shown read-only. */
-  structured: string | null;
   /** The student's result (student calendars). */
   result: { summary: string; done: boolean } | null;
 };
@@ -74,11 +71,8 @@ export function WorkoutPanel({
         {
           key: newKey(),
           type,
-          metconFormat: type === "METCON" ? "FOR_TIME" : null,
           title: "",
           description: "",
-          trainerNotes: "",
-          structured: null,
           result: null,
         },
       ],
@@ -112,10 +106,8 @@ export function WorkoutPanel({
         blocks: workout.blocks.map((b) => ({
           id: b.id,
           type: b.type,
-          metconFormat: b.metconFormat,
           title: b.title,
           description: b.description,
-          trainerNotes: b.trainerNotes,
         })),
       });
       if (result.error) setError(result.error);
@@ -184,57 +176,18 @@ export function WorkoutPanel({
                   placeholder={t("editor.blockTitle")}
                   className={`${input} font-semibold`}
                 />
-              </div>
-              <div className="flex flex-wrap gap-1.5">
-                <select
-                  value={block.type}
-                  onChange={(e) => {
-                    const type = e.target.value as BlockType;
-                    setBlock(block.key, { type, metconFormat: type === "METCON" ? block.metconFormat ?? "FOR_TIME" : null });
-                  }}
-                  className="rounded-md border border-slate-200 px-1.5 py-1 text-xs"
-                >
-                  {BLOCK_TYPES.map((type) => (
-                    <option key={type} value={type}>
-                      {t(`blocks.types.${type}`)}
-                    </option>
-                  ))}
-                </select>
-                {block.type === "METCON" && (
-                  <select
-                    value={block.metconFormat ?? "FOR_TIME"}
-                    onChange={(e) => setBlock(block.key, { metconFormat: e.target.value as MetconFormat })}
-                    className="rounded-md border border-slate-200 px-1.5 py-1 text-xs"
-                  >
-                    {METCON_FORMATS.map((f) => (
-                      <option key={f} value={f}>
-                        {t(`blocks.metconFormats.${f}`)}
-                      </option>
-                    ))}
-                  </select>
-                )}
-                <span className="ml-auto flex items-center gap-2 text-xs text-slate-400">
+                <span className="flex shrink-0 items-center gap-1.5 text-sm text-slate-400">
                   <button type="button" onClick={() => move(index, -1)} disabled={index === 0} aria-label={t("workouts.moveUp")} className="hover:text-slate-900 disabled:opacity-30">↑</button>
                   <button type="button" onClick={() => move(index, 1)} disabled={index === workout.blocks.length - 1} aria-label={t("workouts.moveDown")} className="hover:text-slate-900 disabled:opacity-30">↓</button>
-                  <button type="button" onClick={() => removeBlock(block)} className="hover:text-red-600">
-                    {t("editor.removeBlock")}
-                  </button>
+                  <button type="button" onClick={() => removeBlock(block)} aria-label={t("editor.removeBlock")} title={t("editor.removeBlock")} className="hover:text-red-600">×</button>
                 </span>
               </div>
-              {block.structured && <p className="text-xs font-medium text-slate-600">{block.structured}</p>}
               <textarea
                 value={block.description}
                 onChange={(e) => setBlock(block.key, { description: e.target.value })}
-                rows={rowsFor(block.description)}
+                rows={rowsFor(block.description, 3)}
                 placeholder={t("editor.blockText")}
                 className={input}
-              />
-              <textarea
-                value={block.trainerNotes}
-                onChange={(e) => setBlock(block.key, { trainerNotes: e.target.value })}
-                rows={rowsFor(block.trainerNotes, 1)}
-                placeholder={t("editor.blockNotes")}
-                className={`${input} italic`}
               />
               {showResults && block.id && (
                 <p

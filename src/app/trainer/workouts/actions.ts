@@ -365,13 +365,13 @@ export async function moveBlockAction(
 
 // ---------- Day editor (CoachRx-style panel) ----------
 
+/** A block as the panel edits it: a title and a free-text prescription. */
 export type EditorBlockInput = {
   id?: string;
+  /** Only used when creating ("+ Exercise" → STRENGTH, "+ Conditioning" → METCON). */
   type: string;
-  metconFormat: string | null;
   title: string;
   description: string;
-  trainerNotes: string;
 };
 
 export type WorkoutEditorInput = {
@@ -453,24 +453,19 @@ export async function saveWorkoutEditorAction(
       await tx.workoutBlock.deleteMany({ where: { id: { in: input.removedBlockIds }, workoutId } });
     }
     for (const [index, block] of blocks.entries()) {
-      const type = isBlockType(block.type) ? block.type : "STRENGTH";
+      // Type, notes and structured fields set in the full editor are left untouched.
       const data = {
         order: index + 1,
-        type,
-        metconFormat:
-          type === "METCON" && block.metconFormat && isMetconFormat(block.metconFormat)
-            ? block.metconFormat
-            : type === "METCON"
-              ? ("FOR_TIME" as const)
-              : null,
         title: block.title.trim().slice(0, 200),
         description: text(block.description, 5000),
-        trainerNotes: text(block.trainerNotes, 2000),
       };
       if (block.id) {
         await tx.workoutBlock.updateMany({ where: { id: block.id, workoutId }, data });
       } else {
-        await tx.workoutBlock.create({ data: { ...data, workoutId: workoutId! } });
+        const type = isBlockType(block.type) ? block.type : "STRENGTH";
+        await tx.workoutBlock.create({
+          data: { ...data, type, metconFormat: type === "METCON" ? "FOR_TIME" : null, workoutId: workoutId! },
+        });
       }
     }
   });

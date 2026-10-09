@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { formatLongDate, parseDateKey, resolveWeekStart, toDateKey } from "@/lib/dates";
 import { loadCalendar } from "@/lib/calendar";
 import { readClipboard } from "@/lib/clipboard";
-import { formatPrescription, formatResult } from "@/lib/blocks";
+import { formatResult } from "@/lib/blocks";
 import type { CalendarOwner } from "@/lib/workouts";
 import { getI18n } from "@/i18n/server";
 import { CalendarGrid, GRID_WEEKS, gridStart } from "@/components/calendar-grid";
@@ -74,11 +74,8 @@ export async function OwnerCalendar({
             id: b.id,
             key: b.id,
             type: b.type,
-            metconFormat: b.metconFormat,
             title: b.title,
             description: b.description ?? "",
-            trainerNotes: b.trainerNotes ?? "",
-            structured: formatPrescription(b, i18n) || null,
             result: result ? { summary: formatResult(b, result, i18n), done: result.done } : null,
           };
         }),

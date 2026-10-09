@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
+import { assertNotArchived } from "@/lib/require-session";
 import { prisma } from "@/lib/prisma";
 import { getI18n } from "@/i18n/server";
 
@@ -19,6 +20,7 @@ export async function addCommentAction(
   const session = await auth();
   if (!session) throw new Error("Not authorized");
   const { id: userId, role } = session.user;
+  if (role === "STUDENT") await assertNotArchived(userId);
 
   const body = String(formData.get("body") ?? "").trim();
   if (!body) return { error: t("errors.commentEmpty") };

@@ -19,7 +19,7 @@ export default async function NewWorkoutPage({
       orderBy: { name: "asc" },
     }),
     prisma.user.findMany({
-      where: { trainerId: session.user.id, role: "STUDENT" },
+      where: { trainerId: session.user.id, role: "STUDENT", archivedAt: null },
       orderBy: { name: "asc" },
     }),
   ]);

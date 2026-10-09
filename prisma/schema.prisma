@@ -65,7 +65,11 @@ model User {
   role         Role
   createdAt    DateTime @default(now())
 
+  // Archived students can't sign in and are left out of stats, alerts and pickers.
+  archivedAt   DateTime?
+
   // Personal data (students)
+
   dateOfBirth  DateTime?
   weightKg     Float?
   heightCm     Float?

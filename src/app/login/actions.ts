@@ -2,7 +2,7 @@
 
 import { signIn } from "@/lib/auth";
 import { getI18n } from "@/i18n/server";
-import { AuthError } from "next-auth";
+import { AuthError, CredentialsSignin } from "next-auth";
 
 export async function loginAction(
   _prevState: { error?: string } | undefined,
@@ -19,7 +19,11 @@ export async function loginAction(
       redirectTo: "/",
     });
   } catch (err) {
+    if (err instanceof CredentialsSignin && err.code === "archived") {
+      return { error: t("auth.archivedAccount") };
+    }
     if (err instanceof AuthError) {
+
       return { error: t("auth.invalidCredentials") };
     }
     throw err;

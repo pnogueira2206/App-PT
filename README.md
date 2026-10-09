@@ -5,6 +5,8 @@ Plataforma web (instalável como PWA), inspirada no CoachRx, para um treinador d
 ## Funcionalidades
 
 - **Perfis individuais**: cada aluno tem a sua própria conta (email + palavra-passe).
+- **Página Alunos** (inspirada no CoachRx): resumo com alunos ativos, cumprimento médio (7 dias ou 4 semanas) e programação a acabar; pesquisa por nome, email ou grupo; tabela com "programado até", cumprimento 7 dias · 4 semanas e grupos.
+- **Arquivar alunos**: um aluno arquivado não consegue entrar, deixa de contar para estatísticas, alertas e novidades e sai das listas de escolha; o histórico mantém-se e pode ser reativado a qualquer momento.
 - **Calendário semanal por aluno** (separador *Calendário* no perfil do aluno): treinos de cada dia com estado (rascunho, por fazer, em curso, feito, falhado). Cria um treino diretamente num dia com "+ Treino".
 - **Grupos com calendário próprio**: um treino criado no calendário de um grupo aparece no calendário de cada membro, e **cada aluno reporta o seu resultado individualmente**. No treino de grupo, "Ajustar para X" cria uma versão individual (lesão, escala, carga) que substitui a do grupo só para esse aluno.
 - **Copiar/colar** um treino, um dia ou uma semana inteira, para o mesmo calendário ou para outro aluno/grupo. Os treinos colados ficam em rascunho.

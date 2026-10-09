@@ -69,7 +69,7 @@ export async function getFeed(
 
   const [results, completions] = await Promise.all([
     prisma.blockResult.findMany({
-      where: { student: { trainerId }, updatedAt: { gte: since } },
+      where: { student: { trainerId, archivedAt: null }, updatedAt: { gte: since } },
       include: {
         sets: true,
         records: { select: { id: true } },
@@ -89,7 +89,7 @@ export async function getFeed(
       take: 400,
     }),
     prisma.workoutCompletion.findMany({
-      where: { student: { trainerId }, completedAt: { gte: since } },
+      where: { student: { trainerId, archivedAt: null }, completedAt: { gte: since } },
       include: {
         student: { select: { id: true, name: true } },
         workout: { select: { id: true, title: true, date: true } },
@@ -177,15 +177,15 @@ export async function countUnseen(trainerId: string): Promise<number> {
   const since = feedStart();
   const [results, completions, comments] = await Promise.all([
     prisma.blockResult.findMany({
-      where: { student: { trainerId }, seenAt: null, updatedAt: { gte: since } },
+      where: { student: { trainerId, archivedAt: null }, seenAt: null, updatedAt: { gte: since } },
       select: { studentId: true, block: { select: { workoutId: true } } },
     }),
     prisma.workoutCompletion.findMany({
-      where: { student: { trainerId }, seenAt: null, completedAt: { gte: since } },
+      where: { student: { trainerId, archivedAt: null }, seenAt: null, completedAt: { gte: since } },
       select: { studentId: true, workoutId: true },
     }),
     prisma.resultComment.findMany({
-      where: { readAt: null, createdAt: { gte: since }, author: { role: "STUDENT", trainerId } },
+      where: { readAt: null, createdAt: { gte: since }, author: { role: "STUDENT", trainerId, archivedAt: null } },
 
       select: { result: { select: { studentId: true, block: { select: { workoutId: true } } } } },
     }),

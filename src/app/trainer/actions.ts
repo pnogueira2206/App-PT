@@ -288,3 +288,16 @@ export async function deleteStudentRecordAction(
 
   revalidatePath(`/trainer/students/${studentId}`);
 }
+
+/** Archived students can't sign in and drop out of stats; their history is kept. */
+export async function setStudentArchivedAction(studentId: string, archived: boolean) {
+  const session = await requireTrainer();
+  await requireOwnedStudent(session.user.id, studentId);
+
+  await prisma.user.update({
+    where: { id: studentId },
+    data: { archivedAt: archived ? new Date() : null },
+  });
+
+  revalidatePath("/trainer", "layout");
+}

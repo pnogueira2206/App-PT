@@ -53,7 +53,22 @@ async function main() {
     },
   });
 
+  // An archived former client: can't sign in, shows in the "Archived" tab.
+  await prisma.user.upsert({
+    where: { email: "carla@exemplo.com" },
+    update: {},
+    create: {
+      name: "Carla Mendes",
+      email: "carla@exemplo.com",
+      passwordHash: studentPasswordHash,
+      role: "STUDENT",
+      trainerId: trainer.id,
+      archivedAt: new Date(),
+    },
+  });
+
   const group = await prisma.group.upsert({
+
     where: { id: "seed-group-pt" },
     update: {},
     create: { id: "seed-group-pt", name: "PT Ana + Bruno", trainerId: trainer.id },

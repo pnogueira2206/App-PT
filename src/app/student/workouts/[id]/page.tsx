@@ -131,7 +131,7 @@ export default async function StudentWorkoutPage({ params }: PageProps<"/student
                     resultId={result.id}
                     saved={result.records.length > 0}
                     candidate={
-                      result.records.length > 0
+                      result.records.length > 0 || block.benchmark
                         ? null
                         : detectRecord(
                             block,

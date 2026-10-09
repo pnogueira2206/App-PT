@@ -15,6 +15,12 @@ enum Role {
   STUDENT
 }
 
+/// A block whose score feeds the student's records automatically.
+enum BenchmarkKind {
+  MAX_LOAD
+  TIME
+}
+
 enum RecordType {
   WEIGHT
   TIME
@@ -271,6 +277,11 @@ model WorkoutBlock {
 
   trainerNotes      String?
 
+  // Benchmark: the student logs one number (kg or time) and the record updates itself.
+  benchmark         BenchmarkKind?
+  /// MAX_LOAD only: 1 for a 1RM, 3 for a 3RM...
+  benchmarkReps     Int?
+
   results           BlockResult[]
 }
 
@@ -338,6 +349,8 @@ model PersonalRecord {
   type        RecordType @default(WEIGHT)
   value       String
   unit        String?
+  /// Weight records: the reps of the lift (3 = 3RM). Null for older records (treated as 1RM).
+  reps        Int?
   notes       String?
   recordDate  DateTime @default(now())
   createdAt   DateTime @default(now())

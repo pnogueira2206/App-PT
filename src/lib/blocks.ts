@@ -1,4 +1,5 @@
 import type {
+  BenchmarkKind,
   BlockType,
   CardioModality,
   ExerciseCategory,
@@ -177,7 +178,13 @@ type ResultLike = {
 
 /** One-line summary of a student's score. */
 export function formatResult(
-  block: { type: BlockType; metconFormat: MetconFormat | null; cardioModality: CardioModality | null },
+  block: {
+    type: BlockType;
+    metconFormat: MetconFormat | null;
+    cardioModality: CardioModality | null;
+    benchmark?: BenchmarkKind | null;
+    benchmarkReps?: number | null;
+  },
   result: ResultLike,
   { t, intlLocale }: I18n
 ): string {
@@ -185,7 +192,11 @@ export function formatResult(
   const parts: (string | null)[] = [];
   if (!result.done) parts.push(t("blocks.result.notDone"));
 
-  switch (block.type) {
+  if (block.benchmark === "MAX_LOAD") {
+    if (result.loadKg != null) parts.push(`${t("benchmark.rm", { reps: block.benchmarkReps ?? 1 })}: ${num(result.loadKg)} kg`);
+  } else if (block.benchmark === "TIME") {
+    if (result.timeSeconds != null) parts.push(formatDuration(result.timeSeconds));
+  } else switch (block.type) {
     case "STRENGTH":
     case "ACCESSORY":
       if (result.sets.length > 0) {

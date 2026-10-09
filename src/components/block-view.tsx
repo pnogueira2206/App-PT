@@ -34,6 +34,14 @@ export function BlockView({
         <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${BLOCK_TYPE_STYLES[block.type]}`}>
           {t(`blocks.types.${block.type}`)}
         </span>
+        {block.benchmark && (
+          <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-800">
+            🏆{" "}
+            {block.benchmark === "MAX_LOAD"
+              ? t("benchmark.rm", { reps: block.benchmarkReps ?? 1 })
+              : t("benchmark.kindTime")}
+          </span>
+        )}
       </div>
       <h3 className="font-semibold text-slate-900">{block.title}</h3>
 

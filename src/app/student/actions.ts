@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
+import { syncBenchmarkRecord } from "@/lib/benchmark";
 import { getI18n } from "@/i18n/server";
 import { requireActiveStudent } from "@/lib/require-session";
 import { parseDuration } from "@/lib/blocks";
@@ -38,7 +39,8 @@ export async function submitResultAction(
   const studentId = session.user.id;
 
   const block = await prisma.workoutBlock.findUnique({ where: { id: blockId } });
-  if (!block || !(await findStudentWorkout(block.workoutId, studentId))) {
+  const workout = block ? await findStudentWorkout(block.workoutId, studentId) : null;
+  if (!block || !workout) {
     return { error: t("errors.blockNotFound") };
   }
 
@@ -78,17 +80,21 @@ export async function submitResultAction(
     sets.push({ setNumber: sets.length + 1, reps: repsValue, loadKg: loadValue });
   }
 
-  const usesSets = block.type === "STRENGTH" || block.type === "ACCESSORY";
+  // A benchmark is scored with a single number: the max load or the time.
+  const benchmark = block.benchmark;
+  const usesSets = !benchmark && (block.type === "STRENGTH" || block.type === "ACCESSORY");
   const data = {
     done,
     rpe,
-    timeSeconds: block.type === "METCON" || block.type === "CARDIO" ? timeSeconds : null,
-    rounds: block.type === "METCON" ? rounds : null,
-    reps: block.type === "METCON" ? reps : null,
-    loadKg: block.type === "METCON" ? loadKg : null,
-    distanceM: block.type === "CARDIO" ? distanceM : null,
-    calories: block.type === "CARDIO" ? calories : null,
-    rx: block.type === "METCON" && rxRaw ? rxRaw === "rx" : null,
+    timeSeconds: benchmark
+      ? benchmark === "TIME" ? timeSeconds : null
+      : block.type === "METCON" || block.type === "CARDIO" ? timeSeconds : null,
+    rounds: !benchmark && block.type === "METCON" ? rounds : null,
+    reps: !benchmark && block.type === "METCON" ? reps : null,
+    loadKg: benchmark ? (benchmark === "MAX_LOAD" ? loadKg : null) : block.type === "METCON" ? loadKg : null,
+    distanceM: !benchmark && block.type === "CARDIO" ? distanceM : null,
+    calories: !benchmark && block.type === "CARDIO" ? calories : null,
+    rx: !benchmark && block.type === "METCON" && rxRaw ? rxRaw === "rx" : null,
     scoreText: String(formData.get("scoreText") ?? "").trim() || null,
     studentNotes: String(formData.get("studentNotes") ?? "").trim() || null,
   };
@@ -106,6 +112,7 @@ export async function submitResultAction(
         data: sets.map((set) => ({ ...set, resultId: result.id })),
       });
     }
+    await syncBenchmarkRecord(tx, block, result, studentId, workout.date);
   });
 
   revalidatePath("/student", "layout");

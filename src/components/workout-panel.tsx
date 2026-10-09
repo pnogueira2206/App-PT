@@ -3,10 +3,11 @@
 import Link from "next/link";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import type { BlockType } from "@prisma/client";
+import type { BenchmarkKind, BlockType } from "@prisma/client";
 import { useI18n } from "@/i18n/client";
 import type { CalendarOwner } from "@/lib/workouts";
 import { deleteWorkoutAction, saveWorkoutEditorAction } from "@/app/trainer/workouts/actions";
+import { HistorySearchDialog } from "@/components/history-search";
 
 export type PanelBlock = {
   /** Present for blocks already saved. */
@@ -17,6 +18,11 @@ export type PanelBlock = {
   title: string;
   /** Free-text prescription ("3x5 @ 65%; rest 2'"). */
   description: string;
+  /** Benchmark: the student logs one number (kg or time) and the record updates itself. */
+  benchmark: BenchmarkKind | null;
+  benchmarkReps: number | null;
+  /** Exercise the benchmark record belongs to. */
+  exerciseName: string;
   /** The student's result (student calendars). */
   result: { summary: string; done: boolean } | null;
 };
@@ -44,6 +50,7 @@ export function WorkoutPanel({
   closeHref,
   initial,
   showResults,
+  exercises,
 }: {
   owner: CalendarOwner;
   dateKey: string;
@@ -51,12 +58,15 @@ export function WorkoutPanel({
   closeHref: string;
   initial: PanelWorkout;
   showResults: boolean;
+  /** Library exercise names, suggested for benchmark blocks. */
+  exercises: string[];
 }) {
   const { t } = useI18n();
   const router = useRouter();
   const [workout, setWorkout] = useState(initial);
   const [removed, setRemoved] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [historyFor, setHistoryFor] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
   const set = <K extends keyof PanelWorkout>(key: K, value: PanelWorkout[K]) =>
@@ -73,10 +83,24 @@ export function WorkoutPanel({
           type,
           title: "",
           description: "",
+          benchmark: null,
+          benchmarkReps: null,
+          exerciseName: "",
           result: null,
         },
       ],
     }));
+  const toggleBenchmark = (block: PanelBlock) =>
+    setBlock(
+      block.key,
+      block.benchmark
+        ? { benchmark: null, benchmarkReps: null }
+        : {
+            benchmark: block.type === "STRENGTH" || block.type === "ACCESSORY" ? "MAX_LOAD" : "TIME",
+            benchmarkReps: block.type === "STRENGTH" || block.type === "ACCESSORY" ? 1 : null,
+            exerciseName: block.exerciseName || block.title,
+          }
+    );
   const removeBlock = (block: PanelBlock) => {
     if (block.id) setRemoved((r) => [...r, block.id!]);
     setWorkout((w) => ({ ...w, blocks: w.blocks.filter((b) => b.key !== block.key) }));
@@ -108,6 +132,9 @@ export function WorkoutPanel({
           type: b.type,
           title: b.title,
           description: b.description,
+          benchmark: b.benchmark,
+          benchmarkReps: b.benchmarkReps,
+          exerciseName: b.exerciseName,
         })),
       });
       if (result.error) setError(result.error);
@@ -177,6 +204,25 @@ export function WorkoutPanel({
                   className={`${input} font-semibold`}
                 />
                 <span className="flex shrink-0 items-center gap-1.5 text-sm text-slate-400">
+                  <button
+                    type="button"
+                    onClick={() => setHistoryFor(block.title)}
+                    aria-label={t("historySearch.open")}
+                    title={t("historySearch.open")}
+                    className="hover:text-slate-900"
+                  >
+                    🕘
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => toggleBenchmark(block)}
+                    aria-label={t("benchmark.toggle")}
+                    aria-pressed={!!block.benchmark}
+                    title={t("benchmark.title")}
+                    className={`rounded px-0.5 ${block.benchmark ? "bg-amber-100" : "opacity-50 grayscale hover:opacity-100 hover:grayscale-0"}`}
+                  >
+                    🏆
+                  </button>
                   <button type="button" onClick={() => move(index, -1)} disabled={index === 0} aria-label={t("workouts.moveUp")} className="hover:text-slate-900 disabled:opacity-30">↑</button>
                   <button type="button" onClick={() => move(index, 1)} disabled={index === workout.blocks.length - 1} aria-label={t("workouts.moveDown")} className="hover:text-slate-900 disabled:opacity-30">↓</button>
                   <button type="button" onClick={() => removeBlock(block)} aria-label={t("editor.removeBlock")} title={t("editor.removeBlock")} className="hover:text-red-600">×</button>
@@ -189,6 +235,50 @@ export function WorkoutPanel({
                 placeholder={t("editor.blockText")}
                 className={input}
               />
+              {block.benchmark && (
+                <div className="space-y-2 rounded-md border border-amber-300 bg-amber-50 p-2.5 text-sm">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="font-semibold text-amber-900">🏆 {t("benchmark.toggle")}</span>
+                    <div className="flex rounded-md bg-white p-0.5 text-xs font-medium">
+                      {(["MAX_LOAD", "TIME"] as const).map((kind) => (
+                        <button
+                          key={kind}
+                          type="button"
+                          onClick={() => setBlock(block.key, { benchmark: kind, benchmarkReps: kind === "MAX_LOAD" ? block.benchmarkReps ?? 1 : null })}
+                          className={`rounded px-2 py-1 ${block.benchmark === kind ? "bg-brand text-brand-ink" : "text-slate-500"}`}
+                        >
+                          {kind === "MAX_LOAD" ? t("benchmark.kindMaxLoad") : t("benchmark.kindTime")}
+                        </button>
+                      ))}
+                    </div>
+                    {block.benchmark === "MAX_LOAD" && (
+                      <label className="flex items-center gap-1 text-xs text-amber-900">
+                        {t("benchmark.reps")}
+                        <input
+                          type="number"
+                          min={1}
+                          max={20}
+                          value={block.benchmarkReps ?? 1}
+                          onChange={(e) => setBlock(block.key, { benchmarkReps: Number(e.target.value) || 1 })}
+                          className="w-14 rounded border border-amber-300 bg-white px-1.5 py-0.5 text-sm"
+                        />
+                        <span className="font-semibold">= {t("benchmark.rm", { reps: block.benchmarkReps ?? 1 })}</span>
+                      </label>
+                    )}
+                  </div>
+                  <label className="block text-xs text-amber-900">
+                    {t("benchmark.exercise")}
+                    <input
+                      list="panel-exercises"
+                      value={block.exerciseName}
+                      onChange={(e) => setBlock(block.key, { exerciseName: e.target.value })}
+                      placeholder={block.title || t("benchmark.exercisePlaceholder")}
+                      className={`${input} mt-0.5 bg-white`}
+                    />
+                  </label>
+                  <p className="text-xs text-amber-800">{t("benchmark.hint")}</p>
+                </div>
+              )}
               {showResults && block.id && (
                 <p
                   className={`flex items-center justify-between rounded-md border-l-4 bg-slate-50 px-2.5 py-1.5 text-sm ${
@@ -251,6 +341,14 @@ export function WorkoutPanel({
           )}
         </footer>
       </aside>
+      <datalist id="panel-exercises">
+        {exercises.map((name) => (
+          <option key={name} value={name} />
+        ))}
+      </datalist>
+      {historyFor != null && (
+        <HistorySearchDialog owner={owner} initialQuery={historyFor} onClose={() => setHistoryFor(null)} />
+      )}
     </>
   );
 }

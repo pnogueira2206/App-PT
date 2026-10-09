@@ -1,4 +1,4 @@
-import type { BlockType, CardioModality, MetconFormat, WorkoutKind, WorkoutStatus } from "@prisma/client";
+import type { BenchmarkKind, BlockType, CardioModality, MetconFormat, WorkoutKind, WorkoutStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { addDays, todayKey } from "@/lib/dates";
 import {
@@ -49,6 +49,8 @@ export type GridWorkout = {
     targetCalories: number | null;
     targetPace: string | null;
     trainerNotes: string | null;
+    benchmark: BenchmarkKind | null;
+    benchmarkReps: number | null;
     /** The student's result (student calendars only). */
     result: GridResult | null;
   }[];
@@ -102,6 +104,8 @@ function toBlocks(
     targetCalories: b.targetCalories,
     targetPace: b.targetPace,
     trainerNotes: b.trainerNotes,
+    benchmark: b.benchmark,
+    benchmarkReps: b.benchmarkReps,
     result: b.results?.[0] ?? null,
   }));
 }

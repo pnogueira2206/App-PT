@@ -37,6 +37,10 @@ export async function OwnerCalendar({
   const closeHref = `${basePath}?week=${toDateKey(anchorWeek)}`;
 
   let panel: { dateKey: string; initial: PanelWorkout } | null = null;
+  const exercises =
+    params.edit || params.new
+      ? await prisma.exercise.findMany({ where: { trainerId }, select: { name: true }, orderBy: { name: "asc" } })
+      : [];
   if (params.edit) {
     const workout = await prisma.workout.findFirst({
       where: {
@@ -50,6 +54,7 @@ export async function OwnerCalendar({
           orderBy: { order: "asc" },
           // Results only matter on a student's calendar (groups report per member).
           include: {
+            exercise: { select: { name: true } },
             results: {
               where: { studentId: owner.type === "student" ? owner.id : "-" },
               include: { sets: true },
@@ -76,6 +81,9 @@ export async function OwnerCalendar({
             type: b.type,
             title: b.title,
             description: b.description ?? "",
+            benchmark: b.benchmark,
+            benchmarkReps: b.benchmarkReps,
+            exerciseName: b.exercise?.name ?? "",
             result: result ? { summary: formatResult(b, result, i18n), done: result.done } : null,
           };
         }),
@@ -107,6 +115,7 @@ export async function OwnerCalendar({
           closeHref={closeHref}
           initial={panel.initial}
           showResults={owner.type === "student"}
+          exercises={exercises.map((e) => e.name)}
         />
       )}
     </>

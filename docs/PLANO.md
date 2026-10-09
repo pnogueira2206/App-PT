@@ -119,5 +119,6 @@ Plano de evolução da app atual (Next.js + Prisma, PWA) para uma ferramenta de 
   - Ao publicar, os resultados que já existiam aparecem como "por ver" uma vez: usa "Marcar tudo como visto".
 - **Perfil e calendário estilo CoachRx implementados**: grelha de 6 semanas com linha Estrutura (alunos e grupos), dias de descanso, notas e objetivos.
   - **Editor do dia** em painel lateral: aquecimento, notas, blocos A) B) C) só com título e prescrição em texto livre, resultados do aluno por bloco (✓/✗) e retorno à calma. Os treinos herdados de um grupo abrem no editor completo (para ajustar só para o aluno).
+  - Em cada bloco: **🕘 Histórico** (pesquisa do bloco no histórico do aluno/grupo, treinos e métricas) e **🏆 Benchmark** (carga máxima NRM ou tempo; o resultado do aluno atualiza o recorde automaticamente; os 3RM/5RM ficam separados do 1RM e só o 1RM conta para as percentagens).
   - O calendário do grupo tem a mesma disposição do aluno, com barra lateral de membros e cumprimento médio.
 - **Próximo passo:** usar com alunos reais e depois avançar para a Fase 3 (check-in de prontidão, comentários por treino e mensagens diretas).

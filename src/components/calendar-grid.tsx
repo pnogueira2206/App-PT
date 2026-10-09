@@ -280,6 +280,11 @@ export async function CalendarGrid({
                                       className={`mr-1 inline-block h-1.5 w-1.5 rounded-full align-middle ${BLOCK_TYPE_STYLES[block.type].split(" ")[0]}`}
                                     />
                                     {blockLabel(block.title, index)}
+                                    {block.benchmark && (
+                                      <span className="ml-1 rounded bg-amber-100 px-1 text-[10px] font-semibold text-amber-800">
+                                        🏆 {block.benchmark === "MAX_LOAD" ? t("benchmark.rm", { reps: block.benchmarkReps ?? 1 }) : t("benchmark.kindTime")}
+                                      </span>
+                                    )}
                                     {block.exerciseName && !block.title.includes(block.exerciseName) && (
                                       <span className="font-normal text-slate-500"> · {block.exerciseName}</span>
                                     )}

@@ -95,7 +95,8 @@ export async function getOneRepMaxes(
   if (exerciseIds.length === 0) return maxes;
 
   const records = await prisma.personalRecord.findMany({
-    where: { studentId, type: "WEIGHT", exerciseId: { in: exerciseIds } },
+    // Only 1RMs count (3RM/5RM benchmarks are kept apart); older records have no reps.
+    where: { studentId, type: "WEIGHT", exerciseId: { in: exerciseIds }, OR: [{ reps: null }, { reps: 1 }] },
     select: { exerciseId: true, value: true, unit: true },
   });
   for (const record of records) {

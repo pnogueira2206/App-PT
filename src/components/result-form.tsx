@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import type { BlockType, CardioModality, MetconFormat } from "@prisma/client";
+import type { BenchmarkKind, BlockType, CardioModality, MetconFormat } from "@prisma/client";
 import { submitResultAction } from "@/app/student/actions";
 import { formatDuration, formatPace, parseDuration } from "@/lib/blocks";
 import { useI18n } from "@/i18n/client";
@@ -28,6 +28,8 @@ type BlockInfo = {
   cardioModality: CardioModality | null;
   prescribedSets: number | null;
   prescribedReps: string | null;
+  benchmark: BenchmarkKind | null;
+  benchmarkReps: number | null;
 };
 
 const input = "w-full rounded-lg border border-slate-300 px-2.5 py-2 text-sm";
@@ -68,7 +70,8 @@ export function ResultForm({
   const [distance, setDistance] = useState(existing?.distanceM?.toString() ?? "");
   const [showText, setShowText] = useState(!!existing?.scoreText);
 
-  const usesSets = block.type === "STRENGTH" || block.type === "ACCESSORY";
+  const benchmark = block.benchmark;
+  const usesSets = !benchmark && (block.type === "STRENGTH" || block.type === "ACCESSORY");
   const format = block.metconFormat ?? "FOR_TIME";
 
   const timeSeconds = parseDuration(time);
@@ -154,7 +157,31 @@ export function ResultForm({
         </div>
       )}
 
-      {done && block.type === "METCON" && (
+      {done && benchmark && (
+        <div className="rounded-lg border border-amber-300 bg-amber-50 p-3">
+          <label className="mb-1 block text-sm font-semibold text-amber-900">
+            🏆{" "}
+            {benchmark === "MAX_LOAD"
+              ? t("benchmark.studentLoad", { rm: t("benchmark.rm", { reps: block.benchmarkReps ?? 1 }) })
+              : t("benchmark.studentTime")}
+          </label>
+          {benchmark === "MAX_LOAD" ? (
+            <input name="loadKg" inputMode="decimal" defaultValue={existing?.loadKg ?? ""} placeholder="kg" className={`${input} text-lg font-semibold`} />
+          ) : (
+            <input
+              name="timeSeconds"
+              value={time}
+              onChange={(e) => setTime(e.target.value)}
+              placeholder={t("resultForm.timePlaceholder")}
+              inputMode="numeric"
+              className={`${input} text-lg font-semibold`}
+            />
+          )}
+          <p className="mt-1 text-xs text-amber-800">{t("benchmark.studentHint")}</p>
+        </div>
+      )}
+
+      {done && !benchmark && block.type === "METCON" && (
         <div className="space-y-3">
           <div className="grid grid-cols-2 gap-2">
             {format === "FOR_TIME" && (
@@ -227,7 +254,7 @@ export function ResultForm({
         </div>
       )}
 
-      {done && block.type === "CARDIO" && (
+      {done && !benchmark && block.type === "CARDIO" && (
         <div className="grid grid-cols-3 gap-2">
           <div>
             <label className={label}>{t("blocks.form.time")}</label>

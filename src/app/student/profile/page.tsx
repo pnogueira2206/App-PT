@@ -100,7 +100,7 @@ export default async function ProfilePage() {
                   record={{
                     id: r.id,
                     exerciseId: r.exerciseId,
-                    exerciseName: r.exercise.name,
+                    exerciseName: r.reps && r.reps > 1 ? `${r.exercise.name} · ${t("benchmark.rm", { reps: r.reps })}` : r.exercise.name,
                     type: r.type,
                     value: r.value,
                     unit: r.unit,
@@ -129,7 +129,7 @@ export default async function ProfilePage() {
                   record={{
                     id: r.id,
                     exerciseId: r.exerciseId,
-                    exerciseName: r.exercise.name,
+                    exerciseName: r.reps && r.reps > 1 ? `${r.exercise.name} · ${t("benchmark.rm", { reps: r.reps })}` : r.exercise.name,
                     type: r.type,
                     value: r.value,
                     unit: r.unit,

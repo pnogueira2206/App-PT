@@ -365,6 +365,25 @@ export async function moveBlockAction(
 
 // ---------- Day editor (CoachRx-style panel) ----------
 
+/** Library exercise with this name (case-insensitive), created when missing. */
+async function findOrCreateExercise(
+  tx: Prisma.TransactionClient,
+  trainerId: string,
+  name: string,
+  benchmark: "MAX_LOAD" | "TIME"
+): Promise<string> {
+  const clean = name.slice(0, 120);
+  const existing = await tx.exercise.findFirst({
+    where: { trainerId, name: { equals: clean, mode: "insensitive" } },
+    select: { id: true },
+  });
+  if (existing) return existing.id;
+  const created = await tx.exercise.create({
+    data: { trainerId, name: clean, category: benchmark === "MAX_LOAD" ? "STRENGTH" : "OTHER" },
+  });
+  return created.id;
+}
+
 /** A block as the panel edits it: a title and a free-text prescription. */
 export type EditorBlockInput = {
   id?: string;
@@ -372,6 +391,11 @@ export type EditorBlockInput = {
   type: string;
   title: string;
   description: string;
+  benchmark: "MAX_LOAD" | "TIME" | null;
+  /** MAX_LOAD only (1 = 1RM). */
+  benchmarkReps: number | null;
+  /** Benchmark only: the exercise whose record it updates (defaults to the title). */
+  exerciseName: string;
 };
 
 export type WorkoutEditorInput = {
@@ -454,10 +478,18 @@ export async function saveWorkoutEditorAction(
     }
     for (const [index, block] of blocks.entries()) {
       // Type, notes and structured fields set in the full editor are left untouched.
+      const benchmark = block.benchmark === "MAX_LOAD" || block.benchmark === "TIME" ? block.benchmark : null;
       const data = {
         order: index + 1,
         title: block.title.trim().slice(0, 200),
         description: text(block.description, 5000),
+        benchmark,
+        benchmarkReps:
+          benchmark === "MAX_LOAD" ? Math.min(Math.max(Math.round(block.benchmarkReps ?? 1), 1), 20) : null,
+        // A benchmark is tied to an exercise so the score lands on the right record.
+        ...(benchmark
+          ? { exerciseId: await findOrCreateExercise(tx, trainerId, block.exerciseName.trim() || block.title.trim(), benchmark) }
+          : {}),
       };
       if (block.id) {
         await tx.workoutBlock.updateMany({ where: { id: block.id, workoutId }, data });

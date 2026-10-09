@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getI18n } from "@/i18n/server";
-import { requireStudent } from "@/lib/require-session";
+import { requireActiveStudent } from "@/lib/require-session";
 import { parseDuration } from "@/lib/blocks";
 import { findStudentWorkout } from "@/lib/workouts";
 
@@ -34,7 +34,7 @@ export async function submitResultAction(
   formData: FormData
 ): Promise<ActionState> {
   const { t } = await getI18n();
-  const session = await requireStudent();
+  const session = await requireActiveStudent();
   const studentId = session.user.id;
 
   const block = await prisma.workoutBlock.findUnique({ where: { id: blockId } });
@@ -119,7 +119,7 @@ export async function completeWorkoutAction(
   formData: FormData
 ): Promise<ActionState> {
   const { t } = await getI18n();
-  const session = await requireStudent();
+  const session = await requireActiveStudent();
   const studentId = session.user.id;
 
   if (!(await findStudentWorkout(workoutId, studentId))) {
@@ -147,7 +147,7 @@ export async function updateProfileAction(
   formData: FormData
 ): Promise<ActionState> {
   const { t } = await getI18n();
-  const session = await requireStudent();
+  const session = await requireActiveStudent();
 
   const dateOfBirthRaw = String(formData.get("dateOfBirth") ?? "");
   const weightRaw = String(formData.get("weightKg") ?? "").trim();
@@ -181,7 +181,7 @@ export async function addPersonalRecordAction(
   formData: FormData
 ): Promise<ActionState> {
   const { t } = await getI18n();
-  const session = await requireStudent();
+  const session = await requireActiveStudent();
 
   const student = await prisma.user.findUnique({ where: { id: session.user.id } });
   if (!student?.trainerId) return { error: t("errors.noTrainer") };
@@ -228,7 +228,7 @@ export async function updatePersonalRecordAction(
   formData: FormData
 ): Promise<ActionState> {
   const { t } = await getI18n();
-  const session = await requireStudent();
+  const session = await requireActiveStudent();
 
   const record = await prisma.personalRecord.findFirst({
     where: { id: recordId, studentId: session.user.id },
@@ -262,7 +262,7 @@ export async function updatePersonalRecordAction(
 }
 
 export async function deletePersonalRecordAction(recordId: string) {
-  const session = await requireStudent();
+  const session = await requireActiveStudent();
 
   await prisma.personalRecord.deleteMany({
     where: { id: recordId, studentId: session.user.id },

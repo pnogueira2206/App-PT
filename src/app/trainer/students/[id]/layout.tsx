@@ -5,6 +5,8 @@ import { requireTrainer } from "@/lib/require-session";
 import { ResetPasswordForm } from "@/components/reset-password-form";
 import { Tabs } from "@/components/tabs";
 import { getI18n } from "@/i18n/server";
+import { setStudentArchivedAction } from "@/app/trainer/actions";
+
 import { getStudentStats } from "@/lib/adherence";
 import { AdherencePills } from "@/components/adherence";
 import { formatDate } from "@/lib/dates";
@@ -51,7 +53,14 @@ export default async function StudentLayout({
             )}
 
           </div>
-          <ResetPasswordForm studentId={student.id} />
+          <div className="flex flex-wrap items-center gap-4">
+            <ResetPasswordForm studentId={student.id} />
+            <form action={setStudentArchivedAction.bind(null, student.id, !student.archivedAt)}>
+              <button className="text-sm font-medium text-slate-500 hover:text-slate-900">
+                {student.archivedAt ? t("students.unarchive") : t("students.archive")}
+              </button>
+            </form>
+          </div>
         </div>
         {student.memberships.length > 0 && (
           <div className="mt-2 flex flex-wrap gap-1">
@@ -67,6 +76,12 @@ export default async function StudentLayout({
           </div>
         )}
       </div>
+
+      {student.archivedAt && (
+        <p className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-600">
+          🗄️ {t("students.archivedNotice")}
+        </p>
+      )}
 
       <Tabs
         tabs={[

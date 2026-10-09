@@ -8,6 +8,8 @@ export type Ratio = { done: number; planned: number };
 export type StudentStats = {
   /** Monday to today. */
   week: Ratio;
+  /** Last 7 days, today included. */
+  last7: Ratio;
   /** Last 28 days, today included. */
   month: Ratio;
   lastCompletedDate: Date | null;
@@ -16,6 +18,8 @@ export type StudentStats = {
   missedInARow: number;
   /** Published workouts from today to 3 days ahead. */
   upcoming: number;
+  /** Date of the last published workout programmed for the student (any date). */
+  programmedUntil: Date | null;
 };
 
 export function percent(ratio: Ratio): number | null {
@@ -33,11 +37,32 @@ export async function getStudentStats(
   const until = addDays(today, 14);
 
   const students = await prisma.user.findMany({
-    where: { trainerId, role: "STUDENT", ...(studentIds ? { id: { in: studentIds } } : {}) },
+    where: {
+      trainerId,
+      role: "STUDENT",
+      // A specific list may include archived students (e.g. their own profile header).
+      ...(studentIds ? { id: { in: studentIds } } : { archivedAt: null }),
+    },
     select: { id: true, memberships: { select: { groupId: true } } },
   });
   const ids = students.map((s) => s.id);
   const groupIds = [...new Set(students.flatMap((s) => s.memberships.map((m) => m.groupId)))];
+
+  // Last programmed day, per student (own workouts) and per group.
+  const [lastOwn, lastGroup] = await Promise.all([
+    prisma.workout.groupBy({
+      by: ["studentId"],
+      where: { trainerId, status: "PUBLISHED", studentId: { in: ids } },
+      _max: { date: true },
+    }),
+    prisma.workout.groupBy({
+      by: ["groupId"],
+      where: { trainerId, status: "PUBLISHED", groupId: { in: groupIds } },
+      _max: { date: true },
+    }),
+  ]);
+  const lastByStudent = new Map(lastOwn.map((r) => [r.studentId, r._max.date]));
+  const lastByGroup = new Map(lastGroup.map((r) => [r.groupId, r._max.date]));
 
   const workouts = await prisma.workout.findMany({
     where: {
@@ -93,8 +118,17 @@ export async function getStudentStats(
     const done = mine.filter(isDone);
     const next = mine.find((w) => w.date >= today && !isDone(w));
 
+    const programmedDates = [
+      lastByStudent.get(student.id),
+      ...student.memberships.map((m) => lastByGroup.get(m.groupId)),
+    ].filter((d): d is Date => d instanceof Date);
+
     stats.set(student.id, {
       week: ratio(weekStart),
+      last7: ratio(addDays(today, -6)),
+      programmedUntil:
+        programmedDates.length > 0 ? new Date(Math.max(...programmedDates.map((d) => d.getTime()))) : null,
+
       month: ratio(monthStart),
       lastCompletedDate: done.length > 0 ? done[done.length - 1].date : null,
       nextWorkoutDate: next?.date ?? null,

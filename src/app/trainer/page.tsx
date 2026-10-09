@@ -47,7 +47,7 @@ export default async function TrainerHomePage() {
   const [students, stats, unseen, todayWorkouts, recordsThisWeek, completionsThisWeek, drafts] =
     await Promise.all([
       prisma.user.findMany({
-        where: { trainerId, role: "STUDENT" },
+        where: { trainerId, role: "STUDENT", archivedAt: null },
         orderBy: { name: "asc" },
         select: { id: true, name: true },
       }),
@@ -57,7 +57,15 @@ export default async function TrainerHomePage() {
         where: { trainerId, date: today },
         include: {
           student: { select: { id: true, name: true } },
-          group: { include: { members: { include: { student: { select: { id: true, name: true } } } } } },
+          group: {
+            include: {
+              members: {
+                where: { student: { archivedAt: null } },
+                include: { student: { select: { id: true, name: true } } },
+              },
+            },
+          },
+
           overrides: { select: { studentId: true } },
           completions: { select: { studentId: true } },
           blocks: { select: { results: { select: { studentId: true } } } },
@@ -65,10 +73,10 @@ export default async function TrainerHomePage() {
         orderBy: { createdAt: "asc" },
       }),
       prisma.personalRecord.count({
-        where: { student: { trainerId }, recordDate: { gte: weekStart, lte: today } },
+        where: { student: { trainerId, archivedAt: null }, recordDate: { gte: weekStart, lte: today } },
       }),
       prisma.workoutCompletion.findMany({
-        where: { student: { trainerId }, workout: { date: { gte: weekStart, lte: today } } },
+        where: { student: { trainerId, archivedAt: null }, workout: { date: { gte: weekStart, lte: today } } },
         select: { sessionRpe: true },
       }),
       prisma.workout.count({
@@ -153,8 +161,12 @@ export default async function TrainerHomePage() {
 
       <section className="space-y-3">
         <SectionTitle>{t("dashboard.weekSummary")}</SectionTitle>
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-          <StatTile label={t("dashboard.statAdherence")} value={avgAdherence == null ? "—" : `${avgAdherence}%`} />
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+          <Link href="/trainer/students" className="contents">
+            <StatTile label={t("dashboard.statStudents")} value={String(students.length)} />
+          </Link>
+          <StatTile label={t("dashboard.statAdherence")}
+ value={avgAdherence == null ? "—" : `${avgAdherence}%`} />
           <StatTile
             label={t("dashboard.statSessions")}
             value={t("dashboard.statSessionsValue", { done: weekDone, planned: weekPlanned })}

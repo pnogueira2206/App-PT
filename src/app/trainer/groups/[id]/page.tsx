@@ -41,13 +41,16 @@ export default async function GroupDetailPage({
 
   const clipboard = await readClipboard();
 
-  const memberIds = new Set(group.members.map((m) => m.studentId));
+  // Progress only counts active members; archived ones stay listed in the group.
+  const memberIds = new Set(group.members.filter((m) => !m.student.archivedAt).map((m) => m.studentId));
   const availableStudents = await prisma.user.findMany({
     where: {
       trainerId: session.user.id,
       role: "STUDENT",
-      id: { notIn: [...memberIds] },
+      archivedAt: null,
+      id: { notIn: group.members.map((m) => m.studentId) },
     },
+
     orderBy: { name: "asc" },
   });
 
@@ -136,6 +139,11 @@ export default async function GroupDetailPage({
                   className="font-medium text-slate-800 hover:underline"
                 >
                   {m.student.name}
+                  {m.student.archivedAt && (
+                    <span className="ml-2 rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-500">
+                      {t("students.archivedBadge")}
+                    </span>
+                  )}
                 </Link>
                 <form action={removeMember}>
                   <input type="hidden" name="studentId" value={m.studentId} />

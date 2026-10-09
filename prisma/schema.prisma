@@ -84,7 +84,9 @@ model User {
   blockResults      BlockResult[]
   personalRecords   PersonalRecord[]
   completions       WorkoutCompletion[]
+  resultComments    ResultComment[]
 }
+
 
 model Group {
   id        String   @id @default(cuid())
@@ -159,6 +161,8 @@ model WorkoutCompletion {
   sessionRpe  Int?
   notes       String?
   completedAt DateTime @default(now())
+  // When the trainer last saw this completion; cleared when the student edits it.
+  seenAt      DateTime?
 
   @@unique([workoutId, studentId])
 }
@@ -220,10 +224,30 @@ model BlockResult {
   studentNotes   String?
   completedAt    DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
+  // When the trainer last saw this result; cleared when the student edits it.
+  seenAt         DateTime?
 
   sets           SetLog[]
+  comments       ResultComment[]
+  records        PersonalRecord[]
+
 
   @@unique([blockId, studentId])
+  @@index([studentId, updatedAt])
+}
+
+model ResultComment {
+  id        String      @id @default(cuid())
+  result    BlockResult @relation(fields: [resultId], references: [id], onDelete: Cascade)
+  resultId  String
+  author    User        @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorId  String
+  body      String
+  createdAt DateTime    @default(now())
+  // When the other person (trainer or student) read it.
+  readAt    DateTime?
+
+  @@index([resultId, createdAt])
 }
 
 model SetLog {
@@ -247,4 +271,7 @@ model PersonalRecord {
   notes       String?
   recordDate  DateTime @default(now())
   createdAt   DateTime @default(now())
+  // Set when the record was saved from a workout result (shows 🏆 in the feed).
+  sourceResult   BlockResult? @relation(fields: [sourceResultId], references: [id], onDelete: SetNull)
+  sourceResultId String?
 }

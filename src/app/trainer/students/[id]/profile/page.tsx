@@ -101,6 +101,7 @@ export default async function StudentProfileTabPage({
                   }}
                   updateAction={updateStudentRecordAction.bind(null, student.id, r.id)}
                   deleteAction={deleteStudentRecordAction.bind(null, student.id, r.id)}
+                  historyHref={`/trainer/students/${student.id}/exercises/${r.exerciseId}`}
                 />
               ))}
             </ul>
@@ -129,6 +130,7 @@ export default async function StudentProfileTabPage({
                   }}
                   updateAction={updateStudentRecordAction.bind(null, student.id, r.id)}
                   deleteAction={deleteStudentRecordAction.bind(null, student.id, r.id)}
+                  historyHref={`/trainer/students/${student.id}/exercises/${r.exerciseId}`}
                 />
               ))}
             </ul>

@@ -97,7 +97,8 @@ export async function submitResultAction(
     const result = await tx.blockResult.upsert({
       where: { blockId_studentId: { blockId, studentId } },
       create: { blockId, studentId, ...data },
-      update: { ...data, completedAt: new Date() },
+      // Editing a result makes it "new" again in the trainer's feed.
+      update: { ...data, completedAt: new Date(), seenAt: null },
     });
     await tx.setLog.deleteMany({ where: { resultId: result.id } });
     if (usesSets && sets.length > 0) {
@@ -132,7 +133,8 @@ export async function completeWorkoutAction(
   await prisma.workoutCompletion.upsert({
     where: { workoutId_studentId: { workoutId, studentId } },
     create: { workoutId, studentId, sessionRpe, notes },
-    update: { sessionRpe, notes },
+    update: { sessionRpe, notes, seenAt: null },
+
   });
 
   revalidatePath("/student", "layout");

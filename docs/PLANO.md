@@ -50,7 +50,7 @@ Plano de evolução da app atual (Next.js + Prisma, PWA) para uma ferramenta de 
 - Abrir um bloco, ver a prescrição e o vídeo do exercício e registar o score no formato certo para o tipo de bloco (com o texto livre como alternativa).
 - Marcar o treino como concluído, com uma nota geral e o RPE da sessão.
 
-### Fase 2 — Ver os resultados (fecha o ciclo da prioridade)
+### Fase 2 — Ver os resultados ✅ implementada
 - Painel do treinador **"Novidades"**: lista cronológica de treinos concluídos, scores e notas dos alunos, com o estado "visto/não visto".
 - **Comentar um resultado**: resposta curta do treinador ao score (o início do feedback bidirecional).
 - **Adesão**: % de treinos feitos por aluno, na semana e no mês.
@@ -107,4 +107,13 @@ Plano de evolução da app atual (Next.js + Prisma, PWA) para uma ferramenta de 
   - Ao passar de SQLite para Postgres, as migrações foram recomeçadas: dados de teste numa `dev.db` antiga não são migrados.
   - Os treinos colados ficam sempre em rascunho. "Publicar semana" num aluno publica só os treinos dele; os de grupo publicam-se no calendário do grupo.
   - "Copiar semana/dia" no calendário de um aluno copia os treinos individuais dele (incluindo versões ajustadas); os treinos de grupo copiam-se a partir do calendário do grupo.
-- **Próximo passo:** validar com 2–3 alunos reais e depois avançar para a Fase 2 (painel "Novidades", comentários aos resultados, adesão, PRs automáticos e gráficos).
+- **Identidade PN Coaching, modo claro/escuro e línguas (PT, EN, RU) implementados.**
+- **Fase 2 implementada.** Notas de implementação:
+  - **Painel** com resumo da semana (adesão média, sessões feitas, recordes, RPE médio), alertas (treinos falhados seguidos, adesão baixa, alunos sem treinos nos próximos 3 dias, rascunhos por publicar), novidades por ver, treinos de hoje com o estado de cada aluno e cartões dos alunos com adesão, último e próximo treino.
+  - **Novidades** (`/trainer/feed`): sessões registadas nos últimos 30 dias, agrupadas por aluno + treino, com "por ver"/"todas", marcar como visto e contador na navegação. Quando o aluno edita um resultado, volta a aparecer como novo.
+  - **Comentários** nos resultados, nos dois sentidos (treinador ↔ aluno). O aluno vê o aviso de comentário novo na semana; abrir o treino marca-o como lido.
+  - **Adesão** = treinos publicados concluídos ÷ treinos publicados planeados até hoje (semana e últimas 4 semanas), com cor por nível (≥80% verde, 50–79% âmbar, <50% vermelho) e sempre com o número.
+  - **Recordes automáticos**: força (série mais pesada com ≥1 rep), Metcon "carga máxima" e Metcon "for time" terminado em Rx (benchmarks). Aluno ou treinador guardam com um clique; aparece 🏆 nas novidades e no histórico.
+  - **Gráficos** de evolução por exercício (carga máxima por sessão e tempo por sessão), no histórico do aluno e na nova vista do treinador (perfil do aluno → recorde → exercício).
+  - Ao publicar, os resultados que já existiam aparecem como "por ver" uma vez: usa "Marcar tudo como visto".
+- **Próximo passo:** usar com alunos reais e depois avançar para a Fase 3 (check-in de prontidão, comentários por treino e mensagens diretas).

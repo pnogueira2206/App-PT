@@ -5,6 +5,9 @@ import { requireTrainer } from "@/lib/require-session";
 import { ResetPasswordForm } from "@/components/reset-password-form";
 import { Tabs } from "@/components/tabs";
 import { getI18n } from "@/i18n/server";
+import { getStudentStats } from "@/lib/adherence";
+import { AdherencePills } from "@/components/adherence";
+import { formatDate } from "@/lib/dates";
 
 export default async function StudentLayout({
   children,
@@ -12,13 +15,14 @@ export default async function StudentLayout({
 }: LayoutProps<"/trainer/students/[id]">) {
   const { id } = await params;
   const session = await requireTrainer();
-  const { t } = await getI18n();
+  const { t, intlLocale } = await getI18n();
 
   const student = await prisma.user.findFirst({
     where: { id, trainerId: session.user.id, role: "STUDENT" },
     include: { memberships: { include: { group: true } } },
   });
   if (!student) notFound();
+  const stats = (await getStudentStats(session.user.id, [student.id])).get(student.id);
 
   return (
     <div className="space-y-5">
@@ -30,6 +34,22 @@ export default async function StudentLayout({
           <div>
             <h1 className="text-xl font-bold text-slate-900">{student.name}</h1>
             <p className="text-sm text-slate-500">{student.email}</p>
+            {stats && (
+              <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500">
+                <AdherencePills stats={stats} t={t} />
+                <span>
+                  {stats.lastCompletedDate
+                    ? t("adherence.lastWorkout", { date: formatDate(stats.lastCompletedDate, intlLocale) })
+                    : t("adherence.noneDone")}
+                </span>
+                <span>
+                  {stats.nextWorkoutDate
+                    ? t("adherence.nextWorkout", { date: formatDate(stats.nextWorkoutDate, intlLocale) })
+                    : t("adherence.noNext")}
+                </span>
+              </div>
+            )}
+
           </div>
           <ResetPasswordForm studentId={student.id} />
         </div>

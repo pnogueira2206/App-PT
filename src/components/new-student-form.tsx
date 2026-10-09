@@ -2,8 +2,10 @@
 
 import { useActionState, useRef, useEffect, useState } from "react";
 import { createStudentAction } from "@/app/trainer/actions";
+import { useI18n } from "@/i18n/client";
 
 export function NewStudentForm() {
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const [state, formAction, isPending] = useActionState(
     createStudentAction,
@@ -21,9 +23,9 @@ export function NewStudentForm() {
     return (
       <button
         onClick={() => setOpen(true)}
-        className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
+        className="rounded-lg bg-brand px-4 py-2 text-sm font-medium text-brand-ink hover:bg-brand-hover"
       >
-        + Novo aluno
+        {t("students.newStudent")}
       </button>
     );
   }
@@ -35,32 +37,32 @@ export function NewStudentForm() {
       className="space-y-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
     >
       <div className="flex items-center justify-between">
-        <h3 className="font-semibold text-slate-900">Novo aluno</h3>
+        <h3 className="font-semibold text-slate-900">{t("students.newStudentTitle")}</h3>
         <button
           type="button"
           onClick={() => setOpen(false)}
           className="text-sm text-slate-400 hover:text-slate-700"
         >
-          Fechar
+          {t("common.close")}
         </button>
       </div>
       <div className="grid gap-3 sm:grid-cols-3">
         <input
           name="name"
-          placeholder="Nome"
+          placeholder={t("common.name")}
           required
           className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
         />
         <input
           name="email"
           type="email"
-          placeholder="Email"
+          placeholder={t("common.email")}
           required
           className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
         />
         <input
           name="password"
-          placeholder="Palavra-passe inicial"
+          placeholder={t("students.initialPassword")}
           required
           className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
         />
@@ -74,14 +76,12 @@ export function NewStudentForm() {
       <button
         type="submit"
         disabled={isPending}
-        className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-60"
+        className="rounded-lg bg-brand px-4 py-2 text-sm font-medium text-brand-ink hover:bg-brand-hover disabled:opacity-60"
       >
-        {isPending ? "A criar..." : "Criar aluno"}
+        {isPending ? t("common.creating") : t("students.createStudent")}
       </button>
-      <p className="text-xs text-slate-500">
-        Partilha o email e a palavra-passe com o aluno para ele entrar na
-        app.
-      </p>
+      <p className="text-xs text-slate-500">{t("students.shareHint")}</p>
+
     </form>
   );
 }

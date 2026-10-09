@@ -2,6 +2,8 @@
 
 import { useActionState, useState } from "react";
 import Link from "next/link";
+import { useI18n } from "@/i18n/client";
+import { formatDate } from "@/lib/dates";
 
 type ActionState = { error?: string; success?: string } | undefined;
 
@@ -31,6 +33,7 @@ export function RecordItem({
   deleteAction: (formData: FormData) => void | Promise<void>;
   historyHref?: string;
 }) {
+  const { t, intlLocale } = useI18n();
   const [editing, setEditing] = useState(false);
   const [state, formAction, isPending] = useActionState(updateAction, undefined);
 
@@ -51,20 +54,20 @@ export function RecordItem({
               defaultValue={record.type}
               className="rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm"
             >
-              <option value="WEIGHT">Levantamento</option>
-              <option value="TIME">Treino para tempo</option>
+              <option value="WEIGHT">{t("records.typeLift")}</option>
+              <option value="TIME">{t("records.typeTimed")}</option>
             </select>
             <input
               name="value"
               defaultValue={record.value}
               required
-              placeholder="Valor"
+              placeholder={t("records.value")}
               className="flex-1 rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm"
             />
             <input
               name="unit"
               defaultValue={record.unit ?? ""}
-              placeholder="Unidade"
+              placeholder={t("records.unit")}
               className="w-20 rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm"
             />
           </div>
@@ -78,7 +81,7 @@ export function RecordItem({
             name="notes"
             rows={2}
             defaultValue={record.notes ?? ""}
-            placeholder="Notas (opcional)"
+            placeholder={t("common.notesOptional")}
             className="w-full rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm"
           />
           {state?.error && <p className="text-sm text-red-600">{state.error}</p>}
@@ -86,16 +89,16 @@ export function RecordItem({
             <button
               type="submit"
               disabled={isPending}
-              className="flex-1 rounded-lg bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-60"
+              className="flex-1 rounded-lg bg-brand px-3 py-1.5 text-sm font-medium text-brand-ink hover:bg-brand-hover disabled:opacity-60"
             >
-              Guardar
+              {t("common.save")}
             </button>
             <button
               type="button"
               onClick={() => setEditing(false)}
               className="rounded-lg px-3 py-1.5 text-sm text-slate-500 hover:text-slate-800"
             >
-              Cancelar
+              {t("common.cancel")}
             </button>
           </div>
         </form>
@@ -116,7 +119,7 @@ export function RecordItem({
         <p className="text-sm text-slate-600">
           {record.value} {record.unit ?? ""}
           <span className="ml-2 text-xs text-slate-400">
-            {new Date(record.recordDate).toLocaleDateString("pt-PT")}
+            {formatDate(new Date(record.recordDate), intlLocale)}
           </span>
         </p>
         {record.notes && <p className="text-xs italic text-slate-400">{record.notes}</p>}
@@ -126,11 +129,12 @@ export function RecordItem({
           onClick={() => setEditing(true)}
           className="text-xs font-medium text-slate-500 hover:text-slate-900"
         >
-          Editar
+          {t("common.edit")}
         </button>
         <form action={deleteAction}>
           <button type="submit" className="text-xs text-slate-400 hover:text-red-600">
-            Remover
+            {t("common.remove")}
+
           </button>
         </form>
       </div>

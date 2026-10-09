@@ -1,10 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="96" fill="#0f172a"/>
-  <g stroke="#f8fafc" stroke-width="34" stroke-linecap="round">
-    <line x1="96" y1="256" x2="416" y2="256"/>
-    <line x1="140" y1="196" x2="140" y2="316"/>
-    <line x1="96" y1="220" x2="96" y2="292"/>
-    <line x1="372" y1="196" x2="372" y2="316"/>
-    <line x1="416" y1="220" x2="416" y2="292"/>
-  </g>
+  <rect width="512" height="512" fill="#000000"/>
+  <text x="256" y="288" text-anchor="middle" font-family="Inter, Helvetica, Arial, sans-serif" font-weight="700" font-size="174" fill="#c9b37e">PN</text>
+  <rect x="215" y="330" width="82" height="6" fill="#c9b37e"/>
 </svg>

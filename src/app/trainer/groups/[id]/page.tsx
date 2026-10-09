@@ -2,6 +2,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireTrainer } from "@/lib/require-session";
+import { addDays, resolveWeekStart } from "@/lib/dates";
+import { readClipboard } from "@/lib/clipboard";
+import { WeekCalendar } from "@/components/week-calendar";
+import { getI18n } from "@/i18n/server";
 import {
   addStudentToGroupAction,
   removeStudentFromGroupAction,
@@ -10,20 +14,32 @@ import {
 
 export default async function GroupDetailPage({
   params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+  searchParams,
+}: PageProps<"/trainer/groups/[id]">) {
   const { id } = await params;
+  const { week } = (await searchParams) as { week?: string };
   const session = await requireTrainer();
+  const { t } = await getI18n();
+  const weekStart = resolveWeekStart(week);
 
   const group = await prisma.group.findFirst({
     where: { id, trainerId: session.user.id },
     include: {
       members: { include: { student: true }, orderBy: { student: { name: "asc" } } },
-      workouts: { orderBy: { date: "desc" } },
+      workouts: {
+        where: { date: { gte: weekStart, lt: addDays(weekStart, 7) } },
+        include: {
+          _count: { select: { blocks: true } },
+          completions: { select: { studentId: true } },
+          overrides: { select: { completions: { select: { studentId: true } } } },
+        },
+        orderBy: { createdAt: "asc" },
+      },
     },
   });
   if (!group) notFound();
+
+  const clipboard = await readClipboard();
 
   const memberIds = new Set(group.members.map((m) => m.studentId));
   const availableStudents = await prisma.user.findMany({
@@ -43,31 +59,46 @@ export default async function GroupDetailPage({
     <div className="space-y-6">
       <div>
         <Link href="/trainer/groups" className="text-sm text-slate-500 hover:text-slate-900">
-          ← Grupos
+          {t("groups.back")}
         </Link>
         <div className="mt-1 flex flex-wrap items-center justify-between gap-3">
-          <h1 className="text-xl font-bold text-slate-900">{group.name}</h1>
+          <div>
+            <h1 className="text-xl font-bold text-slate-900">👥 {group.name}</h1>
+            <p className="text-sm text-slate-500">{t("groups.description")}</p>
+          </div>
           <div className="flex items-center gap-3">
-            <Link
-              href={`/trainer/workouts/new?groupId=${group.id}`}
-              className="rounded-lg bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-800"
-            >
-              + Treino para o grupo
-            </Link>
             <form action={deleteGroup}>
               <button
                 type="submit"
                 className="text-sm text-red-500 hover:text-red-700"
               >
-                Eliminar grupo
+                {t("groups.deleteGroup")}
               </button>
             </form>
           </div>
         </div>
       </div>
 
+      <WeekCalendar
+        owner={{ type: "group", id: group.id }}
+        basePath={`/trainer/groups/${group.id}`}
+        weekStart={weekStart}
+        clipboard={clipboard}
+        workouts={group.workouts.map((w) => ({
+          id: w.id,
+          title: w.title,
+          date: w.date,
+          status: w.status,
+          blocksCount: w._count.blocks,
+          progress:
+            w.status === "PUBLISHED" && memberIds.size > 0
+              ? t("groups.completedProgress", { done: countCompleted(w, memberIds), total: memberIds.size })
+              : undefined,
+        }))}
+      />
+
       <section className="space-y-3">
-        <h2 className="font-semibold text-slate-900">Membros</h2>
+        <h2 className="font-semibold text-slate-900">{t("groups.members")}</h2>
         {availableStudents.length > 0 && (
           <form action={addMember} className="flex flex-wrap items-center gap-2">
             <select
@@ -77,7 +108,7 @@ export default async function GroupDetailPage({
               defaultValue=""
             >
               <option value="" disabled>
-                Adicionar aluno...
+                {t("groups.addStudent")}
               </option>
               {availableStudents.map((s) => (
                 <option key={s.id} value={s.id}>
@@ -87,15 +118,15 @@ export default async function GroupDetailPage({
             </select>
             <button
               type="submit"
-              className="rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800"
+              className="rounded-lg bg-brand px-3 py-2 text-sm font-medium text-brand-ink hover:bg-brand-hover"
             >
-              Adicionar
+              {t("common.add")}
             </button>
           </form>
         )}
 
         {group.members.length === 0 ? (
-          <p className="text-sm text-slate-500">Ainda sem alunos neste grupo.</p>
+          <p className="text-sm text-slate-500">{t("groups.noMembers")}</p>
         ) : (
           <ul className="divide-y divide-slate-200 rounded-xl border border-slate-200 bg-white">
             {group.members.map((m) => (
@@ -112,7 +143,8 @@ export default async function GroupDetailPage({
                     type="submit"
                     className="text-sm text-slate-400 hover:text-red-600"
                   >
-                    Remover
+                    {t("common.remove")}
+
                   </button>
                 </form>
               </li>
@@ -121,28 +153,22 @@ export default async function GroupDetailPage({
         )}
       </section>
 
-      <section className="space-y-3">
-        <h2 className="font-semibold text-slate-900">Treinos do grupo</h2>
-        {group.workouts.length === 0 ? (
-          <p className="text-sm text-slate-500">Ainda sem treinos atribuídos a este grupo.</p>
-        ) : (
-          <ul className="space-y-2">
-            {group.workouts.map((w) => (
-              <li key={w.id}>
-                <Link
-                  href={`/trainer/workouts/${w.id}`}
-                  className="block rounded-xl border border-slate-200 bg-white px-4 py-3 hover:bg-slate-50"
-                >
-                  <p className="font-medium text-slate-900">{w.title}</p>
-                  <p className="text-xs text-slate-500">
-                    {w.date ? new Date(w.date).toLocaleDateString("pt-PT") : "Sem data"}
-                  </p>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
     </div>
   );
+}
+
+/** Members who completed the group workout or their adjusted version of it. */
+function countCompleted(
+  workout: {
+    completions: { studentId: string }[];
+    overrides: { completions: { studentId: string }[] }[];
+  },
+  memberIds: Set<string>
+) {
+  const done = new Set(
+    [...workout.completions, ...workout.overrides.flatMap((o) => o.completions)]
+      .map((c) => c.studentId)
+      .filter((studentId) => memberIds.has(studentId))
+  );
+  return done.size;
 }

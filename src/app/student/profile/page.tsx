@@ -9,9 +9,12 @@ import {
   updatePersonalRecordAction,
   deletePersonalRecordAction,
 } from "@/app/student/actions";
+import { getI18n } from "@/i18n/server";
 
 export default async function ProfilePage() {
   const session = await requireStudent();
+  const { t } = await getI18n();
+
 
   const student = await prisma.user.findUniqueOrThrow({
     where: { id: session.user.id },
@@ -49,16 +52,16 @@ export default async function ProfilePage() {
       />
 
       <section className="space-y-3">
-        <h2 className="font-semibold text-slate-900">Recordes pessoais</h2>
+        <h2 className="font-semibold text-slate-900">{t("records.title")}</h2>
         <NewRecordForm
           exerciseNames={exercises.map((e) => e.name)}
           action={addPersonalRecordAction}
         />
 
         <div>
-          <h3 className="mb-1.5 text-sm font-medium text-slate-500">Levantamentos</h3>
+          <h3 className="mb-1.5 text-sm font-medium text-slate-500">{t("records.lifts")}</h3>
           {lifts.length === 0 ? (
-            <p className="text-sm text-slate-400">Sem recordes de levantamentos.</p>
+            <p className="text-sm text-slate-400">{t("records.noLifts")}</p>
           ) : (
             <ul className="space-y-2">
               {lifts.map((r) => (
@@ -84,9 +87,10 @@ export default async function ProfilePage() {
         </div>
 
         <div>
-          <h3 className="mb-1.5 text-sm font-medium text-slate-500">Treinos para tempo</h3>
+          <h3 className="mb-1.5 text-sm font-medium text-slate-500">{t("records.timed")}</h3>
           {timeWorkouts.length === 0 ? (
-            <p className="text-sm text-slate-400">Sem recordes de treinos para tempo.</p>
+            <p className="text-sm text-slate-400">{t("records.noTimed")}</p>
+
           ) : (
             <ul className="space-y-2">
               {timeWorkouts.map((r) => (

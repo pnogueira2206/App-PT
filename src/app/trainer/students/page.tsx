@@ -2,9 +2,11 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireTrainer } from "@/lib/require-session";
 import { NewStudentForm } from "@/components/new-student-form";
+import { getI18n } from "@/i18n/server";
 
 export default async function StudentsPage() {
   const session = await requireTrainer();
+  const { t } = await getI18n();
 
   const students = await prisma.user.findMany({
     where: { trainerId: session.user.id, role: "STUDENT" },
@@ -17,14 +19,13 @@ export default async function StudentsPage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-xl font-bold text-slate-900">Alunos</h1>
+        <h1 className="text-xl font-bold text-slate-900">{t("students.title")}</h1>
         <NewStudentForm />
       </div>
 
       {students.length === 0 ? (
-        <p className="text-sm text-slate-500">
-          Ainda não tens alunos. Cria o primeiro acima.
-        </p>
+        <p className="text-sm text-slate-500">{t("students.empty")}</p>
+
       ) : (
         <ul className="divide-y divide-slate-200 rounded-xl border border-slate-200 bg-white">
           {students.map((student) => (

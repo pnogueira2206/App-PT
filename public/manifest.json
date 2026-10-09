@@ -1,11 +1,11 @@
 {
-  "name": "App PT",
-  "short_name": "App PT",
-  "description": "Plataforma de treinos para personal trainer e alunos",
+  "name": "PN Coaching",
+  "short_name": "PN Coaching",
+  "description": "Coaching individualizado — treinos e acompanhamento",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f8fafc",
-  "theme_color": "#0f172a",
+  "background_color": "#000000",
+  "theme_color": "#000000",
   "orientation": "portrait",
   "icons": [
     {

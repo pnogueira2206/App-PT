@@ -2,22 +2,30 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
+import { getI18n } from "@/i18n/server";
 import { requireStudent } from "@/lib/require-session";
+import { parseDuration } from "@/lib/blocks";
+import { findStudentWorkout } from "@/lib/workouts";
 
 type ActionState = { error?: string; success?: string } | undefined;
 
-async function assertBlockAssignedToStudent(blockId: string, studentId: string) {
-  const block = await prisma.workoutBlock.findUnique({
-    where: { id: blockId },
-    include: { workout: { include: { group: { include: { members: true } } } } },
-  });
-  if (!block) return null;
+function intField(formData: FormData, name: string, max = 100000): number | null | "invalid" {
+  const raw = String(formData.get(name) ?? "").trim();
+  if (!raw) return null;
+  const value = Number(raw);
+  return Number.isInteger(value) && value >= 0 && value <= max ? value : "invalid";
+}
 
-  const isDirect = block.workout.studentId === studentId;
-  const isViaGroup = block.workout.group?.members.some((m) => m.studentId === studentId);
-  if (!isDirect && !isViaGroup) return null;
+function floatField(formData: FormData, name: string): number | null | "invalid" {
+  const raw = String(formData.get(name) ?? "").trim().replace(",", ".");
+  if (!raw) return null;
+  const value = Number(raw);
+  return Number.isFinite(value) && value >= 0 && value <= 100000 ? value : "invalid";
+}
 
-  return block;
+function durationField(formData: FormData, name: string): number | null | "invalid" {
+  const value = parseDuration(String(formData.get(name) ?? ""));
+  return Number.isNaN(value) ? "invalid" : value;
 }
 
 export async function submitResultAction(
@@ -25,37 +33,118 @@ export async function submitResultAction(
   _prev: ActionState,
   formData: FormData
 ): Promise<ActionState> {
+  const { t } = await getI18n();
   const session = await requireStudent();
+  const studentId = session.user.id;
 
-  const block = await assertBlockAssignedToStudent(blockId, session.user.id);
-  if (!block) return { error: "Bloco não encontrado." };
+  const block = await prisma.workoutBlock.findUnique({ where: { id: blockId } });
+  if (!block || !(await findStudentWorkout(block.workoutId, studentId))) {
+    return { error: t("errors.blockNotFound") };
+  }
 
-  const scoreText = String(formData.get("scoreText") ?? "").trim();
-  const studentNotes = String(formData.get("studentNotes") ?? "").trim();
+  const done = formData.get("done") !== "false";
+  const rpe = intField(formData, "rpe", 10);
+  const timeSeconds = durationField(formData, "timeSeconds");
+  const rounds = intField(formData, "rounds");
+  const reps = intField(formData, "reps");
+  const loadKg = floatField(formData, "loadKg");
+  const distanceM = floatField(formData, "distanceM");
+  const calories = intField(formData, "calories");
+  const rxRaw = String(formData.get("rx") ?? "");
 
-  await prisma.blockResult.upsert({
-    where: { blockId_studentId: { blockId, studentId: session.user.id } },
-    create: {
-      blockId,
-      studentId: session.user.id,
-      scoreText: scoreText || null,
-      studentNotes: studentNotes || null,
-    },
-    update: {
-      scoreText: scoreText || null,
-      studentNotes: studentNotes || null,
-      completedAt: new Date(),
-    },
+  if (rpe === "invalid") return { error: t("errors.invalidRpe") };
+  if (timeSeconds === "invalid") return { error: t("errors.invalidTime") };
+  if (rounds === "invalid" || reps === "invalid") return { error: t("errors.invalidRoundsReps") };
+  if (loadKg === "invalid") return { error: t("errors.invalidLoad") };
+  if (distanceM === "invalid") return { error: t("errors.invalidDistance") };
+  if (calories === "invalid") return { error: t("errors.invalidCalories") };
+
+  // Set rows come in as setReps[] / setLoad[] pairs (strength and accessory blocks).
+  const setReps = formData.getAll("setReps").map(String);
+  const setLoads = formData.getAll("setLoad").map(String);
+  const sets: { setNumber: number; reps: number | null; loadKg: number | null }[] = [];
+  for (let i = 0; i < Math.max(setReps.length, setLoads.length); i++) {
+    const r = (setReps[i] ?? "").trim();
+    const l = (setLoads[i] ?? "").trim().replace(",", ".");
+    if (!r && !l) continue;
+    const repsValue = r ? Number(r) : null;
+    const loadValue = l ? Number(l) : null;
+    if (repsValue != null && (!Number.isInteger(repsValue) || repsValue < 0)) {
+      return { error: t("errors.invalidSetReps", { number: i + 1 }) };
+    }
+    if (loadValue != null && (!Number.isFinite(loadValue) || loadValue < 0)) {
+      return { error: t("errors.invalidSetLoad", { number: i + 1 }) };
+    }
+    sets.push({ setNumber: sets.length + 1, reps: repsValue, loadKg: loadValue });
+  }
+
+  const usesSets = block.type === "STRENGTH" || block.type === "ACCESSORY";
+  const data = {
+    done,
+    rpe,
+    timeSeconds: block.type === "METCON" || block.type === "CARDIO" ? timeSeconds : null,
+    rounds: block.type === "METCON" ? rounds : null,
+    reps: block.type === "METCON" ? reps : null,
+    loadKg: block.type === "METCON" ? loadKg : null,
+    distanceM: block.type === "CARDIO" ? distanceM : null,
+    calories: block.type === "CARDIO" ? calories : null,
+    rx: block.type === "METCON" && rxRaw ? rxRaw === "rx" : null,
+    scoreText: String(formData.get("scoreText") ?? "").trim() || null,
+    studentNotes: String(formData.get("studentNotes") ?? "").trim() || null,
+  };
+
+  await prisma.$transaction(async (tx) => {
+    const result = await tx.blockResult.upsert({
+      where: { blockId_studentId: { blockId, studentId } },
+      create: { blockId, studentId, ...data },
+      update: { ...data, completedAt: new Date() },
+    });
+    await tx.setLog.deleteMany({ where: { resultId: result.id } });
+    if (usesSets && sets.length > 0) {
+      await tx.setLog.createMany({
+        data: sets.map((set) => ({ ...set, resultId: result.id })),
+      });
+    }
   });
 
-  revalidatePath(`/student/workouts/${block.workoutId}`);
-  return { success: "Resultado guardado." };
+  revalidatePath("/student", "layout");
+  revalidatePath("/trainer", "layout");
+  return { success: t("success.resultSaved") };
+}
+
+export async function completeWorkoutAction(
+  workoutId: string,
+  _prev: ActionState,
+  formData: FormData
+): Promise<ActionState> {
+  const { t } = await getI18n();
+  const session = await requireStudent();
+  const studentId = session.user.id;
+
+  if (!(await findStudentWorkout(workoutId, studentId))) {
+    return { error: t("errors.workoutNotFound") };
+  }
+
+  const sessionRpe = intField(formData, "sessionRpe", 10);
+  if (sessionRpe === "invalid") return { error: t("errors.invalidRpe") };
+  const notes = String(formData.get("notes") ?? "").trim() || null;
+
+  await prisma.workoutCompletion.upsert({
+    where: { workoutId_studentId: { workoutId, studentId } },
+    create: { workoutId, studentId, sessionRpe, notes },
+    update: { sessionRpe, notes },
+  });
+
+  revalidatePath("/student", "layout");
+  revalidatePath("/trainer", "layout");
+  return { success: t("success.workoutCompleted") };
 }
 
 export async function updateProfileAction(
   _prev: ActionState,
   formData: FormData
 ): Promise<ActionState> {
+  const { t } = await getI18n();
   const session = await requireStudent();
 
   const dateOfBirthRaw = String(formData.get("dateOfBirth") ?? "");
@@ -66,10 +155,10 @@ export async function updateProfileAction(
   const heightCm = heightRaw ? Number(heightRaw.replace(",", ".")) : null;
 
   if (weightRaw && (Number.isNaN(weightKg) || (weightKg as number) <= 0)) {
-    return { error: "Peso inválido." };
+    return { error: t("errors.invalidWeight") };
   }
   if (heightRaw && (Number.isNaN(heightCm) || (heightCm as number) <= 0)) {
-    return { error: "Altura inválida." };
+    return { error: t("errors.invalidHeight") };
   }
 
   await prisma.user.update({
@@ -82,17 +171,18 @@ export async function updateProfileAction(
   });
 
   revalidatePath("/student/profile");
-  return { success: "Dados atualizados." };
+  return { success: t("success.dataUpdated") };
 }
 
 export async function addPersonalRecordAction(
   _prev: ActionState,
   formData: FormData
 ): Promise<ActionState> {
+  const { t } = await getI18n();
   const session = await requireStudent();
 
   const student = await prisma.user.findUnique({ where: { id: session.user.id } });
-  if (!student?.trainerId) return { error: "Sem treinador associado." };
+  if (!student?.trainerId) return { error: t("errors.noTrainer") };
 
   const exerciseName = String(formData.get("exerciseName") ?? "").trim();
   const type = String(formData.get("type") ?? "WEIGHT").trim();
@@ -102,10 +192,10 @@ export async function addPersonalRecordAction(
   const recordDateRaw = String(formData.get("recordDate") ?? "");
 
   if (!exerciseName || !value) {
-    return { error: "Indica o exercício/treino e o valor do recorde." };
+    return { error: t("errors.recordRequired") };
   }
   if (type !== "WEIGHT" && type !== "TIME") {
-    return { error: "Tipo de recorde inválido." };
+    return { error: t("errors.invalidRecordType") };
   }
 
   const exercise = await prisma.exercise.upsert({
@@ -127,7 +217,7 @@ export async function addPersonalRecordAction(
   });
 
   revalidatePath("/student/profile");
-  return { success: "Recorde adicionado." };
+  return { success: t("success.recordAdded") };
 }
 
 export async function updatePersonalRecordAction(
@@ -135,12 +225,13 @@ export async function updatePersonalRecordAction(
   _prev: ActionState,
   formData: FormData
 ): Promise<ActionState> {
+  const { t } = await getI18n();
   const session = await requireStudent();
 
   const record = await prisma.personalRecord.findFirst({
     where: { id: recordId, studentId: session.user.id },
   });
-  if (!record) return { error: "Recorde não encontrado." };
+  if (!record) return { error: t("errors.recordNotFound") };
 
   const type = String(formData.get("type") ?? "WEIGHT").trim();
   const value = String(formData.get("value") ?? "").trim();
@@ -148,9 +239,9 @@ export async function updatePersonalRecordAction(
   const notes = String(formData.get("notes") ?? "").trim();
   const recordDateRaw = String(formData.get("recordDate") ?? "");
 
-  if (!value) return { error: "Indica o valor do recorde." };
+  if (!value) return { error: t("errors.recordValueRequired") };
   if (type !== "WEIGHT" && type !== "TIME") {
-    return { error: "Tipo de recorde inválido." };
+    return { error: t("errors.invalidRecordType") };
   }
 
   await prisma.personalRecord.update({
@@ -165,7 +256,7 @@ export async function updatePersonalRecordAction(
   });
 
   revalidatePath("/student/profile");
-  return { success: "Recorde atualizado." };
+  return { success: t("success.recordUpdated") };
 }
 
 export async function deletePersonalRecordAction(recordId: string) {

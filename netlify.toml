@@ -7,3 +7,11 @@
   # included) to know when to rebuild. It is never published, so the secrets
   # scan skips it; the published output is still scanned.
   SECRETS_SCAN_OMIT_PATHS = ".netlify/.next/cache/**,.next/cache/**"
+
+# Deploy previews (pull requests) never touch the database schema: only the
+# production deploy applies migrations.
+[context.deploy-preview]
+  command = "npm run build"
+
+[context.branch-deploy]
+  command = "npm run build"

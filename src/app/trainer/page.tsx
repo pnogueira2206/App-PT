@@ -1,10 +1,12 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireTrainer } from "@/lib/require-session";
-import { formatDate, parseDateKey, todayKey } from "@/lib/dates";
+import { formatLongDate, parseDateKey, todayKey } from "@/lib/dates";
+import { getI18n } from "@/i18n/server";
 
 export default async function TrainerHomePage() {
   const session = await requireTrainer();
+  const { t, intlLocale } = await getI18n();
   const today = parseDateKey(todayKey())!;
 
   const [students, groups, todayWorkouts] = await Promise.all([
@@ -32,16 +34,18 @@ export default async function TrainerHomePage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-bold text-slate-900">Olá, {session.user.name}</h1>
+        <h1 className="text-xl font-bold text-slate-900">
+          {t("dashboard.hello", { name: session.user.name ?? "" })}
+        </h1>
         <p className="text-sm text-slate-500 first-letter:uppercase">
-          {formatDate(today, { weekday: "long", day: "numeric", month: "long" })}
+          {formatLongDate(today, intlLocale)}
         </p>
       </div>
 
       <section className="space-y-2">
-        <h2 className="font-semibold text-slate-900">Treinos de hoje</h2>
+        <h2 className="font-semibold text-slate-900">{t("dashboard.todayWorkouts")}</h2>
         {todayWorkouts.length === 0 ? (
-          <p className="text-sm text-slate-500">Nenhum treino marcado para hoje.</p>
+          <p className="text-sm text-slate-500">{t("dashboard.noWorkoutsToday")}</p>
         ) : (
           <ul className="space-y-2">
             {todayWorkouts.map((w) => {
@@ -60,11 +64,11 @@ export default async function TrainerHomePage() {
                     </div>
                     {w.status === "DRAFT" ? (
                       <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-800">
-                        Rascunho
+                        {t("common.draft")}
                       </span>
                     ) : (
                       <span className="text-xs font-medium text-slate-500">
-                        {w._count.completions}/{expected} concluído
+                        {t("dashboard.completedOf", { done: w._count.completions, total: expected })}
                       </span>
                     )}
                   </Link>
@@ -78,13 +82,13 @@ export default async function TrainerHomePage() {
       <div className="grid gap-6 sm:grid-cols-2">
         <section className="space-y-2">
           <div className="flex items-center justify-between">
-            <h2 className="font-semibold text-slate-900">Calendários dos alunos</h2>
+            <h2 className="font-semibold text-slate-900">{t("dashboard.studentCalendars")}</h2>
             <Link href="/trainer/students" className="text-sm text-slate-500 hover:text-slate-900">
-              Gerir
+              {t("dashboard.manage")}
             </Link>
           </div>
           {students.length === 0 ? (
-            <p className="text-sm text-slate-500">Ainda não tens alunos.</p>
+            <p className="text-sm text-slate-500">{t("dashboard.noStudents")}</p>
           ) : (
             <ul className="divide-y divide-slate-200 rounded-xl border border-slate-200 bg-white">
               {students.map((s) => (
@@ -104,13 +108,13 @@ export default async function TrainerHomePage() {
 
         <section className="space-y-2">
           <div className="flex items-center justify-between">
-            <h2 className="font-semibold text-slate-900">Grupos</h2>
+            <h2 className="font-semibold text-slate-900">{t("groups.title")}</h2>
             <Link href="/trainer/groups" className="text-sm text-slate-500 hover:text-slate-900">
-              Gerir
+              {t("dashboard.manage")}
             </Link>
           </div>
           {groups.length === 0 ? (
-            <p className="text-sm text-slate-500">Ainda não tens grupos.</p>
+            <p className="text-sm text-slate-500">{t("dashboard.noGroups")}</p>
           ) : (
             <ul className="divide-y divide-slate-200 rounded-xl border border-slate-200 bg-white">
               {groups.map((g) => (
@@ -120,7 +124,10 @@ export default async function TrainerHomePage() {
                     className="flex items-center justify-between px-4 py-2.5 text-sm hover:bg-slate-50"
                   >
                     <span className="font-medium text-slate-800">👥 {g.name}</span>
-                    <span className="text-slate-400">{g._count.members} alunos →</span>
+                    <span className="text-slate-400">
+                      {t("common.students", { count: g._count.members })} →
+                    </span>
+
                   </Link>
                 </li>
               ))}

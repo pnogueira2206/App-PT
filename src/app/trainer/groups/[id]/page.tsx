@@ -5,6 +5,7 @@ import { requireTrainer } from "@/lib/require-session";
 import { addDays, resolveWeekStart } from "@/lib/dates";
 import { readClipboard } from "@/lib/clipboard";
 import { WeekCalendar } from "@/components/week-calendar";
+import { getI18n } from "@/i18n/server";
 import {
   addStudentToGroupAction,
   removeStudentFromGroupAction,
@@ -18,6 +19,7 @@ export default async function GroupDetailPage({
   const { id } = await params;
   const { week } = (await searchParams) as { week?: string };
   const session = await requireTrainer();
+  const { t } = await getI18n();
   const weekStart = resolveWeekStart(week);
 
   const group = await prisma.group.findFirst({
@@ -57,15 +59,12 @@ export default async function GroupDetailPage({
     <div className="space-y-6">
       <div>
         <Link href="/trainer/groups" className="text-sm text-slate-500 hover:text-slate-900">
-          ← Grupos
+          {t("groups.back")}
         </Link>
         <div className="mt-1 flex flex-wrap items-center justify-between gap-3">
           <div>
             <h1 className="text-xl font-bold text-slate-900">👥 {group.name}</h1>
-            <p className="text-sm text-slate-500">
-              Os treinos deste calendário aparecem no calendário de cada membro. Cada aluno
-              reporta o seu resultado individualmente.
-            </p>
+            <p className="text-sm text-slate-500">{t("groups.description")}</p>
           </div>
           <div className="flex items-center gap-3">
             <form action={deleteGroup}>
@@ -73,7 +72,7 @@ export default async function GroupDetailPage({
                 type="submit"
                 className="text-sm text-red-500 hover:text-red-700"
               >
-                Eliminar grupo
+                {t("groups.deleteGroup")}
               </button>
             </form>
           </div>
@@ -93,13 +92,13 @@ export default async function GroupDetailPage({
           blocksCount: w._count.blocks,
           progress:
             w.status === "PUBLISHED" && memberIds.size > 0
-              ? `${countCompleted(w, memberIds)}/${memberIds.size} concluíram`
+              ? t("groups.completedProgress", { done: countCompleted(w, memberIds), total: memberIds.size })
               : undefined,
         }))}
       />
 
       <section className="space-y-3">
-        <h2 className="font-semibold text-slate-900">Membros</h2>
+        <h2 className="font-semibold text-slate-900">{t("groups.members")}</h2>
         {availableStudents.length > 0 && (
           <form action={addMember} className="flex flex-wrap items-center gap-2">
             <select
@@ -109,7 +108,7 @@ export default async function GroupDetailPage({
               defaultValue=""
             >
               <option value="" disabled>
-                Adicionar aluno...
+                {t("groups.addStudent")}
               </option>
               {availableStudents.map((s) => (
                 <option key={s.id} value={s.id}>
@@ -119,15 +118,15 @@ export default async function GroupDetailPage({
             </select>
             <button
               type="submit"
-              className="rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800"
+              className="rounded-lg bg-brand px-3 py-2 text-sm font-medium text-brand-ink hover:bg-brand-hover"
             >
-              Adicionar
+              {t("common.add")}
             </button>
           </form>
         )}
 
         {group.members.length === 0 ? (
-          <p className="text-sm text-slate-500">Ainda sem alunos neste grupo.</p>
+          <p className="text-sm text-slate-500">{t("groups.noMembers")}</p>
         ) : (
           <ul className="divide-y divide-slate-200 rounded-xl border border-slate-200 bg-white">
             {group.members.map((m) => (
@@ -144,7 +143,8 @@ export default async function GroupDetailPage({
                     type="submit"
                     className="text-sm text-slate-400 hover:text-red-600"
                   >
-                    Remover
+                    {t("common.remove")}
+
                   </button>
                 </form>
               </li>

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
+import { getI18n } from "@/i18n/server";
 import { requireStudent } from "@/lib/require-session";
 import { parseDuration } from "@/lib/blocks";
 import { findStudentWorkout } from "@/lib/workouts";
@@ -32,12 +33,13 @@ export async function submitResultAction(
   _prev: ActionState,
   formData: FormData
 ): Promise<ActionState> {
+  const { t } = await getI18n();
   const session = await requireStudent();
   const studentId = session.user.id;
 
   const block = await prisma.workoutBlock.findUnique({ where: { id: blockId } });
   if (!block || !(await findStudentWorkout(block.workoutId, studentId))) {
-    return { error: "Bloco não encontrado." };
+    return { error: t("errors.blockNotFound") };
   }
 
   const done = formData.get("done") !== "false";
@@ -50,12 +52,12 @@ export async function submitResultAction(
   const calories = intField(formData, "calories");
   const rxRaw = String(formData.get("rx") ?? "");
 
-  if (rpe === "invalid") return { error: "RPE inválido (1 a 10)." };
-  if (timeSeconds === "invalid") return { error: "Tempo inválido (usa mm:ss)." };
-  if (rounds === "invalid" || reps === "invalid") return { error: "Rondas/reps inválidas." };
-  if (loadKg === "invalid") return { error: "Carga inválida." };
-  if (distanceM === "invalid") return { error: "Distância inválida." };
-  if (calories === "invalid") return { error: "Calorias inválidas." };
+  if (rpe === "invalid") return { error: t("errors.invalidRpe") };
+  if (timeSeconds === "invalid") return { error: t("errors.invalidTime") };
+  if (rounds === "invalid" || reps === "invalid") return { error: t("errors.invalidRoundsReps") };
+  if (loadKg === "invalid") return { error: t("errors.invalidLoad") };
+  if (distanceM === "invalid") return { error: t("errors.invalidDistance") };
+  if (calories === "invalid") return { error: t("errors.invalidCalories") };
 
   // Set rows come in as setReps[] / setLoad[] pairs (strength and accessory blocks).
   const setReps = formData.getAll("setReps").map(String);
@@ -68,10 +70,10 @@ export async function submitResultAction(
     const repsValue = r ? Number(r) : null;
     const loadValue = l ? Number(l) : null;
     if (repsValue != null && (!Number.isInteger(repsValue) || repsValue < 0)) {
-      return { error: `Reps inválidas na série ${i + 1}.` };
+      return { error: t("errors.invalidSetReps", { number: i + 1 }) };
     }
     if (loadValue != null && (!Number.isFinite(loadValue) || loadValue < 0)) {
-      return { error: `Carga inválida na série ${i + 1}.` };
+      return { error: t("errors.invalidSetLoad", { number: i + 1 }) };
     }
     sets.push({ setNumber: sets.length + 1, reps: repsValue, loadKg: loadValue });
   }
@@ -107,7 +109,7 @@ export async function submitResultAction(
 
   revalidatePath("/student", "layout");
   revalidatePath("/trainer", "layout");
-  return { success: "Resultado guardado." };
+  return { success: t("success.resultSaved") };
 }
 
 export async function completeWorkoutAction(
@@ -115,15 +117,16 @@ export async function completeWorkoutAction(
   _prev: ActionState,
   formData: FormData
 ): Promise<ActionState> {
+  const { t } = await getI18n();
   const session = await requireStudent();
   const studentId = session.user.id;
 
   if (!(await findStudentWorkout(workoutId, studentId))) {
-    return { error: "Treino não encontrado." };
+    return { error: t("errors.workoutNotFound") };
   }
 
   const sessionRpe = intField(formData, "sessionRpe", 10);
-  if (sessionRpe === "invalid") return { error: "RPE inválido (1 a 10)." };
+  if (sessionRpe === "invalid") return { error: t("errors.invalidRpe") };
   const notes = String(formData.get("notes") ?? "").trim() || null;
 
   await prisma.workoutCompletion.upsert({
@@ -134,13 +137,14 @@ export async function completeWorkoutAction(
 
   revalidatePath("/student", "layout");
   revalidatePath("/trainer", "layout");
-  return { success: "Treino concluído. Bom trabalho! 💪" };
+  return { success: t("success.workoutCompleted") };
 }
 
 export async function updateProfileAction(
   _prev: ActionState,
   formData: FormData
 ): Promise<ActionState> {
+  const { t } = await getI18n();
   const session = await requireStudent();
 
   const dateOfBirthRaw = String(formData.get("dateOfBirth") ?? "");
@@ -151,10 +155,10 @@ export async function updateProfileAction(
   const heightCm = heightRaw ? Number(heightRaw.replace(",", ".")) : null;
 
   if (weightRaw && (Number.isNaN(weightKg) || (weightKg as number) <= 0)) {
-    return { error: "Peso inválido." };
+    return { error: t("errors.invalidWeight") };
   }
   if (heightRaw && (Number.isNaN(heightCm) || (heightCm as number) <= 0)) {
-    return { error: "Altura inválida." };
+    return { error: t("errors.invalidHeight") };
   }
 
   await prisma.user.update({
@@ -167,17 +171,18 @@ export async function updateProfileAction(
   });
 
   revalidatePath("/student/profile");
-  return { success: "Dados atualizados." };
+  return { success: t("success.dataUpdated") };
 }
 
 export async function addPersonalRecordAction(
   _prev: ActionState,
   formData: FormData
 ): Promise<ActionState> {
+  const { t } = await getI18n();
   const session = await requireStudent();
 
   const student = await prisma.user.findUnique({ where: { id: session.user.id } });
-  if (!student?.trainerId) return { error: "Sem treinador associado." };
+  if (!student?.trainerId) return { error: t("errors.noTrainer") };
 
   const exerciseName = String(formData.get("exerciseName") ?? "").trim();
   const type = String(formData.get("type") ?? "WEIGHT").trim();
@@ -187,10 +192,10 @@ export async function addPersonalRecordAction(
   const recordDateRaw = String(formData.get("recordDate") ?? "");
 
   if (!exerciseName || !value) {
-    return { error: "Indica o exercício/treino e o valor do recorde." };
+    return { error: t("errors.recordRequired") };
   }
   if (type !== "WEIGHT" && type !== "TIME") {
-    return { error: "Tipo de recorde inválido." };
+    return { error: t("errors.invalidRecordType") };
   }
 
   const exercise = await prisma.exercise.upsert({
@@ -212,7 +217,7 @@ export async function addPersonalRecordAction(
   });
 
   revalidatePath("/student/profile");
-  return { success: "Recorde adicionado." };
+  return { success: t("success.recordAdded") };
 }
 
 export async function updatePersonalRecordAction(
@@ -220,12 +225,13 @@ export async function updatePersonalRecordAction(
   _prev: ActionState,
   formData: FormData
 ): Promise<ActionState> {
+  const { t } = await getI18n();
   const session = await requireStudent();
 
   const record = await prisma.personalRecord.findFirst({
     where: { id: recordId, studentId: session.user.id },
   });
-  if (!record) return { error: "Recorde não encontrado." };
+  if (!record) return { error: t("errors.recordNotFound") };
 
   const type = String(formData.get("type") ?? "WEIGHT").trim();
   const value = String(formData.get("value") ?? "").trim();
@@ -233,9 +239,9 @@ export async function updatePersonalRecordAction(
   const notes = String(formData.get("notes") ?? "").trim();
   const recordDateRaw = String(formData.get("recordDate") ?? "");
 
-  if (!value) return { error: "Indica o valor do recorde." };
+  if (!value) return { error: t("errors.recordValueRequired") };
   if (type !== "WEIGHT" && type !== "TIME") {
-    return { error: "Tipo de recorde inválido." };
+    return { error: t("errors.invalidRecordType") };
   }
 
   await prisma.personalRecord.update({
@@ -250,7 +256,7 @@ export async function updatePersonalRecordAction(
   });
 
   revalidatePath("/student/profile");
-  return { success: "Recorde atualizado." };
+  return { success: t("success.recordUpdated") };
 }
 
 export async function deletePersonalRecordAction(recordId: string) {

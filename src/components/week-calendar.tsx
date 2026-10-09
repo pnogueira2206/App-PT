@@ -5,10 +5,13 @@ import {
   formatDayMonth,
   formatWeekRange,
   formatWeekday,
+  parseDateKey,
   toDateKey,
   todayKey,
   weekDays,
 } from "@/lib/dates";
+import { getI18n } from "@/i18n/server";
+import type { MessageKey } from "@/i18n/translator";
 import type { CalendarOwner, CompletionState } from "@/lib/workouts";
 import type { Clipboard } from "@/lib/clipboard";
 import {
@@ -33,14 +36,14 @@ export type CalendarWorkout = {
   progress?: string;
 };
 
-const STATE_STYLES: Record<CompletionState, { label: string; className: string }> = {
-  done: { label: "Feito", className: "bg-emerald-100 text-emerald-700" },
-  partial: { label: "Em curso", className: "bg-sky-100 text-sky-700" },
-  missed: { label: "Falhado", className: "bg-red-100 text-red-700" },
-  pending: { label: "Por fazer", className: "bg-slate-100 text-slate-600" },
+const STATE_STYLES: Record<CompletionState, { label: MessageKey; className: string }> = {
+  done: { label: "states.done", className: "bg-emerald-100 text-emerald-700" },
+  partial: { label: "states.partial", className: "bg-sky-100 text-sky-700" },
+  missed: { label: "states.missed", className: "bg-red-100 text-red-700" },
+  pending: { label: "states.pending", className: "bg-slate-100 text-slate-600" },
 };
 
-export function WeekCalendar({
+export async function WeekCalendar({
   owner,
   basePath,
   weekStart,
@@ -53,7 +56,16 @@ export function WeekCalendar({
   workouts: CalendarWorkout[];
   clipboard: Clipboard | null;
 }) {
+  const { t, intlLocale } = await getI18n();
   const today = todayKey();
+  const dayMonth = (key: string) => formatDayMonth(parseDateKey(key) ?? weekStart, intlLocale);
+  const clipboardLabel = (c: Clipboard) =>
+    c.kind === "workout"
+      ? t("calendar.clipboardWorkout", { title: c.title })
+      : c.kind === "day"
+        ? t("calendar.clipboardDay", { date: dayMonth(c.date), name: c.ownerName })
+        : t("calendar.clipboardWeek", { date: dayMonth(c.weekStart), name: c.ownerName });
+
   const weekKey = toDateKey(weekStart);
   const days = weekDays(weekStart);
   const ownedDrafts = workouts.filter((w) => w.status === "DRAFT" && !w.groupName).length;
@@ -71,7 +83,7 @@ export function WeekCalendar({
           <Link
             href={`${basePath}?week=${toDateKey(addDays(weekStart, -7))}`}
             className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm hover:bg-slate-50"
-            aria-label="Semana anterior"
+            aria-label={t("common.previousWeek")}
           >
             ←
           </Link>
@@ -79,17 +91,17 @@ export function WeekCalendar({
             href={basePath}
             className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm hover:bg-slate-50"
           >
-            Hoje
+            {t("common.today")}
           </Link>
           <Link
             href={`${basePath}?week=${toDateKey(addDays(weekStart, 7))}`}
             className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm hover:bg-slate-50"
-            aria-label="Semana seguinte"
+            aria-label={t("common.nextWeek")}
           >
             →
           </Link>
           <span className="ml-2 text-sm font-semibold text-slate-900">
-            {formatWeekRange(weekStart)}
+            {formatWeekRange(weekStart, intlLocale)}
           </span>
         </div>
 
@@ -97,21 +109,21 @@ export function WeekCalendar({
           {hasOwned && (
             <form action={copyWeek}>
               <button className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50">
-                Copiar semana
+                {t("calendar.copyWeek")}
               </button>
             </form>
           )}
           {clipboard?.kind === "week" && (
             <form action={pasteWeek}>
               <button className="rounded-lg border border-sky-300 bg-sky-50 px-3 py-1.5 text-sm font-medium text-sky-800 hover:bg-sky-100">
-                Colar semana
+                {t("calendar.pasteWeek")}
               </button>
             </form>
           )}
           {ownedDrafts > 0 && (
             <form action={publishWeek}>
-              <button className="rounded-lg bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-800">
-                Publicar semana ({ownedDrafts})
+              <button className="rounded-lg bg-brand px-3 py-1.5 text-sm font-medium text-brand-ink hover:bg-brand-hover">
+                {t("calendar.publishWeek", { count: ownedDrafts })}
               </button>
             </form>
           )}
@@ -121,13 +133,11 @@ export function WeekCalendar({
       {clipboard && (
         <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-sky-200 bg-sky-50 px-3 py-2 text-sm text-sky-900">
           <span>
-            📋 Copiado: <strong>{clipboard.label}</strong>
-            {clipboard.kind === "week"
-              ? " — usa “Colar semana” acima."
-              : " — usa “Colar” no dia pretendido."}
+            {t("calendar.copied")} <strong>{clipboardLabel(clipboard)}</strong>{" "}
+            {clipboard.kind === "week" ? t("calendar.pasteWeekHint") : t("calendar.pasteDayHint")}
           </span>
           <form action={clearClipboardAction}>
-            <button className="text-xs text-sky-700 underline">Limpar</button>
+            <button className="text-xs text-sky-700 underline">{t("common.clear")}</button>
           </form>
         </div>
       )}
@@ -145,21 +155,14 @@ export function WeekCalendar({
             <div
               key={key}
               className={`flex min-h-28 flex-col gap-2 rounded-xl border bg-white p-2.5 ${
-                isToday ? "border-slate-900" : "border-slate-200"
+                isToday ? "border-brand" : "border-slate-200"
               }`}
             >
               <div className="flex items-baseline justify-between gap-1">
-                <p className={`text-sm font-semibold capitalize ${isToday ? "text-slate-900" : "text-slate-600"}`}>
-                  {formatWeekday(day)}{" "}
-                  <span className="font-normal text-slate-400">{formatDayMonth(day)}</span>
+                <p className={`text-sm font-semibold first-letter:uppercase ${isToday ? "text-slate-900" : "text-slate-600"}`}>
+                  {formatWeekday(day, intlLocale)}{" "}
+                  <span className="font-normal text-slate-400">{formatDayMonth(day, intlLocale)}</span>
                 </p>
-                {dayHasOwned && (
-                  <form action={copyDay}>
-                    <button className="shrink-0 text-xs text-slate-400 hover:text-slate-800" title="Copiar dia">
-                      Copiar
-                    </button>
-                  </form>
-                )}
               </div>
 
               {dayWorkouts.map((w) => (
@@ -174,12 +177,12 @@ export function WeekCalendar({
                   <div className="mt-1 flex flex-wrap gap-1 text-[11px]">
                     {w.status === "DRAFT" && (
                       <span className="rounded-full bg-amber-100 px-1.5 py-0.5 text-amber-800">
-                        Rascunho
+                        {t("common.draft")}
                       </span>
                     )}
                     {w.state && w.status === "PUBLISHED" && (
                       <span className={`rounded-full px-1.5 py-0.5 ${STATE_STYLES[w.state].className}`}>
-                        {STATE_STYLES[w.state].label}
+                        {t(STATE_STYLES[w.state].label)}
                       </span>
                     )}
                     {w.progress && (
@@ -194,25 +197,34 @@ export function WeekCalendar({
                     )}
                     {w.isOverride && (
                       <span className="rounded-full bg-indigo-100 px-1.5 py-0.5 text-indigo-700">
-                        Ajustado
+                        {t("calendar.adjusted")}
                       </span>
                     )}
-                    <span className="px-0.5 text-slate-400">{w.blocksCount} blocos</span>
+                    <span className="px-0.5 text-slate-400">{t("common.blocks", { count: w.blocksCount })}</span>
                   </div>
                 </Link>
               ))}
 
-              <div className="mt-auto flex items-center gap-2 pt-1">
+              <div className="mt-auto flex flex-wrap items-center gap-x-2 gap-y-1 pt-1">
                 <Link
                   href={`/trainer/workouts/new?target=${targetParam}&date=${key}`}
                   className="text-xs font-medium text-slate-500 hover:text-slate-900"
                 >
-                  + Treino
+                  {t("calendar.addWorkout")}
                 </Link>
+                {dayHasOwned && (
+                  <form action={copyDay}>
+                    <button className="text-xs text-slate-400 hover:text-slate-800" title={t("calendar.copyDay")}>
+                      {t("common.copy")}
+                    </button>
+                  </form>
+                )}
                 {clipboard && clipboard.kind !== "week" && (
                   <form action={pasteDay}>
+
                     <button className="text-xs font-medium text-sky-700 hover:text-sky-900">
-                      Colar
+                      {t("common.paste")}
+
                     </button>
                   </form>
                 )}

@@ -4,13 +4,19 @@ import type {
   ExerciseCategory,
   MetconFormat,
 } from "@prisma/client";
+import type { Translate } from "@/i18n/translator";
 
-export const BLOCK_TYPE_LABELS: Record<BlockType, string> = {
-  STRENGTH: "Força",
-  METCON: "Metcon",
-  ACCESSORY: "Acessórios / mobilidade",
-  CARDIO: "Cardio / endurance",
-};
+export const BLOCK_TYPES: BlockType[] = ["STRENGTH", "METCON", "ACCESSORY", "CARDIO"];
+export const METCON_FORMATS: MetconFormat[] = ["FOR_TIME", "AMRAP", "EMOM", "FOR_REPS", "MAX_LOAD"];
+export const CARDIO_MODALITIES: CardioModality[] = ["ROW", "RUN", "BIKE", "SKI", "OTHER"];
+export const EXERCISE_CATEGORIES: ExerciseCategory[] = [
+  "STRENGTH",
+  "WEIGHTLIFTING",
+  "GYMNASTICS",
+  "CARDIO",
+  "MOBILITY",
+  "OTHER",
+];
 
 export const BLOCK_TYPE_STYLES: Record<BlockType, string> = {
   STRENGTH: "bg-sky-100 text-sky-800",
@@ -19,42 +25,20 @@ export const BLOCK_TYPE_STYLES: Record<BlockType, string> = {
   CARDIO: "bg-emerald-100 text-emerald-800",
 };
 
-export const METCON_FORMAT_LABELS: Record<MetconFormat, string> = {
-  FOR_TIME: "For Time",
-  AMRAP: "AMRAP",
-  EMOM: "EMOM",
-  FOR_REPS: "For Reps",
-  MAX_LOAD: "Carga máxima",
-};
-
-export const CARDIO_MODALITY_LABELS: Record<CardioModality, string> = {
-  ROW: "Remo",
-  RUN: "Corrida",
-  BIKE: "Bike",
-  SKI: "Ski",
-  OTHER: "Outro",
-};
-
-export const EXERCISE_CATEGORY_LABELS: Record<ExerciseCategory, string> = {
-  STRENGTH: "Força",
-  WEIGHTLIFTING: "Halterofilia",
-  GYMNASTICS: "Ginástica",
-  CARDIO: "Cardio",
-  MOBILITY: "Mobilidade",
-  OTHER: "Outro",
-};
+/** Translator + Intl locale, from getI18n() or useI18n(). */
+type I18n = { t: Translate; intlLocale: string };
 
 export function isBlockType(value: string): value is BlockType {
-  return value in BLOCK_TYPE_LABELS;
+  return (BLOCK_TYPES as string[]).includes(value);
 }
 export function isMetconFormat(value: string): value is MetconFormat {
-  return value in METCON_FORMAT_LABELS;
+  return (METCON_FORMATS as string[]).includes(value);
 }
 export function isCardioModality(value: string): value is CardioModality {
-  return value in CARDIO_MODALITY_LABELS;
+  return (CARDIO_MODALITIES as string[]).includes(value);
 }
 export function isExerciseCategory(value: string): value is ExerciseCategory {
-  return value in EXERCISE_CATEGORY_LABELS;
+  return (EXERCISE_CATEGORIES as string[]).includes(value);
 }
 
 /** Parses "mm:ss", "h:mm:ss" or plain seconds. Returns null for empty input, NaN for invalid. */
@@ -76,8 +60,8 @@ export function formatDuration(seconds: number): string {
   return h > 0 ? `${h}:${String(m).padStart(2, "0")}:${ss}` : `${m}:${ss}`;
 }
 
-export function formatNumber(value: number): string {
-  return value.toLocaleString("pt-PT", { maximumFractionDigits: 2 });
+export function formatNumber(value: number, locale: string): string {
+  return value.toLocaleString(locale, { maximumFractionDigits: 2 });
 }
 
 /** Load for a percentage of a 1RM, rounded to the nearest 0.5 kg. */
@@ -97,10 +81,10 @@ export function formatPace(
   return `${formatDuration(pace)}/${per === 500 ? "500m" : "km"}`;
 }
 
-export function formatDistance(meters: number): string {
+export function formatDistance(meters: number, locale: string): string {
   return meters >= 1000 && meters % 100 === 0
-    ? `${formatNumber(meters / 1000)} km`
-    : `${formatNumber(meters)} m`;
+    ? `${formatNumber(meters / 1000, locale)} km`
+    : `${formatNumber(meters, locale)} m`;
 }
 
 type PrescriptionBlock = {
@@ -121,7 +105,8 @@ type PrescriptionBlock = {
 };
 
 /** One-line summary of what the trainer prescribed. */
-export function formatPrescription(block: PrescriptionBlock): string {
+export function formatPrescription(block: PrescriptionBlock, { t, intlLocale }: I18n): string {
+  const num = (value: number) => formatNumber(value, intlLocale);
   const parts: (string | null)[] = [];
   switch (block.type) {
     case "STRENGTH":
@@ -129,31 +114,48 @@ export function formatPrescription(block: PrescriptionBlock): string {
       if (block.prescribedSets && block.prescribedReps) {
         parts.push(`${block.prescribedSets} × ${block.prescribedReps}`);
       } else {
-        parts.push(block.prescribedSets ? `${block.prescribedSets} séries` : null);
-        parts.push(block.prescribedReps ? `${block.prescribedReps} reps` : null);
+        parts.push(
+          block.prescribedSets ? t("blocks.prescription.sets", { count: block.prescribedSets }) : null
+        );
+        parts.push(
+          block.prescribedReps ? t("blocks.prescription.reps", { reps: block.prescribedReps }) : null
+        );
       }
-      parts.push(block.percent1RM ? `@ ${formatNumber(block.percent1RM)}% 1RM` : null);
+      parts.push(
+        block.percent1RM ? t("blocks.prescription.percent", { value: num(block.percent1RM) }) : null
+      );
       parts.push(block.prescribedWeight || null);
-      parts.push(block.tempo ? `tempo ${block.tempo}` : null);
-      parts.push(block.restSeconds ? `${formatDuration(block.restSeconds)} descanso` : null);
+      parts.push(block.tempo ? t("blocks.prescription.tempo", { value: block.tempo }) : null);
+      parts.push(
+        block.restSeconds
+          ? t("blocks.prescription.rest", { value: formatDuration(block.restSeconds) })
+          : null
+      );
       break;
     case "METCON":
-      parts.push(block.metconFormat ? METCON_FORMAT_LABELS[block.metconFormat] : null);
+      parts.push(block.metconFormat ? t(`blocks.metconFormats.${block.metconFormat}`) : null);
       if (block.timeCapSeconds) {
-        const label =
+        const value = formatDuration(block.timeCapSeconds);
+        parts.push(
           block.metconFormat === "AMRAP" || block.metconFormat === "EMOM"
-            ? formatDuration(block.timeCapSeconds)
-            : `time cap ${formatDuration(block.timeCapSeconds)}`;
-        parts.push(label);
+            ? value
+            : t("blocks.prescription.timeCap", { value })
+        );
       }
       break;
     case "CARDIO":
-      parts.push(block.cardioModality ? CARDIO_MODALITY_LABELS[block.cardioModality] : null);
-      parts.push(block.targetDistanceM ? formatDistance(block.targetDistanceM) : null);
+      parts.push(block.cardioModality ? t(`blocks.cardioModalities.${block.cardioModality}`) : null);
+      parts.push(block.targetDistanceM ? formatDistance(block.targetDistanceM, intlLocale) : null);
       parts.push(block.targetTimeSeconds ? formatDuration(block.targetTimeSeconds) : null);
-      parts.push(block.targetCalories ? `${block.targetCalories} cal` : null);
-      parts.push(block.targetPace ? `pace ${block.targetPace}` : null);
-      parts.push(block.restSeconds ? `${formatDuration(block.restSeconds)} descanso` : null);
+      parts.push(
+        block.targetCalories ? t("blocks.prescription.calories", { value: block.targetCalories }) : null
+      );
+      parts.push(block.targetPace ? t("blocks.prescription.pace", { value: block.targetPace }) : null);
+      parts.push(
+        block.restSeconds
+          ? t("blocks.prescription.rest", { value: formatDuration(block.restSeconds) })
+          : null
+      );
       break;
   }
   return parts.filter(Boolean).join(" · ");
@@ -176,10 +178,12 @@ type ResultLike = {
 /** One-line summary of a student's score. */
 export function formatResult(
   block: { type: BlockType; metconFormat: MetconFormat | null; cardioModality: CardioModality | null },
-  result: ResultLike
+  result: ResultLike,
+  { t, intlLocale }: I18n
 ): string {
+  const num = (value: number) => formatNumber(value, intlLocale);
   const parts: (string | null)[] = [];
-  if (!result.done) parts.push("Não feito");
+  if (!result.done) parts.push(t("blocks.result.notDone"));
 
   switch (block.type) {
     case "STRENGTH":
@@ -189,7 +193,7 @@ export function formatResult(
           [...result.sets]
             .sort((a, b) => a.setNumber - b.setNumber)
             .map((s) =>
-              [s.reps != null ? `${s.reps}` : "–", s.loadKg != null ? `${formatNumber(s.loadKg)}kg` : null]
+              [s.reps != null ? `${s.reps}` : "–", s.loadKg != null ? `${num(s.loadKg)}kg` : null]
                 .filter(Boolean)
                 .join(" @ ")
             )
@@ -200,28 +204,31 @@ export function formatResult(
     case "METCON":
       if (result.timeSeconds != null) parts.push(formatDuration(result.timeSeconds));
       if (result.rounds != null) {
-        parts.push(`${result.rounds} rondas${result.reps ? ` + ${result.reps} reps` : ""}`);
+        parts.push(
+          t("blocks.result.rounds", { count: result.rounds }) +
+            (result.reps ? t("blocks.result.plusReps", { count: result.reps }) : "")
+        );
       } else if (result.reps != null) {
-        parts.push(`${result.reps} reps`);
+        parts.push(t("blocks.result.reps", { count: result.reps }));
       }
-      if (result.loadKg != null) parts.push(`${formatNumber(result.loadKg)} kg`);
-      if (result.rx != null) parts.push(result.rx ? "Rx" : "Scaled");
+      if (result.loadKg != null) parts.push(`${num(result.loadKg)} kg`);
+      if (result.rx != null) parts.push(result.rx ? "Rx" : t("blocks.result.scaled"));
       break;
     case "CARDIO":
       if (result.timeSeconds != null) parts.push(formatDuration(result.timeSeconds));
-      if (result.distanceM != null) parts.push(formatDistance(result.distanceM));
-      if (result.calories != null) parts.push(`${result.calories} cal`);
+      if (result.distanceM != null) parts.push(formatDistance(result.distanceM, intlLocale));
+      if (result.calories != null) parts.push(t("blocks.prescription.calories", { value: result.calories }));
       if (result.timeSeconds && result.distanceM) {
         parts.push(formatPace(block.cardioModality, result.timeSeconds, result.distanceM));
       }
       break;
   }
 
-  if (result.rpe != null) parts.push(`RPE ${result.rpe}`);
+  if (result.rpe != null) parts.push(t("common.rpe", { value: result.rpe }));
   if (result.scoreText) parts.push(result.scoreText);
 
   const summary = parts.filter(Boolean).join(" · ");
-  return summary || (result.done ? "Feito" : "Não feito");
+  return summary || (result.done ? t("blocks.result.done") : t("blocks.result.notDone"));
 }
 
 /** Extracts a numeric kg value from a free-text personal record value ("100", "100kg", "100,5 kg"). */

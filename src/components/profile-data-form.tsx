@@ -1,6 +1,8 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import { useI18n } from "@/i18n/client";
+import { formatDate } from "@/lib/dates";
 
 type ActionState = { error?: string; success?: string } | undefined;
 
@@ -20,6 +22,7 @@ export function ProfileDataForm({
   heightCm: number | null;
   action: (state: ActionState, formData: FormData) => Promise<ActionState>;
 }) {
+  const { t, intlLocale } = useI18n();
   const [editing, setEditing] = useState(false);
   const [state, formAction, isPending] = useActionState(action, undefined);
 
@@ -33,27 +36,27 @@ export function ProfileDataForm({
     return (
       <div className="rounded-xl border border-slate-200 bg-white p-4">
         <div className="flex items-center justify-between">
-          <h2 className="font-semibold text-slate-900">Dados pessoais</h2>
+          <h2 className="font-semibold text-slate-900">{t("profile.personalData")}</h2>
           <button
             onClick={() => setEditing(true)}
             className="text-sm font-medium text-slate-500 hover:text-slate-900"
           >
-            Editar
+            {t("common.edit")}
           </button>
         </div>
         <dl className="mt-2 grid grid-cols-3 gap-2 text-sm">
           <div>
-            <dt className="text-xs text-slate-400">Nascimento</dt>
+            <dt className="text-xs text-slate-400">{t("profile.birth")}</dt>
             <dd className="font-medium text-slate-800">
-              {dateOfBirth ? new Date(dateOfBirth).toLocaleDateString("pt-PT") : "—"}
+              {dateOfBirth ? formatDate(new Date(dateOfBirth), intlLocale) : "—"}
             </dd>
           </div>
           <div>
-            <dt className="text-xs text-slate-400">Peso</dt>
+            <dt className="text-xs text-slate-400">{t("profile.weight")}</dt>
             <dd className="font-medium text-slate-800">{weightKg ? `${weightKg} kg` : "—"}</dd>
           </div>
           <div>
-            <dt className="text-xs text-slate-400">Altura</dt>
+            <dt className="text-xs text-slate-400">{t("profile.height")}</dt>
             <dd className="font-medium text-slate-800">{heightCm ? `${heightCm} cm` : "—"}</dd>
           </div>
         </dl>
@@ -67,18 +70,18 @@ export function ProfileDataForm({
       className="space-y-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
     >
       <div className="flex items-center justify-between">
-        <h2 className="font-semibold text-slate-900">Dados pessoais</h2>
+        <h2 className="font-semibold text-slate-900">{t("profile.personalData")}</h2>
         <button
           type="button"
           onClick={() => setEditing(false)}
           className="text-sm text-slate-400 hover:text-slate-700"
         >
-          Fechar
+          {t("common.close")}
         </button>
       </div>
 
       <div>
-        <label className="block text-xs text-slate-500">Data de nascimento</label>
+        <label className="block text-xs text-slate-500">{t("profile.dateOfBirth")}</label>
         <input
           name="dateOfBirth"
           type="date"
@@ -88,7 +91,7 @@ export function ProfileDataForm({
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="block text-xs text-slate-500">Peso (kg)</label>
+          <label className="block text-xs text-slate-500">{t("profile.weightKg")}</label>
           <input
             name="weightKg"
             type="number"
@@ -99,7 +102,7 @@ export function ProfileDataForm({
           />
         </div>
         <div>
-          <label className="block text-xs text-slate-500">Altura (cm)</label>
+          <label className="block text-xs text-slate-500">{t("profile.heightCm")}</label>
           <input
             name="heightCm"
             type="number"
@@ -116,9 +119,10 @@ export function ProfileDataForm({
       <button
         type="submit"
         disabled={isPending}
-        className="w-full rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-60"
+        className="w-full rounded-lg bg-brand px-4 py-2 text-sm font-medium text-brand-ink hover:bg-brand-hover disabled:opacity-60"
       >
-        {isPending ? "A guardar..." : "Guardar"}
+        {isPending ? t("common.saving") : t("common.save")}
+
       </button>
     </form>
   );

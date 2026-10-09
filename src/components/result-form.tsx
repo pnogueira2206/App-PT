@@ -4,6 +4,7 @@ import { useActionState, useState } from "react";
 import type { BlockType, CardioModality, MetconFormat } from "@prisma/client";
 import { submitResultAction } from "@/app/student/actions";
 import { formatDuration, formatPace, parseDuration } from "@/lib/blocks";
+import { useI18n } from "@/i18n/client";
 
 type ExistingResult = {
   done: boolean;
@@ -53,6 +54,7 @@ export function ResultForm({
   existing: ExistingResult;
   suggestedLoadKg?: number;
 }) {
+  const { t } = useI18n();
   const [state, formAction, isPending] = useActionState(
     submitResultAction.bind(null, block.id),
     undefined
@@ -82,11 +84,13 @@ export function ResultForm({
   return (
     <form action={formAction} className="mt-3 space-y-3 border-t border-slate-100 pt-3">
       <div className="flex items-center justify-between">
-        <p className="text-xs font-medium uppercase tracking-wide text-slate-400">O teu resultado</p>
+        <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+          {t("resultForm.yourResult")}
+        </p>
         <div className="flex rounded-lg bg-slate-100 p-0.5 text-xs font-medium">
           {[
-            { value: true, text: "Feito" },
-            { value: false, text: "Não feito" },
+            { value: true, text: t("blocks.result.done") },
+            { value: false, text: t("blocks.result.notDone") },
           ].map((option) => (
             <button
               key={option.text}
@@ -106,9 +110,9 @@ export function ResultForm({
       {done && usesSets && (
         <div className="space-y-1.5">
           <div className="grid grid-cols-[2rem_1fr_1fr] gap-2 text-xs font-medium text-slate-500">
-            <span>Série</span>
-            <span>Reps</span>
-            <span>Carga (kg)</span>
+            <span>{t("resultForm.set")}</span>
+            <span>{t("blocks.form.reps")}</span>
+            <span>{t("resultForm.loadKg")}</span>
           </div>
           {sets.map((set, i) => (
             <div key={i} className="grid grid-cols-[2rem_1fr_1fr] items-center gap-2">
@@ -135,7 +139,7 @@ export function ResultForm({
               onClick={() => setSets((current) => [...current, { ...(current.at(-1) ?? { reps: "", load: "" }) }])}
               className="font-medium text-slate-600 hover:text-slate-900"
             >
-              + Série
+              {t("resultForm.addSet")}
             </button>
             {sets.length > 1 && (
               <button
@@ -143,7 +147,7 @@ export function ResultForm({
                 onClick={() => setSets((current) => current.slice(0, -1))}
                 className="text-slate-400 hover:text-red-600"
               >
-                − Remover última
+                {t("resultForm.removeLastSet")}
               </button>
             )}
           </div>
@@ -156,18 +160,18 @@ export function ResultForm({
             {format === "FOR_TIME" && (
               <>
                 <div>
-                  <label className={label}>Tempo (mm:ss)</label>
+                  <label className={label}>{t("blocks.form.time")}</label>
                   <input
                     name="timeSeconds"
                     value={time}
                     onChange={(e) => setTime(e.target.value)}
-                    placeholder="ex: 7:32"
+                    placeholder={t("resultForm.timePlaceholder")}
                     inputMode="numeric"
                     className={input}
                   />
                 </div>
                 <div>
-                  <label className={label}>Reps (se não acabaste no time cap)</label>
+                  <label className={label}>{t("resultForm.repsIfCapped")}</label>
                   <input name="reps" inputMode="numeric" defaultValue={existing?.reps ?? ""} className={input} />
                 </div>
               </>
@@ -175,24 +179,28 @@ export function ResultForm({
             {(format === "AMRAP" || format === "EMOM") && (
               <>
                 <div>
-                  <label className={label}>{format === "AMRAP" ? "Rondas" : "Rondas completas"}</label>
+                  <label className={label}>
+                    {format === "AMRAP" ? t("resultForm.rounds") : t("resultForm.roundsCompleted")}
+                  </label>
                   <input name="rounds" inputMode="numeric" defaultValue={existing?.rounds ?? ""} className={input} />
                 </div>
                 <div>
-                  <label className={label}>{format === "AMRAP" ? "+ Reps" : "Reps totais (opcional)"}</label>
+                  <label className={label}>
+                    {format === "AMRAP" ? t("resultForm.plusReps") : t("resultForm.totalRepsOptional")}
+                  </label>
                   <input name="reps" inputMode="numeric" defaultValue={existing?.reps ?? ""} className={input} />
                 </div>
               </>
             )}
             {format === "FOR_REPS" && (
               <div>
-                <label className={label}>Reps totais</label>
+                <label className={label}>{t("resultForm.totalReps")}</label>
                 <input name="reps" inputMode="numeric" defaultValue={existing?.reps ?? ""} className={input} />
               </div>
             )}
             {format === "MAX_LOAD" && (
               <div>
-                <label className={label}>Carga (kg)</label>
+                <label className={label}>{t("resultForm.loadKg")}</label>
                 <input name="loadKg" inputMode="decimal" defaultValue={existing?.loadKg ?? ""} className={input} />
               </div>
             )}
@@ -201,7 +209,7 @@ export function ResultForm({
           <div className="flex rounded-lg bg-slate-100 p-0.5 text-sm font-medium">
             {[
               { value: "rx", text: "Rx" },
-              { value: "scaled", text: "Scaled" },
+              { value: "scaled", text: t("blocks.result.scaled") },
             ].map((option) => (
               <button
                 key={option.value}
@@ -222,7 +230,7 @@ export function ResultForm({
       {done && block.type === "CARDIO" && (
         <div className="grid grid-cols-3 gap-2">
           <div>
-            <label className={label}>Tempo (mm:ss)</label>
+            <label className={label}>{t("blocks.form.time")}</label>
             <input
               name="timeSeconds"
               value={time}
@@ -232,7 +240,7 @@ export function ResultForm({
             />
           </div>
           <div>
-            <label className={label}>Distância (m)</label>
+            <label className={label}>{t("blocks.form.distance")}</label>
             <input
               name="distanceM"
               value={distance}
@@ -242,16 +250,16 @@ export function ResultForm({
             />
           </div>
           <div>
-            <label className={label}>Calorias</label>
+            <label className={label}>{t("blocks.form.calories")}</label>
             <input name="calories" inputMode="numeric" defaultValue={existing?.calories ?? ""} className={input} />
           </div>
-          {pace && <p className="col-span-3 text-xs text-slate-500">Pace: {pace}</p>}
+          {pace && <p className="col-span-3 text-xs text-slate-500">{t("resultForm.pace", { value: pace })}</p>}
         </div>
       )}
 
       {done && block.type !== "ACCESSORY" && (
         <div>
-          <label className={label}>Esforço (RPE 1–10)</label>
+          <label className={label}>{t("resultForm.effort")}</label>
           <select name="rpe" defaultValue={existing?.rpe ?? ""} className={input}>
             <option value="">—</option>
             {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
@@ -265,17 +273,17 @@ export function ResultForm({
 
       {showText ? (
         <div>
-          <label className={label}>Resultado em texto (opcional)</label>
+          <label className={label}>{t("resultForm.textResult")}</label>
           <input
             name="scoreText"
             defaultValue={existing?.scoreText ?? ""}
-            placeholder="ex: 21-15-9 com banda verde"
+            placeholder={t("resultForm.textResultPlaceholder")}
             className={input}
           />
         </div>
       ) : (
         <button type="button" onClick={() => setShowText(true)} className="text-xs text-slate-500 underline">
-          Escrever resultado em texto livre
+          {t("resultForm.writeText")}
         </button>
       )}
 
@@ -283,7 +291,7 @@ export function ResultForm({
         name="studentNotes"
         rows={2}
         defaultValue={existing?.studentNotes ?? ""}
-        placeholder="Notas para o treinador (como te sentiste, dores, escalas...)"
+        placeholder={t("resultForm.notesPlaceholder")}
         className={input}
       />
 
@@ -293,9 +301,10 @@ export function ResultForm({
       <button
         type="submit"
         disabled={isPending}
-        className="w-full rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-60"
+        className="w-full rounded-lg bg-brand px-3 py-2 text-sm font-medium text-brand-ink hover:bg-brand-hover disabled:opacity-60"
       >
-        {isPending ? "A guardar..." : existing ? "Atualizar resultado" : "Guardar resultado"}
+        {isPending ? t("common.saving") : existing ? t("resultForm.update") : t("resultForm.submit")}
+
       </button>
     </form>
   );

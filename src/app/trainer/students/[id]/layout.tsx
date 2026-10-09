@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { requireTrainer } from "@/lib/require-session";
 import { ResetPasswordForm } from "@/components/reset-password-form";
 import { Tabs } from "@/components/tabs";
+import { getI18n } from "@/i18n/server";
 
 export default async function StudentLayout({
   children,
@@ -11,6 +12,7 @@ export default async function StudentLayout({
 }: LayoutProps<"/trainer/students/[id]">) {
   const { id } = await params;
   const session = await requireTrainer();
+  const { t } = await getI18n();
 
   const student = await prisma.user.findFirst({
     where: { id, trainerId: session.user.id, role: "STUDENT" },
@@ -22,7 +24,7 @@ export default async function StudentLayout({
     <div className="space-y-5">
       <div>
         <Link href="/trainer/students" className="text-sm text-slate-500 hover:text-slate-900">
-          ← Alunos
+          {t("students.back")}
         </Link>
         <div className="mt-1 flex flex-wrap items-center justify-between gap-3">
           <div>
@@ -48,8 +50,9 @@ export default async function StudentLayout({
 
       <Tabs
         tabs={[
-          { href: `/trainer/students/${student.id}`, label: "Calendário" },
-          { href: `/trainer/students/${student.id}/profile`, label: "Perfil e recordes" },
+          { href: `/trainer/students/${student.id}`, label: t("students.tabCalendar") },
+          { href: `/trainer/students/${student.id}/profile`, label: t("students.tabProfile") },
+
         ]}
       />
 

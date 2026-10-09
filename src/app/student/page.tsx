@@ -18,17 +18,20 @@ import {
   withoutOverridden,
   type CompletionState,
 } from "@/lib/workouts";
+import { getI18n } from "@/i18n/server";
+import type { MessageKey } from "@/i18n/translator";
 
-const STATE_STYLES: Record<CompletionState, { label: string; className: string }> = {
-  done: { label: "Feito ✓", className: "bg-emerald-100 text-emerald-700" },
-  partial: { label: "Em curso", className: "bg-sky-100 text-sky-700" },
-  missed: { label: "Por registar", className: "bg-amber-100 text-amber-800" },
-  pending: { label: "Por fazer", className: "bg-slate-100 text-slate-600" },
+const STATE_STYLES: Record<CompletionState, { label: MessageKey; className: string }> = {
+  done: { label: "states.studentDone", className: "bg-emerald-100 text-emerald-700" },
+  partial: { label: "states.partial", className: "bg-sky-100 text-sky-700" },
+  missed: { label: "states.studentMissed", className: "bg-amber-100 text-amber-800" },
+  pending: { label: "states.pending", className: "bg-slate-100 text-slate-600" },
 };
 
 export default async function StudentHomePage({ searchParams }: PageProps<"/student">) {
   const { week } = (await searchParams) as { week?: string };
   const session = await requireStudent();
+  const { t, intlLocale } = await getI18n();
   const studentId = session.user.id;
 
   const weekStart = resolveWeekStart(week);
@@ -57,22 +60,22 @@ export default async function StudentHomePage({ searchParams }: PageProps<"/stud
         <Link
           href={`/student?week=${toDateKey(addDays(weekStart, -7))}`}
           className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm"
-          aria-label="Semana anterior"
+          aria-label={t("common.previousWeek")}
         >
           ←
         </Link>
         <div className="text-center">
-          <p className="text-sm font-semibold text-slate-900">{formatWeekRange(weekStart)}</p>
+          <p className="text-sm font-semibold text-slate-900">{formatWeekRange(weekStart, intlLocale)}</p>
           {toDateKey(weekStart) !== toDateKey(resolveWeekStart(undefined)) && (
             <Link href="/student" className="text-xs text-slate-500 underline">
-              Voltar a hoje
+              {t("studentHome.backToToday")}
             </Link>
           )}
         </div>
         <Link
           href={`/student?week=${toDateKey(addDays(weekStart, 7))}`}
           className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm"
-          aria-label="Semana seguinte"
+          aria-label={t("common.nextWeek")}
         >
           →
         </Link>
@@ -88,16 +91,17 @@ export default async function StudentHomePage({ searchParams }: PageProps<"/stud
             <li
               key={key}
               className={`rounded-xl border p-3 ${
-                isToday ? "border-slate-900 bg-white shadow-sm" : "border-slate-200 bg-white/60"
+                isToday ? "border-brand bg-white shadow-sm" : "border-slate-200 bg-white/60"
               }`}
             >
-              <p className={`text-sm font-semibold capitalize ${isToday ? "text-slate-900" : "text-slate-500"}`}>
-                {isToday ? "Hoje · " : ""}
-                {formatWeekday(day)} <span className="font-normal">{formatDayMonth(day)}</span>
+              <p className={`text-sm font-semibold first-letter:uppercase ${isToday ? "text-slate-900" : "text-slate-500"}`}>
+                {isToday ? t("studentHome.todayPrefix") : ""}
+                {formatWeekday(day, intlLocale)}{" "}
+                <span className="font-normal">{formatDayMonth(day, intlLocale)}</span>
               </p>
 
               {dayWorkouts.length === 0 ? (
-                <p className="mt-1 text-xs text-slate-400">Sem treino</p>
+                <p className="mt-1 text-xs text-slate-400">{t("studentHome.noWorkout")}</p>
               ) : (
                 <div className="mt-2 space-y-2">
                   {dayWorkouts.map((w) => {
@@ -113,12 +117,15 @@ export default async function StudentHomePage({ searchParams }: PageProps<"/stud
                       >
                         <div>
                           <p className="font-medium text-slate-900">{w.title}</p>
-                          <p className="text-xs text-slate-500">{w.blocks.length} blocos</p>
+                          <p className="text-xs text-slate-500">
+                            {t("common.blocks", { count: w.blocks.length })}
+                          </p>
                         </div>
                         <span
                           className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${STATE_STYLES[state].className}`}
                         >
-                          {STATE_STYLES[state].label}
+                          {t(STATE_STYLES[state].label)}
+
                         </span>
                       </Link>
                     );

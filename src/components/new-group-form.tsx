@@ -2,8 +2,10 @@
 
 import { useActionState, useRef, useEffect, useState } from "react";
 import { createGroupAction } from "@/app/trainer/actions";
+import { useI18n } from "@/i18n/client";
 
 export function NewGroupForm() {
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const [state, formAction, isPending] = useActionState(
     createGroupAction,
@@ -19,9 +21,9 @@ export function NewGroupForm() {
     return (
       <button
         onClick={() => setOpen(true)}
-        className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
+        className="rounded-lg bg-brand px-4 py-2 text-sm font-medium text-brand-ink hover:bg-brand-hover"
       >
-        + Novo grupo
+        {t("groups.newGroup")}
       </button>
     );
   }
@@ -34,23 +36,24 @@ export function NewGroupForm() {
     >
       <input
         name="name"
-        placeholder="Nome do grupo (ex: Turma da manhã)"
+        placeholder={t("groups.namePlaceholder")}
         required
         className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm"
       />
       <button
         type="submit"
         disabled={isPending}
-        className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-60"
+        className="rounded-lg bg-brand px-4 py-2 text-sm font-medium text-brand-ink hover:bg-brand-hover disabled:opacity-60"
       >
-        Criar
+        {t("common.create")}
       </button>
       <button
         type="button"
         onClick={() => setOpen(false)}
         className="text-sm text-slate-400 hover:text-slate-700"
       >
-        Cancelar
+        {t("common.cancel")}
+
       </button>
       {state?.error && <span className="w-full text-sm text-red-600">{state.error}</span>}
     </form>

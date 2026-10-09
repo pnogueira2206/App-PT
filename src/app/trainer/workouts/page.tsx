@@ -2,9 +2,11 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireTrainer } from "@/lib/require-session";
 import { formatDate } from "@/lib/dates";
+import { getI18n } from "@/i18n/server";
 
 export default async function WorkoutsPage() {
   const session = await requireTrainer();
+  const { t, intlLocale } = await getI18n();
 
   const workouts = await prisma.workout.findMany({
     where: { trainerId: session.user.id },
@@ -17,21 +19,19 @@ export default async function WorkoutsPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl font-bold text-slate-900">Treinos</h1>
-          <p className="text-sm text-slate-500">
-            Para programar, usa o calendário de cada aluno ou grupo.
-          </p>
+          <h1 className="text-xl font-bold text-slate-900">{t("workouts.title")}</h1>
+          <p className="text-sm text-slate-500">{t("workouts.hint")}</p>
         </div>
         <Link
           href="/trainer/workouts/new"
-          className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
+          className="rounded-lg bg-brand px-4 py-2 text-sm font-medium text-brand-ink hover:bg-brand-hover"
         >
-          + Novo treino
+          {t("workouts.newWorkout")}
         </Link>
       </div>
 
       {workouts.length === 0 ? (
-        <p className="text-sm text-slate-500">Ainda não criaste nenhum treino.</p>
+        <p className="text-sm text-slate-500">{t("workouts.empty")}</p>
       ) : (
         <ul className="space-y-2">
           {workouts.map((w) => (
@@ -45,17 +45,19 @@ export default async function WorkoutsPage() {
                     {w.title}
                     {w.status === "DRAFT" && (
                       <span className="ml-2 rounded-full bg-amber-100 px-1.5 py-0.5 text-[11px] font-normal text-amber-800">
-                        Rascunho
+                        {t("common.draft")}
                       </span>
                     )}
                   </p>
                   <p className="text-xs text-slate-500">
-                    {w.group ? `👥 ${w.group.name}` : (w.student?.name ?? "Sem destinatário")}
-                    {w.sourceWorkoutId ? " (ajustado)" : ""} · {w._count.blocks} blocos
+                    {w.group ? `👥 ${w.group.name}` : (w.student?.name ?? t("common.noTarget"))}
+                    {w.sourceWorkoutId ? t("workouts.adjustedSuffix") : ""} ·{" "}
+                    {t("common.blocks", { count: w._count.blocks })}
                   </p>
                 </div>
-                <span className="text-xs capitalize text-slate-400">
-                  {formatDate(w.date, { weekday: "short", day: "numeric", month: "short" })}
+                <span className="text-xs text-slate-400 first-letter:uppercase">
+                  {formatDate(w.date, intlLocale, { weekday: "short", day: "numeric", month: "short" })}
+
                 </span>
               </Link>
             </li>

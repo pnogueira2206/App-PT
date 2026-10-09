@@ -2,7 +2,8 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireStudent } from "@/lib/require-session";
-import { formatDate, toDateKey } from "@/lib/dates";
+import { formatLongDate, toDateKey } from "@/lib/dates";
+import { getI18n } from "@/i18n/server";
 import { loadFromPercent } from "@/lib/blocks";
 import { findStudentWorkout, getOneRepMaxes } from "@/lib/workouts";
 import { BlockView } from "@/components/block-view";
@@ -13,6 +14,8 @@ export default async function StudentWorkoutPage({ params }: PageProps<"/student
   const { id } = await params;
   const session = await requireStudent();
   const studentId = session.user.id;
+  const i18n = await getI18n();
+  const { t, intlLocale } = i18n;
 
   if (!(await findStudentWorkout(id, studentId))) {
     // An old link to a group workout that was later adjusted for this student.
@@ -51,11 +54,11 @@ export default async function StudentWorkoutPage({ params }: PageProps<"/student
           href={`/student?week=${toDateKey(workout.date)}`}
           className="text-sm text-slate-500 hover:text-slate-900"
         >
-          ← Calendário
+          {t("studentHome.backToCalendar")}
         </Link>
         <h1 className="mt-1 text-xl font-bold text-slate-900">{workout.title}</h1>
         <p className="text-sm text-slate-500 first-letter:uppercase">
-          {formatDate(workout.date, { weekday: "long", day: "numeric", month: "long" })}
+          {formatLongDate(workout.date, intlLocale)}
           {" · "}
           {workout.trainer.name}
         </p>
@@ -73,6 +76,8 @@ export default async function StudentWorkoutPage({ params }: PageProps<"/student
                 block={block}
                 index={idx}
                 oneRepMaxKg={oneRepMax}
+                i18n={i18n}
+
                 exerciseHref={block.exercise ? `/student/exercises/${block.exercise.id}/history` : undefined}
               />
               <ResultForm

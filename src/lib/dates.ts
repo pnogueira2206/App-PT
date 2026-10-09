@@ -46,19 +46,26 @@ export function diffInDays(a: Date, b: Date): number {
   return Math.round((a.getTime() - b.getTime()) / DAY_MS);
 }
 
-export function formatDate(date: Date, options?: Intl.DateTimeFormatOptions): string {
-  return date.toLocaleDateString("pt-PT", { timeZone: "UTC", ...options });
+// `locale` is a BCP 47 tag (INTL_LOCALE from @/i18n/config, or intlLocale from getI18n/useI18n).
+
+export function formatDate(date: Date, locale: string, options?: Intl.DateTimeFormatOptions): string {
+  return date.toLocaleDateString(locale, { timeZone: "UTC", ...options });
 }
 
-export function formatWeekday(date: Date): string {
-  return formatDate(date, { weekday: "short" }).replace(".", "");
+export function formatWeekday(date: Date, locale: string): string {
+  return formatDate(date, locale, { weekday: "short" }).replace(".", "");
 }
 
-export function formatDayMonth(date: Date): string {
-  return formatDate(date, { day: "numeric", month: "short" }).replace(".", "");
+export function formatDayMonth(date: Date, locale: string): string {
+  return formatDate(date, locale, { day: "numeric", month: "short" }).replace(".", "");
 }
 
-export function formatWeekRange(weekStart: Date): string {
+export function formatWeekRange(weekStart: Date, locale: string): string {
   const end = addDays(weekStart, 6);
-  return `${formatDayMonth(weekStart)} – ${formatDayMonth(end)}`;
+  return `${formatDayMonth(weekStart, locale)} – ${formatDayMonth(end, locale)}`;
+}
+
+/** Long date for headings, e.g. "Quinta-feira, 8 de outubro". */
+export function formatLongDate(date: Date, locale: string): string {
+  return formatDate(date, locale, { weekday: "long", day: "numeric", month: "long" });
 }

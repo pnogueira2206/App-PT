@@ -1,18 +1,14 @@
 import Link from "next/link";
 import type { WorkoutBlock, Exercise } from "@prisma/client";
-import {
-  BLOCK_TYPE_LABELS,
-  BLOCK_TYPE_STYLES,
-  formatNumber,
-  formatPrescription,
-  loadFromPercent,
-} from "@/lib/blocks";
+import { BLOCK_TYPE_STYLES, formatNumber, formatPrescription, loadFromPercent } from "@/lib/blocks";
+import type { Translate } from "@/i18n/translator";
 
 export function BlockView({
   block,
   index,
   oneRepMaxKg,
   exerciseHref,
+  i18n,
 }: {
   block: WorkoutBlock & { exercise: Exercise | null };
   index: number;
@@ -20,8 +16,12 @@ export function BlockView({
   oneRepMaxKg?: number;
   /** Link for the exercise name (e.g. its history). */
   exerciseHref?: string;
+  /** Translator from getI18n() (this is rendered by Server Components). */
+  i18n: { t: Translate; intlLocale: string };
 }) {
-  const prescription = formatPrescription(block);
+  const { t, intlLocale } = i18n;
+  const num = (value: number) => formatNumber(value, intlLocale);
+  const prescription = formatPrescription(block, i18n);
   const computedLoad =
     block.percent1RM && oneRepMaxKg ? loadFromPercent(oneRepMaxKg, block.percent1RM) : null;
 
@@ -29,10 +29,10 @@ export function BlockView({
     <div className="space-y-1.5">
       <div className="flex flex-wrap items-center gap-2 pr-12">
         <span className="text-xs font-medium uppercase tracking-wide text-slate-400">
-          Bloco {index + 1}
+          {t("blocks.blockNumber", { number: index + 1 })}
         </span>
         <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${BLOCK_TYPE_STYLES[block.type]}`}>
-          {BLOCK_TYPE_LABELS[block.type]}
+          {t(`blocks.types.${block.type}`)}
         </span>
       </div>
       <h3 className="font-semibold text-slate-900">{block.title}</h3>
@@ -56,7 +56,7 @@ export function BlockView({
               rel="noopener noreferrer"
               className="text-xs font-medium text-red-600 hover:text-red-800"
             >
-              ▶ Ver vídeo
+              {t("common.watchVideo")}
             </a>
           )}
         </p>
@@ -66,8 +66,9 @@ export function BlockView({
 
       {computedLoad != null && (
         <p className="inline-block rounded-md bg-sky-50 px-2 py-1 text-sm text-sky-900">
-          {formatNumber(block.percent1RM!)}% do teu 1RM ({formatNumber(oneRepMaxKg!)} kg) ≈{" "}
-          <strong>{formatNumber(computedLoad)} kg</strong>
+          {t("blocks.percentOfMax", { percent: num(block.percent1RM!), max: num(oneRepMaxKg!) })}{" "}
+          <strong>{num(computedLoad)} kg</strong>
+
         </p>
       )}
 

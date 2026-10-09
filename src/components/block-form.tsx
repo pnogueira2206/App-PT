@@ -2,12 +2,8 @@
 
 import { useActionState, useId, useState } from "react";
 import type { BlockType, CardioModality, MetconFormat } from "@prisma/client";
-import {
-  BLOCK_TYPE_LABELS,
-  CARDIO_MODALITY_LABELS,
-  METCON_FORMAT_LABELS,
-  formatDuration,
-} from "@/lib/blocks";
+import { BLOCK_TYPES, CARDIO_MODALITIES, METCON_FORMATS, formatDuration } from "@/lib/blocks";
+import { useI18n } from "@/i18n/client";
 
 type ActionState = { error?: string; success?: string } | undefined;
 
@@ -62,6 +58,7 @@ export function BlockForm({
     },
     undefined
   );
+  const { t } = useI18n();
   const [type, setType] = useState<BlockType>(initial?.type ?? "STRENGTH");
   const [metconFormat, setMetconFormat] = useState<MetconFormat>(
     initial?.metconFormat ?? "FOR_TIME"
@@ -76,16 +73,16 @@ export function BlockForm({
       className="space-y-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
     >
       <div className="flex flex-wrap gap-1.5">
-        {(Object.keys(BLOCK_TYPE_LABELS) as BlockType[]).map((t) => (
+        {BLOCK_TYPES.map((option) => (
           <button
-            key={t}
+            key={option}
             type="button"
-            onClick={() => setType(t)}
+            onClick={() => setType(option)}
             className={`rounded-full px-3 py-1 text-xs font-medium ${
-              type === t ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+              type === option ? "bg-brand text-brand-ink" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
             }`}
           >
-            {BLOCK_TYPE_LABELS[t]}
+            {t(`blocks.types.${option}`)}
           </button>
         ))}
         <input type="hidden" name="type" value={type} />
@@ -93,24 +90,28 @@ export function BlockForm({
 
       <div className="grid gap-3 sm:grid-cols-2">
         <div>
-          <label className={label}>Nome do bloco</label>
+          <label className={label}>{t("blocks.form.title")}</label>
           <input
             name="title"
             required
             defaultValue={initial?.title}
-            placeholder={type === "METCON" ? "ex: Metcon" : "ex: A. Força"}
+            placeholder={
+              type === "METCON" ? t("blocks.form.titlePlaceholderMetcon") : t("blocks.form.titlePlaceholder")
+            }
             className={input}
           />
         </div>
         <div>
           <label className={label}>
-            Exercício {type === "METCON" ? "(opcional, ex: benchmark)" : ""}
+            {type === "METCON" ? t("blocks.form.exerciseOptionalMetcon") : t("blocks.form.exercise")}
           </label>
           <input
             name="exerciseName"
             list={listId}
             defaultValue={initial?.exerciseName ?? ""}
-            placeholder={type === "CARDIO" ? "ex: Remo" : "ex: Back Squat"}
+            placeholder={
+              type === "CARDIO" ? t("blocks.form.exercisePlaceholderCardio") : t("blocks.form.exercisePlaceholder")
+            }
             className={input}
           />
           <datalist id={listId}>
@@ -124,28 +125,30 @@ export function BlockForm({
       {type === "METCON" && (
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className={label}>Formato</label>
+            <label className={label}>{t("blocks.form.format")}</label>
             <select
               name="metconFormat"
               value={metconFormat}
               onChange={(e) => setMetconFormat(e.target.value as MetconFormat)}
               className={input}
             >
-              {(Object.keys(METCON_FORMAT_LABELS) as MetconFormat[]).map((f) => (
+              {METCON_FORMATS.map((f) => (
                 <option key={f} value={f}>
-                  {METCON_FORMAT_LABELS[f]}
+                  {t(`blocks.metconFormats.${f}`)}
                 </option>
               ))}
             </select>
           </div>
           <div>
             <label className={label}>
-              {metconFormat === "AMRAP" || metconFormat === "EMOM" ? "Duração (mm:ss)" : "Time cap (mm:ss)"}
+              {metconFormat === "AMRAP" || metconFormat === "EMOM"
+                ? t("blocks.form.duration")
+                : t("blocks.form.timeCap")}
             </label>
             <input
               name="timeCapSeconds"
               defaultValue={duration(initial?.timeCapSeconds)}
-              placeholder="ex: 12:00"
+              placeholder={t("blocks.form.timeCapPlaceholder")}
               inputMode="numeric"
               className={input}
             />
@@ -156,7 +159,7 @@ export function BlockForm({
       {usesSets && (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           <div>
-            <label className={label}>Séries</label>
+            <label className={label}>{t("blocks.form.sets")}</label>
             <input
               name="prescribedSets"
               type="number"
@@ -166,52 +169,52 @@ export function BlockForm({
             />
           </div>
           <div>
-            <label className={label}>Reps</label>
+            <label className={label}>{t("blocks.form.reps")}</label>
             <input
               name="prescribedReps"
               defaultValue={initial?.prescribedReps ?? ""}
-              placeholder="ex: 5 ou 8-10"
+              placeholder={t("blocks.form.repsPlaceholder")}
               className={input}
             />
           </div>
           {type === "STRENGTH" && (
             <div>
-              <label className={label}>% do 1RM</label>
+              <label className={label}>{t("blocks.form.percent1RM")}</label>
               <input
                 name="percent1RM"
                 inputMode="decimal"
                 defaultValue={initial?.percent1RM ?? ""}
-                placeholder="ex: 75"
+                placeholder={t("blocks.form.percentPlaceholder")}
                 className={input}
               />
             </div>
           )}
           <div>
-            <label className={label}>Carga</label>
+            <label className={label}>{t("blocks.form.load")}</label>
             <input
               name="prescribedWeight"
               defaultValue={initial?.prescribedWeight ?? ""}
-              placeholder="ex: 60kg, RPE 8"
+              placeholder={t("blocks.form.loadPlaceholder")}
               className={input}
             />
           </div>
           {type === "STRENGTH" && (
             <div>
-              <label className={label}>Tempo de execução</label>
+              <label className={label}>{t("blocks.form.tempo")}</label>
               <input
                 name="tempo"
                 defaultValue={initial?.tempo ?? ""}
-                placeholder="ex: 31X1"
+                placeholder={t("blocks.form.tempoPlaceholder")}
                 className={input}
               />
             </div>
           )}
           <div>
-            <label className={label}>Descanso (mm:ss)</label>
+            <label className={label}>{t("blocks.form.rest")}</label>
             <input
               name="restSeconds"
               defaultValue={duration(initial?.restSeconds)}
-              placeholder="ex: 2:00"
+              placeholder={t("blocks.form.restPlaceholder")}
               className={input}
             />
           </div>
@@ -221,41 +224,41 @@ export function BlockForm({
       {type === "CARDIO" && (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           <div>
-            <label className={label}>Modalidade</label>
+            <label className={label}>{t("blocks.form.modality")}</label>
             <select
               name="cardioModality"
               defaultValue={initial?.cardioModality ?? "ROW"}
               className={input}
             >
-              {(Object.keys(CARDIO_MODALITY_LABELS) as CardioModality[]).map((m) => (
+              {CARDIO_MODALITIES.map((m) => (
                 <option key={m} value={m}>
-                  {CARDIO_MODALITY_LABELS[m]}
+                  {t(`blocks.cardioModalities.${m}`)}
                 </option>
               ))}
             </select>
           </div>
           <div>
-            <label className={label}>Distância (m)</label>
+            <label className={label}>{t("blocks.form.distance")}</label>
             <input
               name="targetDistanceM"
               type="number"
               min={0}
               defaultValue={initial?.targetDistanceM ?? ""}
-              placeholder="ex: 2000"
+              placeholder={t("blocks.form.distancePlaceholder")}
               className={input}
             />
           </div>
           <div>
-            <label className={label}>Tempo (mm:ss)</label>
+            <label className={label}>{t("blocks.form.time")}</label>
             <input
               name="targetTimeSeconds"
               defaultValue={duration(initial?.targetTimeSeconds)}
-              placeholder="ex: 20:00"
+              placeholder={t("blocks.form.timePlaceholder")}
               className={input}
             />
           </div>
           <div>
-            <label className={label}>Calorias</label>
+            <label className={label}>{t("blocks.form.calories")}</label>
             <input
               name="targetCalories"
               type="number"
@@ -265,16 +268,16 @@ export function BlockForm({
             />
           </div>
           <div>
-            <label className={label}>Pace alvo</label>
+            <label className={label}>{t("blocks.form.targetPace")}</label>
             <input
               name="targetPace"
               defaultValue={initial?.targetPace ?? ""}
-              placeholder="ex: 2:05/500m"
+              placeholder={t("blocks.form.targetPacePlaceholder")}
               className={input}
             />
           </div>
           <div>
-            <label className={label}>Descanso (mm:ss)</label>
+            <label className={label}>{t("blocks.form.rest")}</label>
             <input
               name="restSeconds"
               defaultValue={duration(initial?.restSeconds)}
@@ -286,7 +289,7 @@ export function BlockForm({
 
       <div>
         <label className={label}>
-          {type === "METCON" ? "Treino (WOD)" : "Descrição"}
+          {type === "METCON" ? t("blocks.form.wod") : t("blocks.form.description")}
         </label>
         <textarea
           name="description"
@@ -294,22 +297,22 @@ export function BlockForm({
           defaultValue={initial?.description ?? ""}
           placeholder={
             type === "METCON"
-              ? "ex:\n21-15-9\nThrusters 43/30kg\nPull-ups"
+              ? t("blocks.form.wodPlaceholder")
               : type === "ACCESSORY"
-                ? "ex:\n3 rondas:\n10 Banded pull-aparts\n30s Couch stretch / lado"
-                : "Detalhes adicionais (opcional)"
+                ? t("blocks.form.accessoryPlaceholder")
+                : t("blocks.form.descriptionPlaceholder")
           }
           className={`${input} font-mono`}
         />
       </div>
 
       <div>
-        <label className={label}>Notas para o aluno</label>
+        <label className={label}>{t("blocks.form.notes")}</label>
         <textarea
           name="trainerNotes"
           rows={2}
           defaultValue={initial?.trainerNotes ?? ""}
-          placeholder="Técnica, intenção, escalas..."
+          placeholder={t("blocks.form.notesPlaceholder")}
           className={input}
         />
       </div>
@@ -320,13 +323,14 @@ export function BlockForm({
         <button
           type="submit"
           disabled={isPending}
-          className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-60"
+          className="rounded-lg bg-brand px-4 py-2 text-sm font-medium text-brand-ink hover:bg-brand-hover disabled:opacity-60"
         >
-          {isPending ? "A guardar..." : submitLabel}
+          {isPending ? t("common.saving") : submitLabel}
         </button>
         {onCancel && (
           <button type="button" onClick={onCancel} className="text-sm text-slate-500 hover:text-slate-800">
-            Cancelar
+            {t("common.cancel")}
+
           </button>
         )}
       </div>

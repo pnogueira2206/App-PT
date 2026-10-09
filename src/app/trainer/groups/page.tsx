@@ -2,9 +2,11 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireTrainer } from "@/lib/require-session";
 import { NewGroupForm } from "@/components/new-group-form";
+import { getI18n } from "@/i18n/server";
 
 export default async function GroupsPage() {
   const session = await requireTrainer();
+  const { t } = await getI18n();
 
   const groups = await prisma.group.findMany({
     where: { trainerId: session.user.id },
@@ -15,14 +17,12 @@ export default async function GroupsPage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-xl font-bold text-slate-900">Grupos</h1>
+        <h1 className="text-xl font-bold text-slate-900">{t("groups.title")}</h1>
         <NewGroupForm />
       </div>
 
       {groups.length === 0 ? (
-        <p className="text-sm text-slate-500">
-          Ainda não tens grupos. Cria um grupo para atribuir treinos a vários alunos de uma vez.
-        </p>
+        <p className="text-sm text-slate-500">{t("groups.empty")}</p>
       ) : (
         <ul className="divide-y divide-slate-200 rounded-xl border border-slate-200 bg-white">
           {groups.map((g) => (
@@ -33,7 +33,8 @@ export default async function GroupsPage() {
               >
                 <span className="font-medium text-slate-900">{g.name}</span>
                 <span className="text-sm text-slate-500">
-                  {g.members.length} {g.members.length === 1 ? "aluno" : "alunos"}
+                  {t("common.students", { count: g.members.length })}
+
                 </span>
               </Link>
             </li>

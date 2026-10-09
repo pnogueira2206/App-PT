@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import type { Prisma, WorkoutStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { getI18n } from "@/i18n/server";
 import { requireTrainer } from "@/lib/require-session";
 import { parseDateKey } from "@/lib/dates";
 import {
@@ -52,6 +53,7 @@ export async function createWorkoutAction(
   _prev: ActionState,
   formData: FormData
 ): Promise<ActionState> {
+  const { t } = await getI18n();
   const session = await requireTrainer();
 
   const title = String(formData.get("title") ?? "").trim();
@@ -59,12 +61,12 @@ export async function createWorkoutAction(
   const date = parseDateKey(String(formData.get("date") ?? ""));
   const target = String(formData.get("target") ?? "");
 
-  if (!title) return { error: "Indica um título para o treino." };
-  if (!date) return { error: "Escolhe o dia do treino." };
-  if (!target) return { error: "Escolhe um grupo ou aluno." };
+  if (!title) return { error: t("errors.workoutTitle") };
+  if (!date) return { error: t("errors.workoutDay") };
+  if (!target) return { error: t("errors.workoutTarget") };
 
   const owner = await resolveOwner(session.user.id, target);
-  if (!owner) return { error: "Destinatário inválido." };
+  if (!owner) return { error: t("errors.invalidTarget") };
 
   const workout = await prisma.workout.create({
     data: {
@@ -86,6 +88,7 @@ export async function updateWorkoutDetailsAction(
   _prev: ActionState,
   formData: FormData
 ): Promise<ActionState> {
+  const { t } = await getI18n();
   const session = await requireTrainer();
   await requireOwnedWorkout(session.user.id, workoutId);
 
@@ -93,8 +96,8 @@ export async function updateWorkoutDetailsAction(
   const description = String(formData.get("description") ?? "").trim();
   const date = parseDateKey(String(formData.get("date") ?? ""));
 
-  if (!title) return { error: "Indica um título para o treino." };
-  if (!date) return { error: "Escolhe o dia do treino." };
+  if (!title) return { error: t("errors.workoutTitle") };
+  if (!date) return { error: t("errors.workoutDay") };
 
   await prisma.workout.update({
     where: { id: workoutId },
@@ -102,7 +105,7 @@ export async function updateWorkoutDetailsAction(
   });
 
   revalidateAll();
-  return { success: "Treino atualizado." };
+  return { success: t("success.workoutUpdated") };
 }
 
 export async function setWorkoutStatusAction(workoutId: string, status: WorkoutStatus) {
@@ -191,11 +194,12 @@ async function parseBlockForm(
   trainerId: string,
   formData: FormData
 ): Promise<{ data: BlockFields } | { error: string }> {
+  const { t } = await getI18n();
   const type = String(formData.get("type") ?? "");
-  if (!isBlockType(type)) return { error: "Tipo de bloco inválido." };
+  if (!isBlockType(type)) return { error: t("errors.invalidBlockType") };
 
   const title = String(formData.get("title") ?? "").trim();
-  if (!title) return { error: "Indica um nome para o bloco." };
+  if (!title) return { error: t("errors.blockTitle") };
 
   const sets = optionalInt(formData, "prescribedSets");
   const percent1RM = optionalFloat(formData, "percent1RM");
@@ -205,15 +209,15 @@ async function parseBlockForm(
   const targetTime = optionalDuration(formData, "targetTimeSeconds");
   const calories = optionalInt(formData, "targetCalories");
 
-  if (sets === "invalid") return { error: "Número de séries inválido." };
+  if (sets === "invalid") return { error: t("errors.invalidSets") };
   if (percent1RM === "invalid" || (percent1RM != null && percent1RM > 200)) {
-    return { error: "Percentagem do 1RM inválida." };
+    return { error: t("errors.invalidPercent") };
   }
-  if (rest === "invalid") return { error: "Descanso inválido (usa mm:ss ou segundos)." };
-  if (timeCap === "invalid") return { error: "Tempo inválido (usa mm:ss ou segundos)." };
-  if (distance === "invalid") return { error: "Distância inválida." };
-  if (targetTime === "invalid") return { error: "Tempo alvo inválido (usa mm:ss)." };
-  if (calories === "invalid") return { error: "Calorias inválidas." };
+  if (rest === "invalid") return { error: t("errors.invalidRest") };
+  if (timeCap === "invalid") return { error: t("errors.invalidDuration") };
+  if (distance === "invalid") return { error: t("errors.invalidDistance") };
+  if (targetTime === "invalid") return { error: t("errors.invalidTargetTime") };
+  if (calories === "invalid") return { error: t("errors.invalidCalories") };
 
   const metconFormat = String(formData.get("metconFormat") ?? "");
   const cardioModality = String(formData.get("cardioModality") ?? "");
@@ -261,6 +265,7 @@ export async function addBlockAction(
   _prev: ActionState,
   formData: FormData
 ): Promise<ActionState> {
+  const { t } = await getI18n();
   const session = await requireTrainer();
   await requireOwnedWorkout(session.user.id, workoutId);
 
@@ -277,7 +282,7 @@ export async function addBlockAction(
   });
 
   revalidateAll();
-  return { success: "Bloco adicionado." };
+  return { success: t("success.blockAdded") };
 }
 
 export async function updateBlockAction(
@@ -286,6 +291,7 @@ export async function updateBlockAction(
   _prev: ActionState,
   formData: FormData
 ): Promise<ActionState> {
+  const { t } = await getI18n();
   const session = await requireTrainer();
   await requireOwnedWorkout(session.user.id, workoutId);
 
@@ -296,10 +302,10 @@ export async function updateBlockAction(
     where: { id: blockId, workoutId },
     data: parsed.data,
   });
-  if (count === 0) return { error: "Bloco não encontrado." };
+  if (count === 0) return { error: t("errors.blockNotFound") };
 
   revalidateAll();
-  return { success: "Bloco atualizado." };
+  return { success: t("success.blockUpdated") };
 }
 
 export async function deleteBlockAction(workoutId: string, blockId: string) {

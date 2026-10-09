@@ -6,19 +6,27 @@ import type { CalendarOwner } from "@/lib/workouts";
 
 const COOKIE_NAME = "pt_clipboard";
 
+// Display names are stored (not a ready-made label) so the banner follows the UI language.
 export type Clipboard =
-  | { kind: "workout"; workoutId: string; label: string }
-  | { kind: "day"; owner: CalendarOwner; date: string; label: string }
-  | { kind: "week"; owner: CalendarOwner; weekStart: string; label: string };
+  | { kind: "workout"; workoutId: string; title: string }
+  | { kind: "day"; owner: CalendarOwner; date: string; ownerName: string }
+  | { kind: "week"; owner: CalendarOwner; weekStart: string; ownerName: string };
+
 
 export async function readClipboard(): Promise<Clipboard | null> {
   const raw = (await cookies()).get(COOKIE_NAME)?.value;
   if (!raw) return null;
   try {
-    return JSON.parse(raw) as Clipboard;
+    const value = JSON.parse(raw) as Clipboard;
+    // Ignore cookies written by an older version of the clipboard format.
+    const valid =
+      (value.kind === "workout" && typeof value.title === "string") ||
+      ((value.kind === "day" || value.kind === "week") && typeof value.ownerName === "string");
+    return valid ? value : null;
   } catch {
     return null;
   }
+
 }
 
 export async function writeClipboard(clipboard: Clipboard | null) {

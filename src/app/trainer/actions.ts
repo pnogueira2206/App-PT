@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { requireTrainer } from "@/lib/require-session";
+import { getI18n } from "@/i18n/server";
 
 type ActionState = { error?: string; success?: string } | undefined;
 
@@ -13,6 +14,7 @@ export async function createStudentAction(
   formData: FormData
 ): Promise<ActionState> {
   const session = await requireTrainer();
+  const { t } = await getI18n();
 
   const name = String(formData.get("name") ?? "").trim();
   const email = String(formData.get("email") ?? "")
@@ -21,15 +23,15 @@ export async function createStudentAction(
   const password = String(formData.get("password") ?? "");
 
   if (!name || !email || !password) {
-    return { error: "Preenche nome, email e palavra-passe." };
+    return { error: t("errors.fillStudent") };
   }
   if (password.length < 6) {
-    return { error: "A palavra-passe deve ter pelo menos 6 caracteres." };
+    return { error: t("errors.passwordMin6") };
   }
 
   const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) {
-    return { error: "Já existe uma conta com este email." };
+    return { error: t("errors.emailExists") };
   }
 
   const passwordHash = await bcrypt.hash(password, 10);
@@ -45,7 +47,7 @@ export async function createStudentAction(
   });
 
   revalidatePath("/trainer/students");
-  return { success: "Aluno criado com sucesso." };
+  return { success: t("success.studentCreated") };
 }
 
 export async function createGroupAction(
@@ -53,15 +55,16 @@ export async function createGroupAction(
   formData: FormData
 ): Promise<ActionState> {
   const session = await requireTrainer();
+  const { t } = await getI18n();
   const name = String(formData.get("name") ?? "").trim();
-  if (!name) return { error: "Indica um nome para o grupo." };
+  if (!name) return { error: t("errors.groupName") };
 
   await prisma.group.create({
     data: { name, trainerId: session.user.id },
   });
 
   revalidatePath("/trainer/groups");
-  return { success: "Grupo criado com sucesso." };
+  return { success: t("success.groupCreated") };
 }
 
 export async function addStudentToGroupAction(
@@ -120,17 +123,18 @@ export async function resetStudentPasswordAction(
   formData: FormData
 ): Promise<ActionState> {
   const session = await requireTrainer();
+  const { t } = await getI18n();
   const studentId = String(formData.get("studentId") ?? "");
   const password = String(formData.get("password") ?? "");
 
   if (password.length < 6) {
-    return { error: "A palavra-passe deve ter pelo menos 6 caracteres." };
+    return { error: t("errors.passwordMin6") };
   }
 
   const student = await prisma.user.findFirst({
     where: { id: studentId, trainerId: session.user.id, role: "STUDENT" },
   });
-  if (!student) return { error: "Aluno não encontrado." };
+  if (!student) return { error: t("errors.studentNotFound") };
 
   const passwordHash = await bcrypt.hash(password, 10);
   await prisma.user.update({
@@ -138,7 +142,7 @@ export async function resetStudentPasswordAction(
     data: { passwordHash },
   });
 
-  return { success: "Palavra-passe redefinida." };
+  return { success: t("success.passwordReset") };
 }
 
 async function requireOwnedStudent(trainerId: string, studentId: string) {
@@ -155,6 +159,7 @@ export async function updateStudentProfileAction(
   formData: FormData
 ): Promise<ActionState> {
   const session = await requireTrainer();
+  const { t } = await getI18n();
   await requireOwnedStudent(session.user.id, studentId);
 
   const dateOfBirthRaw = String(formData.get("dateOfBirth") ?? "");
@@ -165,10 +170,10 @@ export async function updateStudentProfileAction(
   const heightCm = heightRaw ? Number(heightRaw.replace(",", ".")) : null;
 
   if (weightRaw && (Number.isNaN(weightKg) || (weightKg as number) <= 0)) {
-    return { error: "Peso inválido." };
+    return { error: t("errors.invalidWeight") };
   }
   if (heightRaw && (Number.isNaN(heightCm) || (heightCm as number) <= 0)) {
-    return { error: "Altura inválida." };
+    return { error: t("errors.invalidHeight") };
   }
 
   await prisma.user.update({
@@ -181,7 +186,7 @@ export async function updateStudentProfileAction(
   });
 
   revalidatePath(`/trainer/students/${studentId}`);
-  return { success: "Dados atualizados." };
+  return { success: t("success.dataUpdated") };
 }
 
 export async function addStudentRecordAction(
@@ -190,6 +195,7 @@ export async function addStudentRecordAction(
   formData: FormData
 ): Promise<ActionState> {
   const session = await requireTrainer();
+  const { t } = await getI18n();
   await requireOwnedStudent(session.user.id, studentId);
 
   const exerciseName = String(formData.get("exerciseName") ?? "").trim();
@@ -200,10 +206,10 @@ export async function addStudentRecordAction(
   const recordDateRaw = String(formData.get("recordDate") ?? "");
 
   if (!exerciseName || !value) {
-    return { error: "Indica o exercício/treino e o valor do recorde." };
+    return { error: t("errors.recordRequired") };
   }
   if (type !== "WEIGHT" && type !== "TIME") {
-    return { error: "Tipo de recorde inválido." };
+    return { error: t("errors.invalidRecordType") };
   }
 
   const exercise = await prisma.exercise.upsert({
@@ -225,7 +231,7 @@ export async function addStudentRecordAction(
   });
 
   revalidatePath(`/trainer/students/${studentId}`);
-  return { success: "Recorde adicionado." };
+  return { success: t("success.recordAdded") };
 }
 
 export async function updateStudentRecordAction(
@@ -235,12 +241,13 @@ export async function updateStudentRecordAction(
   formData: FormData
 ): Promise<ActionState> {
   const session = await requireTrainer();
+  const { t } = await getI18n();
   await requireOwnedStudent(session.user.id, studentId);
 
   const record = await prisma.personalRecord.findFirst({
     where: { id: recordId, studentId },
   });
-  if (!record) return { error: "Recorde não encontrado." };
+  if (!record) return { error: t("errors.recordNotFound") };
 
   const type = String(formData.get("type") ?? "WEIGHT").trim();
   const value = String(formData.get("value") ?? "").trim();
@@ -248,9 +255,9 @@ export async function updateStudentRecordAction(
   const notes = String(formData.get("notes") ?? "").trim();
   const recordDateRaw = String(formData.get("recordDate") ?? "");
 
-  if (!value) return { error: "Indica o valor do recorde." };
+  if (!value) return { error: t("errors.recordValueRequired") };
   if (type !== "WEIGHT" && type !== "TIME") {
-    return { error: "Tipo de recorde inválido." };
+    return { error: t("errors.invalidRecordType") };
   }
 
   await prisma.personalRecord.update({
@@ -265,7 +272,7 @@ export async function updateStudentRecordAction(
   });
 
   revalidatePath(`/trainer/students/${studentId}`);
-  return { success: "Recorde atualizado." };
+  return { success: t("success.recordUpdated") };
 }
 
 export async function deleteStudentRecordAction(

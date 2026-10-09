@@ -1,12 +1,14 @@
 "use server";
 
 import { signIn } from "@/lib/auth";
+import { getI18n } from "@/i18n/server";
 import { AuthError } from "next-auth";
 
 export async function loginAction(
   _prevState: { error?: string } | undefined,
   formData: FormData
 ): Promise<{ error?: string }> {
+  const { t } = await getI18n();
   const email = String(formData.get("email") ?? "");
   const password = String(formData.get("password") ?? "");
 
@@ -18,7 +20,7 @@ export async function loginAction(
     });
   } catch (err) {
     if (err instanceof AuthError) {
-      return { error: "Email ou palavra-passe incorretos." };
+      return { error: t("auth.invalidCredentials") };
     }
     throw err;
   }

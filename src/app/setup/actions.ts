@@ -3,6 +3,7 @@
 import bcrypt from "bcryptjs";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { getI18n } from "@/i18n/server";
 import { signIn } from "@/lib/auth";
 
 // Name/email go back with errors so the form can refill them (React resets forms after an action).
@@ -13,6 +14,7 @@ export async function createFirstTrainerAction(
   _prev: ActionState,
   formData: FormData
 ): Promise<ActionState> {
+  const { t } = await getI18n();
   const name = String(formData.get("name") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const password = String(formData.get("password") ?? "");
@@ -20,9 +22,9 @@ export async function createFirstTrainerAction(
 
   const fail = (error: string) => ({ error, name, email });
 
-  if (!name || !email || !password) return fail("Preenche todos os campos.");
-  if (password.length < 8) return fail("A palavra-passe deve ter pelo menos 8 caracteres.");
-  if (password !== confirm) return fail("As palavras-passe não coincidem.");
+  if (!name || !email || !password) return fail(t("errors.fillAll"));
+  if (password.length < 8) return fail(t("errors.passwordMin8"));
+  if (password !== confirm) return fail(t("errors.passwordMismatch"));
 
   const passwordHash = await bcrypt.hash(password, 10);
 
@@ -38,11 +40,11 @@ export async function createFirstTrainerAction(
     );
   } catch (error) {
     if (error instanceof SetupClosedError) {
-      return fail("Já existe uma conta de treinador. Entra pela página de login.");
+      return fail(t("errors.trainerExists"));
     }
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      if (error.code === "P2002") return fail("Já existe uma conta com este email.");
-      if (error.code === "P2034") return fail("Tenta novamente.");
+      if (error.code === "P2002") return fail(t("errors.emailExists"));
+      if (error.code === "P2034") return fail(t("errors.tryAgain"));
     }
     throw error;
   }

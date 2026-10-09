@@ -1,4 +1,4 @@
-# App PT
+# PN Coaching
 
 Plataforma web (instalável como PWA), inspirada no CoachRx, para um treinador de CrossFit / personal trainer programar treinos individuais em calendário e receber os resultados dos alunos.
 
@@ -20,6 +20,8 @@ Plataforma web (instalável como PWA), inspirada no CoachRx, para um treinador d
 - **Perfil do aluno**: dados pessoais e recordes pessoais (Levantamentos / Treinos para tempo), editáveis pelo aluno e pelo treinador.
 - **Histórico por exercício** com os scores estruturados.
 - **PWA**: pode ser instalada no ecrã inicial do telemóvel (manifest + service worker).
+- **Línguas**: português (PT), inglês e russo. Cada pessoa escolhe no menu 🌐 do cabeçalho (ou no ecrã de login); fica guardado no browser. Os textos estão em `src/i18n/messages/` (`pt.ts` é a referência; `en.ts` e `ru.ts` têm de ter as mesmas chaves).
+- **Modo claro e escuro** (ou automático, segundo o sistema), com a identidade visual PN Coaching: preto, grafite e dourado `#c9b37e`. As cores estão em `src/app/globals.css`.
 
 O plano completo (fases seguintes) está em [`docs/PLANO.md`](docs/PLANO.md).
 

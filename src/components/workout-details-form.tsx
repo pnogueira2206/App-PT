@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { updateWorkoutDetailsAction } from "@/app/trainer/workouts/actions";
+import { useI18n } from "@/i18n/client";
 
 export function WorkoutDetailsForm({
   workoutId,
@@ -14,6 +15,7 @@ export function WorkoutDetailsForm({
   description: string | null;
   date: string;
 }) {
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const [state, formAction, isPending] = useActionState(
     async (prev: Awaited<ReturnType<typeof updateWorkoutDetailsAction>>, formData: FormData) => {
@@ -31,7 +33,7 @@ export function WorkoutDetailsForm({
         onClick={() => setOpen(true)}
         className="text-sm text-slate-500 hover:text-slate-900"
       >
-        Editar detalhes
+        {t("workouts.editDetails")}
       </button>
     );
   }
@@ -60,7 +62,7 @@ export function WorkoutDetailsForm({
         name="description"
         rows={2}
         defaultValue={description ?? ""}
-        placeholder="Descrição / objetivo da sessão (opcional)"
+        placeholder={t("workouts.descriptionPlaceholder")}
         className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
       />
       {state?.error && <p className="text-sm text-red-600">{state.error}</p>}
@@ -68,12 +70,13 @@ export function WorkoutDetailsForm({
         <button
           type="submit"
           disabled={isPending}
-          className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-60"
+          className="rounded-lg bg-brand px-4 py-2 text-sm font-medium text-brand-ink hover:bg-brand-hover disabled:opacity-60"
         >
-          {isPending ? "A guardar..." : "Guardar"}
+          {isPending ? t("common.saving") : t("common.save")}
         </button>
         <button type="button" onClick={() => setOpen(false)} className="text-sm text-slate-500">
-          Cancelar
+          {t("common.cancel")}
+
         </button>
       </div>
     </form>

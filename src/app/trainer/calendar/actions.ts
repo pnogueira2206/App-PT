@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireTrainer } from "@/lib/require-session";
-import { addDays, diffInDays, formatDayMonth, parseDateKey, startOfWeek } from "@/lib/dates";
+import { addDays, diffInDays, parseDateKey, startOfWeek } from "@/lib/dates";
 import { readClipboard, writeClipboard } from "@/lib/clipboard";
 import { duplicateWorkout, type CalendarOwner } from "@/lib/workouts";
 
@@ -53,35 +53,26 @@ export async function copyWorkoutAction(workoutId: string) {
   });
   if (!workout) throw new Error("Not found");
 
-  await writeClipboard({ kind: "workout", workoutId, label: `Treino "${workout.title}"` });
+  await writeClipboard({ kind: "workout", workoutId, title: workout.title });
   revalidatePath("/trainer", "layout");
 }
 
 export async function copyDayAction(owner: CalendarOwner, dateKey: string) {
   const session = await requireTrainer();
-  const name = await requireOwner(session.user.id, owner);
-  const date = requireDate(dateKey);
+  const ownerName = await requireOwner(session.user.id, owner);
+  requireDate(dateKey);
 
-  await writeClipboard({
-    kind: "day",
-    owner,
-    date: dateKey,
-    label: `Dia ${formatDayMonth(date)} de ${name}`,
-  });
+  await writeClipboard({ kind: "day", owner, date: dateKey, ownerName });
   revalidatePath("/trainer", "layout");
 }
 
 export async function copyWeekAction(owner: CalendarOwner, weekStartKey: string) {
   const session = await requireTrainer();
-  const name = await requireOwner(session.user.id, owner);
-  const weekStart = startOfWeek(requireDate(weekStartKey));
+  const ownerName = await requireOwner(session.user.id, owner);
+  requireDate(weekStartKey);
 
-  await writeClipboard({
-    kind: "week",
-    owner,
-    weekStart: weekStartKey,
-    label: `Semana de ${formatDayMonth(weekStart)} de ${name}`,
-  });
+  await writeClipboard({ kind: "week", owner, weekStart: weekStartKey, ownerName });
+
   revalidatePath("/trainer", "layout");
 }
 

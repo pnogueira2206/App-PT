@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { requireTrainer } from "@/lib/require-session";
 import { NewWorkoutForm } from "@/components/new-workout-form";
 import { parseDateKey, todayKey } from "@/lib/dates";
+import { getI18n } from "@/i18n/server";
 
 export default async function NewWorkoutPage({
   searchParams,
@@ -9,6 +10,7 @@ export default async function NewWorkoutPage({
   searchParams: Promise<{ target?: string; date?: string; groupId?: string; studentId?: string }>;
 }) {
   const session = await requireTrainer();
+  const { t } = await getI18n();
   const params = await searchParams;
 
   const [groups, students] = await Promise.all([
@@ -33,7 +35,8 @@ export default async function NewWorkoutPage({
 
   return (
     <div className="space-y-6">
-      <h1 className="text-xl font-bold text-slate-900">Novo treino</h1>
+      <h1 className="text-xl font-bold text-slate-900">{t("workouts.newWorkoutTitle")}</h1>
+
       <NewWorkoutForm
         groups={groups}
         students={students}

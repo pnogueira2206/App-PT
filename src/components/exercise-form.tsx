@@ -2,7 +2,8 @@
 
 import { useActionState, useEffect, useRef, useState } from "react";
 import type { ExerciseCategory } from "@prisma/client";
-import { EXERCISE_CATEGORY_LABELS } from "@/lib/blocks";
+import { EXERCISE_CATEGORIES } from "@/lib/blocks";
+import { useI18n } from "@/i18n/client";
 import {
   createExerciseAction,
   deleteExerciseAction,
@@ -20,14 +21,21 @@ type Exercise = {
 const input = "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm";
 
 function Fields({ exercise }: { exercise?: Exercise }) {
+  const { t } = useI18n();
   return (
     <>
       <div className="grid gap-3 sm:grid-cols-[1fr_12rem]">
-        <input name="name" required defaultValue={exercise?.name} placeholder="Nome (ex: Clean & Jerk)" className={input} />
+        <input
+          name="name"
+          required
+          defaultValue={exercise?.name}
+          placeholder={t("exercises.namePlaceholder")}
+          className={input}
+        />
         <select name="category" defaultValue={exercise?.category ?? "STRENGTH"} className={input}>
-          {(Object.keys(EXERCISE_CATEGORY_LABELS) as ExerciseCategory[]).map((c) => (
+          {EXERCISE_CATEGORIES.map((c) => (
             <option key={c} value={c}>
-              {EXERCISE_CATEGORY_LABELS[c]}
+              {t(`exercises.categories.${c}`)}
             </option>
           ))}
         </select>
@@ -36,14 +44,14 @@ function Fields({ exercise }: { exercise?: Exercise }) {
         name="videoUrl"
         type="url"
         defaultValue={exercise?.videoUrl ?? ""}
-        placeholder="Link do vídeo (YouTube, Instagram...)"
+        placeholder={t("exercises.videoPlaceholder")}
         className={input}
       />
       <textarea
         name="notes"
         rows={2}
         defaultValue={exercise?.notes ?? ""}
-        placeholder="Pontos-chave de técnica (opcional)"
+        placeholder={t("exercises.notesPlaceholder")}
         className={input}
       />
     </>
@@ -51,6 +59,7 @@ function Fields({ exercise }: { exercise?: Exercise }) {
 }
 
 export function NewExerciseForm() {
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const [state, formAction, isPending] = useActionState(createExerciseAction, undefined);
   const formRef = useRef<HTMLFormElement>(null);
@@ -63,9 +72,9 @@ export function NewExerciseForm() {
     return (
       <button
         onClick={() => setOpen(true)}
-        className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
+        className="rounded-lg bg-brand px-4 py-2 text-sm font-medium text-brand-ink hover:bg-brand-hover"
       >
-        + Novo exercício
+        {t("exercises.newExercise")}
       </button>
     );
   }
@@ -79,12 +88,12 @@ export function NewExerciseForm() {
         <button
           type="submit"
           disabled={isPending}
-          className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-60"
+          className="rounded-lg bg-brand px-4 py-2 text-sm font-medium text-brand-ink hover:bg-brand-hover disabled:opacity-60"
         >
-          {isPending ? "A guardar..." : "Criar exercício"}
+          {isPending ? t("common.saving") : t("exercises.createExercise")}
         </button>
         <button type="button" onClick={() => setOpen(false)} className="text-sm text-slate-500">
-          Fechar
+          {t("common.close")}
         </button>
       </div>
     </form>
@@ -92,6 +101,7 @@ export function NewExerciseForm() {
 }
 
 export function ExerciseItem({ exercise }: { exercise: Exercise }) {
+  const { t } = useI18n();
   const [editing, setEditing] = useState(false);
   const [state, formAction, isPending] = useActionState(
     async (prev: Awaited<ReturnType<typeof updateExerciseAction>>, formData: FormData) => {
@@ -116,17 +126,17 @@ export function ExerciseItem({ exercise }: { exercise: Exercise }) {
             <button
               type="submit"
               disabled={isPending}
-              className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-60"
+              className="rounded-lg bg-brand px-4 py-2 text-sm font-medium text-brand-ink hover:bg-brand-hover disabled:opacity-60"
             >
-              {isPending ? "A guardar..." : "Guardar"}
+              {isPending ? t("common.saving") : t("common.save")}
             </button>
             <button type="button" onClick={() => setEditing(false)} className="text-sm text-slate-500">
-              Cancelar
+              {t("common.cancel")}
             </button>
           </div>
         </form>
         <form action={deleteAction}>
-          <button className="text-xs text-red-500 hover:text-red-700">Eliminar exercício</button>
+          <button className="text-xs text-red-500 hover:text-red-700">{t("exercises.deleteExercise")}</button>
           {deleteState?.error && <p className="mt-1 text-sm text-red-600">{deleteState.error}</p>}
         </form>
       </li>
@@ -147,14 +157,15 @@ export function ExerciseItem({ exercise }: { exercise: Exercise }) {
             rel="noopener noreferrer"
             className="text-xs font-medium text-red-600 hover:text-red-800"
           >
-            ▶ Vídeo
+            {t("exercises.video")}
           </a>
         ) : (
-          <span className="text-xs text-slate-300">Sem vídeo</span>
+          <span className="text-xs text-slate-300">{t("exercises.noVideo")}</span>
         )}
         <button onClick={() => setEditing(true)} className="text-xs font-medium text-slate-500 hover:text-slate-900">
-          Editar
+          {t("common.edit")}
         </button>
+
       </div>
     </li>
   );

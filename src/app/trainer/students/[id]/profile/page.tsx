@@ -6,6 +6,7 @@ import { ProfileDataForm } from "@/components/profile-data-form";
 import { NewRecordForm } from "@/components/new-record-form";
 import { RecordItem } from "@/components/record-item";
 import { formatDate, parseDateKey, todayKey } from "@/lib/dates";
+import { getI18n } from "@/i18n/server";
 import { getStudentGroupIds, studentWorkoutsWhere, withoutOverridden } from "@/lib/workouts";
 import {
   updateStudentProfileAction,
@@ -21,6 +22,7 @@ export default async function StudentProfileTabPage({
 }) {
   const { id } = await params;
   const session = await requireTrainer();
+  const { t, intlLocale } = await getI18n();
 
   const student = await prisma.user.findFirst({
     where: { id, trainerId: session.user.id, role: "STUDENT" },
@@ -75,13 +77,13 @@ export default async function StudentProfileTabPage({
       />
 
       <section className="space-y-3">
-        <h2 className="font-semibold text-slate-900">Recordes pessoais</h2>
+        <h2 className="font-semibold text-slate-900">{t("records.title")}</h2>
         <NewRecordForm exerciseNames={exercises.map((e) => e.name)} action={boundAddRecord} />
 
         <div>
-          <h3 className="mb-1.5 text-sm font-medium text-slate-500">Levantamentos</h3>
+          <h3 className="mb-1.5 text-sm font-medium text-slate-500">{t("records.lifts")}</h3>
           {lifts.length === 0 ? (
-            <p className="text-sm text-slate-400">Sem recordes de levantamentos.</p>
+            <p className="text-sm text-slate-400">{t("records.noLifts")}</p>
           ) : (
             <ul className="space-y-2">
               {lifts.map((r) => (
@@ -106,9 +108,10 @@ export default async function StudentProfileTabPage({
         </div>
 
         <div>
-          <h3 className="mb-1.5 text-sm font-medium text-slate-500">Treinos para tempo</h3>
+          <h3 className="mb-1.5 text-sm font-medium text-slate-500">{t("records.timed")}</h3>
           {timeWorkouts.length === 0 ? (
-            <p className="text-sm text-slate-400">Sem recordes de treinos para tempo.</p>
+            <p className="text-sm text-slate-400">{t("records.noTimed")}</p>
+
           ) : (
             <ul className="space-y-2">
               {timeWorkouts.map((r) => (
@@ -134,9 +137,9 @@ export default async function StudentProfileTabPage({
       </section>
 
       <section>
-        <h2 className="mb-2 font-semibold text-slate-900">Treinos passados</h2>
+        <h2 className="mb-2 font-semibold text-slate-900">{t("students.pastWorkouts")}</h2>
         {workouts.length === 0 ? (
-          <p className="text-sm text-slate-500">Ainda sem treinos publicados.</p>
+          <p className="text-sm text-slate-500">{t("students.noPublishedWorkouts")}</p>
         ) : (
           <ul className="space-y-2">
             {workouts.map((w) => {
@@ -152,9 +155,11 @@ export default async function StudentProfileTabPage({
                     <div>
                       <p className="font-medium text-slate-900">{w.title}</p>
                       <p className="text-xs text-slate-500">
-                        {formatDate(w.date)}
+                        {formatDate(w.date, intlLocale)}
                         {w.group ? ` · ${w.group.name}` : ""}
-                        {completion?.sessionRpe ? ` · RPE ${completion.sessionRpe}` : ""}
+                        {completion?.sessionRpe
+                          ? ` · ${t("common.rpe", { value: completion.sessionRpe })}`
+                          : ""}
                       </p>
                     </div>
                     <span
@@ -166,7 +171,8 @@ export default async function StudentProfileTabPage({
                             : "bg-red-100 text-red-700"
                       }`}
                     >
-                      {completion ? "Feito" : `${done}/${total} blocos`}
+                      {completion ? t("states.done") : t("students.blocksDone", { done, total })}
+
                     </span>
                   </Link>
                 </li>

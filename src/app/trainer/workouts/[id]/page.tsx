@@ -2,7 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireTrainer } from "@/lib/require-session";
-import { formatDate, toDateKey } from "@/lib/dates";
+import { APP_TIMEZONE, formatDate, formatLongDate, toDateKey } from "@/lib/dates";
+import { getI18n } from "@/i18n/server";
 import { formatResult } from "@/lib/blocks";
 import { calendarPath } from "@/lib/workouts";
 import { AddBlockForm } from "@/components/add-block-form";
@@ -24,6 +25,8 @@ const smallButton = "text-xs text-slate-400 hover:text-slate-800 disabled:opacit
 export default async function WorkoutDetailPage({ params }: PageProps<"/trainer/workouts/[id]">) {
   const { id } = await params;
   const session = await requireTrainer();
+  const i18n = await getI18n();
+  const { t, intlLocale } = i18n;
 
   const workout = await prisma.workout.findFirst({
     where: { id, trainerId: session.user.id },
@@ -77,7 +80,7 @@ export default async function WorkoutDetailPage({ params }: PageProps<"/trainer/
           href={owner ? calendarPath(owner, workout.date) : "/trainer/workouts"}
           className="text-sm text-slate-500 hover:text-slate-900"
         >
-          ← Calendário de {workout.group?.name ?? workout.student?.name ?? "—"}
+          {t("workouts.backToCalendar", { name: workout.group?.name ?? workout.student?.name ?? "—" })}
         </Link>
 
         <div className="flex flex-wrap items-start justify-between gap-3">
@@ -89,11 +92,11 @@ export default async function WorkoutDetailPage({ params }: PageProps<"/trainer/
                   isPublished ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-800"
                 }`}
               >
-                {isPublished ? "Publicado" : "Rascunho"}
+                {isPublished ? t("common.published") : t("common.draft")}
               </span>
             </div>
             <p className="text-sm text-slate-500 first-letter:uppercase">
-              {formatDate(workout.date, { weekday: "long", day: "numeric", month: "long" })}
+              {formatLongDate(workout.date, intlLocale)}
               {" · "}
               {workout.group ? `👥 ${workout.group.name}` : workout.student?.name}
             </p>
@@ -105,19 +108,19 @@ export default async function WorkoutDetailPage({ params }: PageProps<"/trainer/
                 className={
                   isPublished
                     ? "rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50"
-                    : "rounded-lg bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-800"
+                    : "rounded-lg bg-brand px-3 py-1.5 text-sm font-medium text-brand-ink hover:bg-brand-hover"
                 }
               >
-                {isPublished ? "Voltar a rascunho" : "Publicar"}
+                {isPublished ? t("workouts.unpublish") : t("workouts.publish")}
               </button>
             </form>
             <form action={copyWorkoutAction.bind(null, workout.id)}>
               <button className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50">
-                Copiar
+                {t("common.copy")}
               </button>
             </form>
             <form action={deleteWorkoutAction.bind(null, workout.id)}>
-              <button className="px-1 text-sm text-red-500 hover:text-red-700">Eliminar</button>
+              <button className="px-1 text-sm text-red-500 hover:text-red-700">{t("common.delete")}</button>
             </form>
           </div>
         </div>
@@ -134,19 +137,19 @@ export default async function WorkoutDetailPage({ params }: PageProps<"/trainer/
 
       {workout.sourceWorkout && (
         <div className="rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-2 text-sm text-indigo-900">
-          Versão ajustada para {workout.student?.name} do treino de grupo{" "}
+          {t("workouts.overrideBefore", { name: workout.student?.name ?? "" })}{" "}
           <Link href={`/trainer/workouts/${workout.sourceWorkout.id}`} className="font-medium underline">
             {workout.sourceWorkout.title}
             {workout.sourceWorkout.group ? ` (${workout.sourceWorkout.group.name})` : ""}
           </Link>
-          . As alterações aqui só afetam este aluno.
+          {t("workouts.overrideAfter")}
         </div>
       )}
 
       {workout.group && workout.group.members.length > 0 && (
         <div className="rounded-xl border border-slate-200 bg-white p-3">
           <p className="mb-2 text-sm font-medium text-slate-700">
-            Ajustar este treino para um aluno (lesão, escala, carga diferente...)
+            {t("workouts.adjustPrompt")}
           </p>
           <div className="flex flex-wrap gap-2">
             {workout.group.members.map(({ student }) => {
@@ -157,12 +160,12 @@ export default async function WorkoutDetailPage({ params }: PageProps<"/trainer/
                   href={`/trainer/workouts/${overrideId}`}
                   className="rounded-full bg-indigo-100 px-3 py-1 text-xs font-medium text-indigo-800 hover:bg-indigo-200"
                 >
-                  {student.name} · versão ajustada →
+                  {t("workouts.adjustedVersion", { name: student.name })}
                 </Link>
               ) : (
                 <form key={student.id} action={createOverrideAction.bind(null, workout.id, student.id)}>
                   <button className="rounded-full border border-slate-200 px-3 py-1 text-xs text-slate-700 hover:bg-slate-50">
-                    Ajustar para {student.name}
+                    {t("workouts.adjustFor", { name: student.name })}
                   </button>
                 </form>
               );
@@ -173,7 +176,7 @@ export default async function WorkoutDetailPage({ params }: PageProps<"/trainer/
 
       <section className="space-y-3">
         {workout.blocks.length === 0 && (
-          <p className="text-sm text-slate-500">Ainda sem blocos. Adiciona o primeiro abaixo.</p>
+          <p className="text-sm text-slate-500">{t("workouts.noBlocks")}</p>
         )}
         {workout.blocks.map((block, idx) => (
           <div key={block.id} className="rounded-xl border border-slate-200 bg-white">
@@ -184,13 +187,13 @@ export default async function WorkoutDetailPage({ params }: PageProps<"/trainer/
               initial={{ ...block, exerciseName: block.exercise?.name ?? null }}
             >
               <div className="p-4">
-                <BlockView block={block} index={idx} />
+                <BlockView block={block} index={idx} i18n={i18n} />
               </div>
             </BlockEditor>
 
             <div className="flex items-center gap-3 border-t border-slate-100 px-4 py-2">
               <form action={moveBlockAction.bind(null, workout.id, block.id, "up")}>
-                <button className={smallButton} disabled={idx === 0} aria-label="Mover para cima">
+                <button className={smallButton} disabled={idx === 0} aria-label={t("workouts.moveUp")}>
                   ↑
                 </button>
               </form>
@@ -198,16 +201,16 @@ export default async function WorkoutDetailPage({ params }: PageProps<"/trainer/
                 <button
                   className={smallButton}
                   disabled={idx === workout.blocks.length - 1}
-                  aria-label="Mover para baixo"
+                  aria-label={t("workouts.moveDown")}
                 >
                   ↓
                 </button>
               </form>
               <form action={duplicateBlockAction.bind(null, workout.id, block.id)}>
-                <button className={smallButton}>Duplicar</button>
+                <button className={smallButton}>{t("workouts.duplicate")}</button>
               </form>
               <form action={deleteBlockAction.bind(null, workout.id, block.id)} className="ml-auto">
-                <button className="text-xs text-slate-400 hover:text-red-600">Remover</button>
+                <button className="text-xs text-slate-400 hover:text-red-600">{t("common.remove")}</button>
               </form>
             </div>
 
@@ -220,13 +223,13 @@ export default async function WorkoutDetailPage({ params }: PageProps<"/trainer/
                       <span className="font-medium text-slate-700">{student.name}</span>
                       {result ? (
                         <span className="text-right text-slate-700">
-                          {formatResult(block, result)}
+                          {formatResult(block, result, i18n)}
                           {result.studentNotes && (
                             <span className="block text-xs italic text-slate-400">{result.studentNotes}</span>
                           )}
                         </span>
                       ) : (
-                        <span className="text-slate-300">Sem resultado</span>
+                        <span className="text-slate-300">{t("workouts.noResult")}</span>
                       )}
                     </div>
                   );
@@ -241,7 +244,7 @@ export default async function WorkoutDetailPage({ params }: PageProps<"/trainer/
 
       {isPublished && reportingStudents.length > 0 && (
         <section className="space-y-2">
-          <h2 className="font-semibold text-slate-900">Sessão</h2>
+          <h2 className="font-semibold text-slate-900">{t("workouts.session")}</h2>
           <ul className="divide-y divide-slate-100 rounded-xl border border-slate-200 bg-white">
             {reportingStudents.map((student) => {
               const completion = workout.completions.find((c) => c.studentId === student.id);
@@ -252,14 +255,21 @@ export default async function WorkoutDetailPage({ params }: PageProps<"/trainer/
                   </Link>
                   {completion ? (
                     <span className="text-right text-slate-700">
-                      ✅ Concluído {formatDate(completion.completedAt, { day: "numeric", month: "short", timeZone: "Europe/Lisbon" })}
-                      {completion.sessionRpe ? ` · RPE ${completion.sessionRpe}` : ""}
+                      {t("workouts.completedOn", {
+                        date: formatDate(completion.completedAt, intlLocale, {
+                          day: "numeric",
+                          month: "short",
+                          timeZone: APP_TIMEZONE,
+                        }),
+                      })}
+                      {completion.sessionRpe ? ` · ${t("common.rpe", { value: completion.sessionRpe })}` : ""}
                       {completion.notes && (
                         <span className="block text-xs italic text-slate-500">{completion.notes}</span>
                       )}
                     </span>
                   ) : (
-                    <span className="text-slate-400">Por concluir</span>
+                    <span className="text-slate-400">{t("workouts.notCompleted")}</span>
+
                   )}
                 </li>
               );

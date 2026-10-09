@@ -10,6 +10,14 @@ export type StudentStats = {
   week: Ratio;
   /** Last 7 days, today included. */
   last7: Ratio;
+  /** Last 30 days, today included. */
+  last30: Ratio;
+  /** Last 90 days, today included. */
+  last90: Ratio;
+  /** Whole loaded window (all-time when called with `history: "all"`, else 90 days). */
+  total: Ratio;
+  /** Completed workouts in a row, most recent first (today counts only once done). */
+  streak: number;
   /** Last 28 days, today included. */
   month: Ratio;
   lastCompletedDate: Date | null;
@@ -28,12 +36,12 @@ export function percent(ratio: Ratio): number | null {
 
 export async function getStudentStats(
   trainerId: string,
-  studentIds?: string[]
+  studentIds?: string[],
+  options: { history?: "all" } = {}
 ): Promise<Map<string, StudentStats>> {
   const today = parseDateKey(todayKey())!;
   const weekStart = startOfWeek(today);
-  const monthStart = addDays(today, -27);
-  const from = weekStart < monthStart ? weekStart : monthStart;
+  const from = options.history === "all" ? new Date(0) : addDays(today, -89);
   const until = addDays(today, 14);
 
   const students = await prisma.user.findMany({
@@ -52,12 +60,12 @@ export async function getStudentStats(
   const [lastOwn, lastGroup] = await Promise.all([
     prisma.workout.groupBy({
       by: ["studentId"],
-      where: { trainerId, status: "PUBLISHED", studentId: { in: ids } },
+      where: { trainerId, status: "PUBLISHED", kind: "TRAINING", studentId: { in: ids } },
       _max: { date: true },
     }),
     prisma.workout.groupBy({
       by: ["groupId"],
-      where: { trainerId, status: "PUBLISHED", groupId: { in: groupIds } },
+      where: { trainerId, status: "PUBLISHED", kind: "TRAINING", groupId: { in: groupIds } },
       _max: { date: true },
     }),
   ]);
@@ -68,6 +76,7 @@ export async function getStudentStats(
     where: {
       trainerId,
       status: "PUBLISHED",
+      kind: "TRAINING",
       date: { gte: from, lte: until },
       OR: [{ studentId: { in: ids } }, { groupId: { in: groupIds } }],
     },
@@ -115,6 +124,10 @@ export async function getStudentStats(
     let missedInARow = 0;
     for (let i = past.length - 1; i >= 0 && !isDone(past[i]); i--) missedInARow++;
 
+    const upToToday = mine.filter((w) => w.date < today || (w.date.getTime() === today.getTime() && isDone(w)));
+    let streak = 0;
+    for (let i = upToToday.length - 1; i >= 0 && isDone(upToToday[i]); i--) streak++;
+
     const done = mine.filter(isDone);
     const next = mine.find((w) => w.date >= today && !isDone(w));
 
@@ -126,10 +139,15 @@ export async function getStudentStats(
     stats.set(student.id, {
       week: ratio(weekStart),
       last7: ratio(addDays(today, -6)),
+      last30: ratio(addDays(today, -29)),
+      last90: ratio(addDays(today, -89)),
+      total: ratio(from),
+      streak,
+
       programmedUntil:
         programmedDates.length > 0 ? new Date(Math.max(...programmedDates.map((d) => d.getTime()))) : null,
 
-      month: ratio(monthStart),
+      month: ratio(addDays(today, -27)),
       lastCompletedDate: done.length > 0 ? done[done.length - 1].date : null,
       nextWorkoutDate: next?.date ?? null,
       missedInARow,

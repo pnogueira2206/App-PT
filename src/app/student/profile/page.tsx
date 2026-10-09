@@ -10,14 +10,22 @@ import {
   deletePersonalRecordAction,
 } from "@/app/student/actions";
 import { getI18n } from "@/i18n/server";
+import { formatDate } from "@/lib/dates";
+
 
 export default async function ProfilePage() {
   const session = await requireStudent();
-  const { t } = await getI18n();
+  const { t, intlLocale } = await getI18n();
 
 
   const student = await prisma.user.findUniqueOrThrow({
     where: { id: session.user.id },
+    include: {
+      goals: {
+        where: { status: { in: ["ACTIVE", "ACHIEVED"] } },
+        orderBy: [{ status: "asc" }, { targetDate: "asc" }],
+      },
+    },
   });
 
   const [records, exercises] = await Promise.all([
@@ -50,6 +58,28 @@ export default async function ProfilePage() {
         heightCm={student.heightCm}
         action={updateProfileAction}
       />
+
+      {student.goals.length > 0 && (
+        <section className="space-y-2">
+          <h2 className="font-semibold text-slate-900">🎯 {t("goals.studentTitle")}</h2>
+          <ul className="space-y-1.5">
+            {student.goals.map((goal) => (
+              <li
+                key={goal.id}
+                className="flex items-baseline justify-between gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
+              >
+                <span className={goal.status === "ACHIEVED" ? "text-slate-500 line-through" : "font-medium text-slate-900"}>
+                  {goal.status === "ACHIEVED" ? "✅ " : ""}
+                  {goal.title}
+                </span>
+                {goal.targetDate && (
+                  <span className="shrink-0 text-xs text-slate-400">{formatDate(goal.targetDate, intlLocale)}</span>
+                )}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <section className="space-y-3">
         <h2 className="font-semibold text-slate-900">{t("records.title")}</h2>

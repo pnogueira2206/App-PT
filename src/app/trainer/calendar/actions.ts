@@ -147,3 +147,50 @@ export async function publishWeekAction(owner: CalendarOwner, weekStartKey: stri
 
   revalidateAll();
 }
+
+/** Marks a day as a planned rest day (published right away; never counts as missed). */
+export async function createRestDayAction(owner: CalendarOwner, dateKey: string) {
+  const session = await requireTrainer();
+  await requireOwner(session.user.id, owner);
+  const date = requireDate(dateKey);
+
+  await prisma.workout.create({
+    data: {
+      title: "—",
+      kind: "REST",
+      status: "PUBLISHED",
+      date,
+      trainerId: session.user.id,
+      studentId: owner.type === "student" ? owner.id : null,
+      groupId: owner.type === "group" ? owner.id : null,
+    },
+  });
+  revalidateAll();
+}
+
+export async function removeRestDayAction(workoutId: string) {
+  const session = await requireTrainer();
+  await prisma.workout.deleteMany({
+    where: { id: workoutId, trainerId: session.user.id, kind: "REST" },
+  });
+  revalidateAll();
+}
+
+/** Saves the focus of one weekday in the student's weekly structure (empty clears it). */
+export async function saveTrainingDayAction(studentId: string, weekday: number, formData: FormData) {
+  const session = await requireTrainer();
+  await requireOwner(session.user.id, { type: "student", id: studentId });
+  if (!Number.isInteger(weekday) || weekday < 0 || weekday > 6) throw new Error("Invalid weekday");
+
+  const focus = String(formData.get("focus") ?? "").trim().slice(0, 500);
+  if (focus) {
+    await prisma.trainingDay.upsert({
+      where: { studentId_weekday: { studentId, weekday } },
+      create: { studentId, weekday, focus },
+      update: { focus },
+    });
+  } else {
+    await prisma.trainingDay.deleteMany({ where: { studentId, weekday } });
+  }
+  revalidatePath("/trainer", "layout");
+}

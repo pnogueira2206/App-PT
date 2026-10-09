@@ -46,6 +46,7 @@ export default async function StudentProfileTabPage({
         where: {
           ...studentWorkoutsWhere(id, groupIds, { publishedOnly: true }),
           trainerId: session.user.id,
+          kind: "TRAINING",
           date: { lte: parseDateKey(todayKey())! },
         },
         include: {

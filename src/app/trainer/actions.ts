@@ -301,3 +301,92 @@ export async function setStudentArchivedAction(studentId: string, archived: bool
 
   revalidatePath("/trainer", "layout");
 }
+
+// ---------- Coach notes ----------
+
+export async function addNoteAction(
+  studentId: string,
+  _prev: ActionState,
+  formData: FormData
+): Promise<ActionState> {
+  const session = await requireTrainer();
+  const { t } = await getI18n();
+  await requireOwnedStudent(session.user.id, studentId);
+
+  const body = String(formData.get("body") ?? "").trim();
+  if (!body) return { error: t("errors.noteEmpty") };
+
+  await prisma.coachNote.create({
+    data: { studentId, authorId: session.user.id, body: body.slice(0, 5000) },
+  });
+  revalidatePath(`/trainer/students/${studentId}`, "layout");
+  return { success: "ok" };
+}
+
+export async function toggleNotePinAction(studentId: string, noteId: string) {
+  const session = await requireTrainer();
+  await requireOwnedStudent(session.user.id, studentId);
+  const note = await prisma.coachNote.findFirst({ where: { id: noteId, studentId } });
+  if (!note) return;
+  await prisma.coachNote.update({ where: { id: noteId }, data: { pinned: !note.pinned } });
+  revalidatePath(`/trainer/students/${studentId}`, "layout");
+}
+
+export async function deleteNoteAction(studentId: string, noteId: string) {
+  const session = await requireTrainer();
+  await requireOwnedStudent(session.user.id, studentId);
+  await prisma.coachNote.deleteMany({ where: { id: noteId, studentId } });
+  revalidatePath(`/trainer/students/${studentId}`, "layout");
+}
+
+// ---------- Goals ----------
+
+export async function addGoalAction(
+  studentId: string,
+  _prev: ActionState,
+  formData: FormData
+): Promise<ActionState> {
+  const session = await requireTrainer();
+  const { t } = await getI18n();
+  await requireOwnedStudent(session.user.id, studentId);
+
+  const title = String(formData.get("title") ?? "").trim();
+  const notes = String(formData.get("notes") ?? "").trim();
+  const targetDateRaw = String(formData.get("targetDate") ?? "");
+  if (!title) return { error: t("errors.goalTitle") };
+
+  await prisma.goal.create({
+    data: {
+      studentId,
+      title: title.slice(0, 200),
+      notes: notes ? notes.slice(0, 2000) : null,
+      targetDate: targetDateRaw ? new Date(`${targetDateRaw}T00:00:00.000Z`) : null,
+    },
+  });
+  revalidatePath(`/trainer/students/${studentId}`, "layout");
+  revalidatePath("/student", "layout");
+  return { success: "ok" };
+}
+
+export async function setGoalStatusAction(
+  studentId: string,
+  goalId: string,
+  status: "ACTIVE" | "ACHIEVED" | "DROPPED"
+) {
+  const session = await requireTrainer();
+  await requireOwnedStudent(session.user.id, studentId);
+  await prisma.goal.updateMany({
+    where: { id: goalId, studentId },
+    data: { status, achievedAt: status === "ACHIEVED" ? new Date() : null },
+  });
+  revalidatePath(`/trainer/students/${studentId}`, "layout");
+  revalidatePath("/student", "layout");
+}
+
+export async function deleteGoalAction(studentId: string, goalId: string) {
+  const session = await requireTrainer();
+  await requireOwnedStudent(session.user.id, studentId);
+  await prisma.goal.deleteMany({ where: { id: goalId, studentId } });
+  revalidatePath(`/trainer/students/${studentId}`, "layout");
+  revalidatePath("/student", "layout");
+}

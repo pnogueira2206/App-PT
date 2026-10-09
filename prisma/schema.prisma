@@ -25,6 +25,18 @@ enum WorkoutStatus {
   PUBLISHED
 }
 
+enum WorkoutKind {
+  TRAINING
+  // Planned rest day: shown in calendars, never counted as missed.
+  REST
+}
+
+enum GoalStatus {
+  ACTIVE
+  ACHIEVED
+  DROPPED
+}
+
 enum BlockType {
   STRENGTH
   METCON
@@ -89,7 +101,52 @@ model User {
   personalRecords   PersonalRecord[]
   completions       WorkoutCompletion[]
   resultComments    ResultComment[]
+  trainingDays      TrainingDay[]
+  notesAbout        CoachNote[]   @relation("NotesAbout")
+  notesWritten      CoachNote[]   @relation("NotesWritten")
+  goals             Goal[]
 }
+
+/** The student's weekly structure: the focus of each weekday ("Lower / Str - Squat ..."). */
+model TrainingDay {
+  id        String @id @default(cuid())
+  student   User   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  studentId String
+  // 0 = Monday ... 6 = Sunday
+  weekday   Int
+  focus     String
+
+  @@unique([studentId, weekday])
+}
+
+/** Private notes the trainer keeps about a student. */
+model CoachNote {
+  id        String   @id @default(cuid())
+  student   User     @relation("NotesAbout", fields: [studentId], references: [id], onDelete: Cascade)
+  studentId String
+  author    User     @relation("NotesWritten", fields: [authorId], references: [id], onDelete: Cascade)
+  authorId  String
+  body      String
+  pinned    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([studentId, createdAt])
+}
+
+model Goal {
+  id         String     @id @default(cuid())
+  student    User       @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  studentId  String
+  title      String
+  notes      String?
+  targetDate DateTime?
+  status     GoalStatus @default(ACTIVE)
+  achievedAt DateTime?
+  createdAt  DateTime   @default(now())
+
+  @@index([studentId, status])
+}
+
 
 
 model Group {
@@ -137,6 +194,7 @@ model Workout {
   // Calendar day, stored as UTC midnight (see src/lib/dates.ts)
   date        DateTime
   status      WorkoutStatus @default(DRAFT)
+  kind        WorkoutKind   @default(TRAINING)
   trainer     User      @relation("TrainerWorkouts", fields: [trainerId], references: [id])
   trainerId   String
   group       Group?    @relation(fields: [groupId], references: [id])

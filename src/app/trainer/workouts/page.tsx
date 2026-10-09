@@ -9,7 +9,7 @@ export default async function WorkoutsPage() {
   const { t, intlLocale } = await getI18n();
 
   const workouts = await prisma.workout.findMany({
-    where: { trainerId: session.user.id },
+    where: { trainerId: session.user.id, kind: "TRAINING" },
     include: { group: true, student: true, _count: { select: { blocks: true } } },
     orderBy: [{ date: "desc" }, { createdAt: "desc" }],
     take: 100,

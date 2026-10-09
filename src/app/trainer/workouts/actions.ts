@@ -94,6 +94,8 @@ export async function updateWorkoutDetailsAction(
 
   const title = String(formData.get("title") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();
+  const warmup = String(formData.get("warmup") ?? "").trim();
+  const cooldown = String(formData.get("cooldown") ?? "").trim();
   const date = parseDateKey(String(formData.get("date") ?? ""));
 
   if (!title) return { error: t("errors.workoutTitle") };
@@ -101,7 +103,7 @@ export async function updateWorkoutDetailsAction(
 
   await prisma.workout.update({
     where: { id: workoutId },
-    data: { title, description: description || null, date },
+    data: { title, description: description || null, warmup: warmup || null, cooldown: cooldown || null, date },
   });
 
   revalidateAll();
@@ -359,4 +361,120 @@ export async function moveBlockAction(
     )
   );
   revalidateAll();
+}
+
+// ---------- Day editor (CoachRx-style panel) ----------
+
+export type EditorBlockInput = {
+  id?: string;
+  type: string;
+  metconFormat: string | null;
+  title: string;
+  description: string;
+  trainerNotes: string;
+};
+
+export type WorkoutEditorInput = {
+  owner: CalendarOwner;
+  date: string;
+  workoutId?: string;
+  title: string;
+  description: string;
+  warmup: string;
+  cooldown: string;
+  publish: boolean;
+  blocks: EditorBlockInput[];
+  removedBlockIds: string[];
+};
+
+const text = (value: string, max: number) => value.trim().slice(0, max) || null;
+
+/**
+ * Saves a whole workout from the day editor: creates it if needed, updates the
+ * edited block fields (keeping structured fields set in the full editor),
+ * creates new blocks, deletes only the blocks the trainer removed, and
+ * renumbers them in the order shown.
+ */
+export async function saveWorkoutEditorAction(
+  input: WorkoutEditorInput
+): Promise<{ error?: string; workoutId?: string }> {
+  const session = await requireTrainer();
+  const { t } = await getI18n();
+  const trainerId = session.user.id;
+
+  const date = parseDateKey(input.date);
+  if (!date) return { error: t("errors.workoutDay") };
+  const owner = await resolveOwner(trainerId, `${input.owner.type}:${input.owner.id}`);
+  if (!owner) return { error: t("errors.invalidTarget") };
+
+  const blocks = input.blocks.filter((b) => b.title.trim() || b.description.trim());
+  if (blocks.some((b) => !b.title.trim())) return { error: t("errors.blockTitle") };
+
+  let workoutId = input.workoutId;
+  if (workoutId) await requireOwnedWorkout(trainerId, workoutId);
+
+  // Untitled workouts take the first line of the day's focus ("Lower"), else a default.
+  let title = input.title.trim();
+  if (!title) {
+    const focus = await prisma.trainingDay.findFirst({
+      where: {
+        ...(owner.type === "student" ? { studentId: owner.id } : { groupId: owner.id }),
+        weekday: (date.getUTCDay() + 6) % 7,
+      },
+    });
+    title = focus?.focus.split("\n")[0]?.trim() || t("calendar.defaultTitle");
+  }
+
+  const fields = {
+    title: title.slice(0, 200),
+    description: text(input.description, 5000),
+    warmup: text(input.warmup, 5000),
+    cooldown: text(input.cooldown, 5000),
+    status: input.publish ? ("PUBLISHED" as const) : ("DRAFT" as const),
+  };
+
+  await prisma.$transaction(async (tx) => {
+    if (workoutId) {
+      await tx.workout.update({ where: { id: workoutId }, data: fields });
+    } else {
+      const created = await tx.workout.create({
+        data: {
+          ...fields,
+          date,
+          trainerId,
+          studentId: owner.type === "student" ? owner.id : null,
+          groupId: owner.type === "group" ? owner.id : null,
+        },
+      });
+      workoutId = created.id;
+    }
+
+    if (input.removedBlockIds.length > 0) {
+      await tx.workoutBlock.deleteMany({ where: { id: { in: input.removedBlockIds }, workoutId } });
+    }
+    for (const [index, block] of blocks.entries()) {
+      const type = isBlockType(block.type) ? block.type : "STRENGTH";
+      const data = {
+        order: index + 1,
+        type,
+        metconFormat:
+          type === "METCON" && block.metconFormat && isMetconFormat(block.metconFormat)
+            ? block.metconFormat
+            : type === "METCON"
+              ? ("FOR_TIME" as const)
+              : null,
+        title: block.title.trim().slice(0, 200),
+        description: text(block.description, 5000),
+        trainerNotes: text(block.trainerNotes, 2000),
+      };
+      if (block.id) {
+        await tx.workoutBlock.updateMany({ where: { id: block.id, workoutId }, data });
+      } else {
+        await tx.workoutBlock.create({ data: { ...data, workoutId: workoutId! } });
+      }
+    }
+  });
+
+  revalidateAll();
+  return { workoutId };
 }

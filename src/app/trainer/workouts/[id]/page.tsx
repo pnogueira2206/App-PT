@@ -147,11 +147,25 @@ export default async function WorkoutDetailPage({ params }: PageProps<"/trainer/
         </div>
 
         {workout.description && <p className="text-sm text-slate-600">{workout.description}</p>}
+        {workout.warmup && (
+          <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{t("editor.warmup")}</p>
+            <p className="whitespace-pre-wrap text-slate-700">{workout.warmup}</p>
+          </div>
+        )}
+        {workout.cooldown && (
+          <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{t("editor.cooldown")}</p>
+            <p className="whitespace-pre-wrap text-slate-700">{workout.cooldown}</p>
+          </div>
+        )}
 
         <WorkoutDetailsForm
           workoutId={workout.id}
           title={workout.title}
           description={workout.description}
+          warmup={workout.warmup}
+          cooldown={workout.cooldown}
           date={toDateKey(workout.date)}
         />
       </div>

@@ -15,6 +15,8 @@ export type GridWorkout = {
   id: string;
   title: string;
   description: string | null;
+  warmup: string | null;
+  cooldown: string | null;
   date: Date;
   status: WorkoutStatus;
   kind: WorkoutKind;
@@ -46,7 +48,24 @@ export type GridWorkout = {
     targetTimeSeconds: number | null;
     targetCalories: number | null;
     targetPace: string | null;
+    trainerNotes: string | null;
+    /** The student's result (student calendars only). */
+    result: GridResult | null;
   }[];
+};
+
+export type GridResult = {
+  done: boolean;
+  timeSeconds: number | null;
+  rounds: number | null;
+  reps: number | null;
+  loadKg: number | null;
+  distanceM: number | null;
+  calories: number | null;
+  rx: boolean | null;
+  rpe: number | null;
+  scoreText: string | null;
+  sets: { setNumber: number; reps: number | null; loadKg: number | null }[];
 };
 
 const blockSelect = {
@@ -56,7 +75,12 @@ const blockSelect = {
 
 type GridBlock = GridWorkout["blocks"][number];
 
-function toBlocks(blocks: (Omit<GridBlock, "exerciseName"> & { exercise: { name: string } | null })[]): GridBlock[] {
+function toBlocks(
+  blocks: (Omit<GridBlock, "exerciseName" | "result"> & {
+    exercise: { name: string } | null;
+    results?: GridResult[];
+  })[]
+): GridBlock[] {
   return blocks.map((b) => ({
     id: b.id,
     order: b.order,
@@ -77,6 +101,8 @@ function toBlocks(blocks: (Omit<GridBlock, "exerciseName"> & { exercise: { name:
     targetTimeSeconds: b.targetTimeSeconds,
     targetCalories: b.targetCalories,
     targetPace: b.targetPace,
+    trainerNotes: b.trainerNotes,
+    result: b.results?.[0] ?? null,
   }));
 }
 
@@ -107,7 +133,7 @@ export async function loadCalendar(
             ...blockSelect,
             include: {
               ...blockSelect.include,
-              _count: { select: { results: { where: { studentId: owner.id } } } },
+              results: { where: { studentId: owner.id }, include: { sets: true } },
             },
           },
         },
@@ -119,6 +145,8 @@ export async function loadCalendar(
       id: w.id,
       title: w.title,
       description: w.description,
+      warmup: w.warmup,
+      cooldown: w.cooldown,
       date: w.date,
       status: w.status,
       kind: w.kind,
@@ -127,7 +155,7 @@ export async function loadCalendar(
       isOverride: !!w.sourceWorkoutId,
       state: completionState(w, today, {
         completed: w.completions.length > 0,
-        resultsCount: w.blocks.reduce((n, b) => n + b._count.results, 0),
+        resultsCount: w.blocks.reduce((n, b) => n + b.results.length, 0),
       }),
       progress: null,
       blocks: toBlocks(w.blocks),
@@ -160,6 +188,8 @@ export async function loadCalendar(
       id: w.id,
       title: w.title,
       description: w.description,
+      warmup: w.warmup,
+      cooldown: w.cooldown,
       date: w.date,
       status: w.status,
       kind: w.kind,

@@ -97,6 +97,13 @@ export default async function StudentWorkoutPage({ params }: PageProps<"/student
         )}
       </div>
 
+      {workout.warmup && (
+          <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{t("editor.warmup")}</p>
+            <p className="whitespace-pre-wrap text-slate-700">{workout.warmup}</p>
+          </div>
+        )}
+
       <div className="space-y-3">
         {workout.blocks.map((block, idx) => {
           const oneRepMax = block.exerciseId ? oneRepMaxes.get(block.exerciseId) : undefined;
@@ -151,6 +158,13 @@ export default async function StudentWorkoutPage({ params }: PageProps<"/student
           );
         })}
       </div>
+
+      {workout.cooldown && (
+        <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm">
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{t("editor.cooldown")}</p>
+          <p className="whitespace-pre-wrap text-slate-700">{workout.cooldown}</p>
+        </div>
+      )}
 
       <CompleteWorkoutForm workoutId={workout.id} existing={workout.completions[0] ?? null} />
     </div>

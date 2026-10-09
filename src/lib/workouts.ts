@@ -121,6 +121,8 @@ export async function duplicateWorkout(
     data: {
       title: source.title,
       description: source.description,
+      warmup: source.warmup,
+      cooldown: source.cooldown,
       date: target.date,
       kind: source.kind,
       status: target.status ?? "DRAFT",

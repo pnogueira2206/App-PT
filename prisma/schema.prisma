@@ -107,16 +107,19 @@ model User {
   goals             Goal[]
 }
 
-/** The student's weekly structure: the focus of each weekday ("Lower / Str - Squat ..."). */
+/** Weekly structure of a student or a group: the focus of each weekday ("Lower / Str - Squat ..."). */
 model TrainingDay {
-  id        String @id @default(cuid())
-  student   User   @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  studentId String
+  id        String  @id @default(cuid())
+  student   User?   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  studentId String?
+  group     Group?  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  groupId   String?
   // 0 = Monday ... 6 = Sunday
   weekday   Int
   focus     String
 
   @@unique([studentId, weekday])
+  @@unique([groupId, weekday])
 }
 
 /** Private notes the trainer keeps about a student. */
@@ -156,8 +159,10 @@ model Group {
   trainerId String
   createdAt DateTime @default(now())
 
-  members   GroupMember[]
-  workouts  Workout[]
+  members      GroupMember[]
+  workouts     Workout[]
+  trainingDays TrainingDay[]
+
 }
 
 model GroupMember {
@@ -195,6 +200,9 @@ model Workout {
   date        DateTime
   status      WorkoutStatus @default(DRAFT)
   kind        WorkoutKind   @default(TRAINING)
+  // Free-text warm-up and cooldown around the blocks (CoachRx-style workout).
+  warmup      String?
+  cooldown    String?
   trainer     User      @relation("TrainerWorkouts", fields: [trainerId], references: [id])
   trainerId   String
   group       Group?    @relation(fields: [groupId], references: [id])

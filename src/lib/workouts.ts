@@ -10,7 +10,7 @@ export function calendarPath(owner: CalendarOwner, date?: Date): string {
   return `${base}/${owner.id}${date ? `?week=${toDateKey(date)}` : ""}`;
 }
 
-export type CompletionState = "done" | "partial" | "missed" | "pending";
+export type CompletionState = "done" | "partial" | "missed" | "pending" | "rest";
 
 export async function getStudentGroupIds(studentId: string): Promise<string[]> {
   const memberships = await prisma.groupMember.findMany({
@@ -52,10 +52,11 @@ export async function withoutOverridden<T extends { id: string; groupId: string 
 }
 
 export function completionState(
-  workout: { date: Date; status: string },
+  workout: { date: Date; status: string; kind?: string },
   todayKeyValue: string,
   info: { completed: boolean; resultsCount: number }
 ): CompletionState {
+  if (workout.kind === "REST") return "rest";
   if (info.completed) return "done";
   if (info.resultsCount > 0) return "partial";
   if (workout.status === "PUBLISHED" && workout.date.toISOString().slice(0, 10) < todayKeyValue) {
@@ -70,6 +71,7 @@ export async function findStudentWorkout(workoutId: string, studentId: string) {
     where: {
       id: workoutId,
       status: "PUBLISHED",
+      kind: "TRAINING",
       OR: [{ studentId }, { group: { members: { some: { studentId } } } }],
     },
   });
@@ -120,6 +122,7 @@ export async function duplicateWorkout(
       title: source.title,
       description: source.description,
       date: target.date,
+      kind: source.kind,
       status: target.status ?? "DRAFT",
       trainerId: source.trainerId,
       studentId: target.owner.type === "student" ? target.owner.id : null,

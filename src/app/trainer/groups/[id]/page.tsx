@@ -2,9 +2,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireTrainer } from "@/lib/require-session";
-import { addDays, resolveWeekStart } from "@/lib/dates";
+import { resolveWeekStart } from "@/lib/dates";
+import { loadCalendar } from "@/lib/calendar";
 import { readClipboard } from "@/lib/clipboard";
-import { WeekCalendar } from "@/components/week-calendar";
+import { CalendarGrid, GRID_WEEKS, gridStart } from "@/components/calendar-grid";
 import { getI18n } from "@/i18n/server";
 import {
   addStudentToGroupAction,
@@ -20,29 +21,22 @@ export default async function GroupDetailPage({
   const { week } = (await searchParams) as { week?: string };
   const session = await requireTrainer();
   const { t } = await getI18n();
-  const weekStart = resolveWeekStart(week);
+  const anchorWeek = resolveWeekStart(week);
 
   const group = await prisma.group.findFirst({
     where: { id, trainerId: session.user.id },
     include: {
       members: { include: { student: true }, orderBy: { student: { name: "asc" } } },
-      workouts: {
-        where: { date: { gte: weekStart, lt: addDays(weekStart, 7) } },
-        include: {
-          _count: { select: { blocks: true } },
-          completions: { select: { studentId: true } },
-          overrides: { select: { completions: { select: { studentId: true } } } },
-        },
-        orderBy: { createdAt: "asc" },
-      },
     },
   });
   if (!group) notFound();
 
-  const clipboard = await readClipboard();
+  const owner = { type: "group" as const, id: group.id };
+  const [workouts, clipboard] = await Promise.all([
+    loadCalendar(session.user.id, owner, gridStart(anchorWeek), GRID_WEEKS * 7),
+    readClipboard(),
+  ]);
 
-  // Progress only counts active members; archived ones stay listed in the group.
-  const memberIds = new Set(group.members.filter((m) => !m.student.archivedAt).map((m) => m.studentId));
   const availableStudents = await prisma.user.findMany({
     where: {
       trainerId: session.user.id,
@@ -82,22 +76,12 @@ export default async function GroupDetailPage({
         </div>
       </div>
 
-      <WeekCalendar
-        owner={{ type: "group", id: group.id }}
+      <CalendarGrid
+        owner={owner}
         basePath={`/trainer/groups/${group.id}`}
-        weekStart={weekStart}
+        anchorWeek={anchorWeek}
+        workouts={workouts}
         clipboard={clipboard}
-        workouts={group.workouts.map((w) => ({
-          id: w.id,
-          title: w.title,
-          date: w.date,
-          status: w.status,
-          blocksCount: w._count.blocks,
-          progress:
-            w.status === "PUBLISHED" && memberIds.size > 0
-              ? t("groups.completedProgress", { done: countCompleted(w, memberIds), total: memberIds.size })
-              : undefined,
-        }))}
       />
 
       <section className="space-y-3">
@@ -163,20 +147,4 @@ export default async function GroupDetailPage({
 
     </div>
   );
-}
-
-/** Members who completed the group workout or their adjusted version of it. */
-function countCompleted(
-  workout: {
-    completions: { studentId: string }[];
-    overrides: { completions: { studentId: string }[] }[];
-  },
-  memberIds: Set<string>
-) {
-  const done = new Set(
-    [...workout.completions, ...workout.overrides.flatMap((o) => o.completions)]
-      .map((c) => c.studentId)
-      .filter((studentId) => memberIds.has(studentId))
-  );
-  return done.size;
 }

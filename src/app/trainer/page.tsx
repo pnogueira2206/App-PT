@@ -54,7 +54,7 @@ export default async function TrainerHomePage() {
       getStudentStats(trainerId),
       getFeed(trainerId, { onlyUnseen: true }),
       prisma.workout.findMany({
-        where: { trainerId, date: today },
+        where: { trainerId, date: today, kind: "TRAINING" },
         include: {
           student: { select: { id: true, name: true } },
           group: {
@@ -80,7 +80,7 @@ export default async function TrainerHomePage() {
         select: { sessionRpe: true },
       }),
       prisma.workout.count({
-        where: { trainerId, status: "DRAFT", date: { gte: today, lte: addDays(today, 14) } },
+        where: { trainerId, status: "DRAFT", kind: "TRAINING", date: { gte: today, lte: addDays(today, 14) } },
       }),
     ]);
 

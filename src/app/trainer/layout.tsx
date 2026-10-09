@@ -15,7 +15,7 @@ export default async function TrainerLayout({
     <div className="flex min-h-screen flex-col">
       <TrainerNav unseenCount={await countUnseen(session.user.id)} />
 
-      <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6">
+      <main className="mx-auto w-full max-w-[90rem] flex-1 px-4 py-6">
         {children}
       </main>
     </div>

@@ -26,7 +26,9 @@ const STATE_STYLES: Record<CompletionState, { label: MessageKey; className: stri
   partial: { label: "states.partial", className: "bg-sky-100 text-sky-700" },
   missed: { label: "states.studentMissed", className: "bg-amber-100 text-amber-800" },
   pending: { label: "states.pending", className: "bg-slate-100 text-slate-600" },
+  rest: { label: "states.rest", className: "bg-slate-100 text-slate-500" },
 };
+
 
 export default async function StudentHomePage({ searchParams }: PageProps<"/student">) {
   const { week } = (await searchParams) as { week?: string };
@@ -122,7 +124,18 @@ export default async function StudentHomePage({ searchParams }: PageProps<"/stud
                       completed: w.completions.length > 0,
                       resultsCount: w.blocks.reduce((n, b) => n + b.results.length, 0),
                     });
+                    if (w.kind === "REST") {
+                      return (
+                        <p
+                          key={w.id}
+                          className="rounded-lg border border-dashed border-slate-200 px-3 py-2 text-sm text-slate-500"
+                        >
+                          😴 {t("states.rest")}
+                        </p>
+                      );
+                    }
                     return (
+
                       <Link
                         key={w.id}
                         href={`/student/workouts/${w.id}`}

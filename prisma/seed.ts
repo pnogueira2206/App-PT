@@ -324,7 +324,53 @@ async function main() {
     data: { resultId: amrapResult.id, authorId: trainer.id, body: "Grande ritmo! Na próxima tenta 6 rondas." },
   });
 
+  // Weekly structure (like the coach's spreadsheet), a rest day, a note and goals.
+  const structure = [
+    "Lower\nPrimer - OHS\nStr - Squat\nWL - Snatch Battery\nAcc - SL Sq + Low Back",
+    "Upper\nStr - Push + Pull\nHSW Intervals\n*Int - T2B Skill Work",
+    "Lower\nWL - Split Jerk\nCJ Battery\nStr - Hinge\nAcc - Hams + Add",
+    "Upper\nStr - Push + Pull\n(A) V Press + V Pull (B)\nCF Intervals",
+    "Conditioning\nConditioning (15-->8')\nAcc - Core",
+  ];
+  for (const [weekday, focus] of structure.entries()) {
+    await prisma.trainingDay.upsert({
+      where: { studentId_weekday: { studentId: ana.id, weekday } },
+      update: { focus },
+      create: { studentId: ana.id, weekday, focus },
+    });
+  }
+  await prisma.workout.create({
+    data: {
+      id: "seed-ana-rest",
+      title: "—",
+      kind: "REST",
+      status: "PUBLISHED",
+      date: weekDay(6),
+      trainerId: trainer.id,
+      studentId: ana.id,
+    },
+  });
+  if ((await prisma.coachNote.count({ where: { studentId: ana.id } })) === 0) {
+    await prisma.coachNote.create({
+      data: {
+        studentId: ana.id,
+        authorId: trainer.id,
+        pinned: true,
+        body: "Ombro esquerdo sensível em overhead pesado: preferir landmine press quando estiver irritado.",
+      },
+    });
+  }
+  if ((await prisma.goal.count({ where: { studentId: ana.id } })) === 0) {
+    await prisma.goal.createMany({
+      data: [
+        { studentId: ana.id, title: "Back Squat 90 kg", targetDate: new Date("2026-12-15T00:00:00.000Z") },
+        { studentId: ana.id, title: "Primeiro muscle-up", targetDate: new Date("2027-03-01T00:00:00.000Z") },
+      ],
+    });
+  }
+
   if ((await prisma.personalRecord.count({ where: { studentId: ana.id } })) === 0) {
+
 
     await prisma.personalRecord.createMany({
       data: [

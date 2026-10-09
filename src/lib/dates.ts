@@ -69,3 +69,10 @@ export function formatWeekRange(weekStart: Date, locale: string): string {
 export function formatLongDate(date: Date, locale: string): string {
   return formatDate(date, locale, { weekday: "long", day: "numeric", month: "long" });
 }
+
+/** ISO-8601 week number of a UTC date. */
+export function isoWeek(date: Date): number {
+  const thursday = addDays(startOfWeek(date), 3);
+  const yearStart = new Date(Date.UTC(thursday.getUTCFullYear(), 0, 1));
+  return Math.floor(diffInDays(thursday, yearStart) / 7) + 1;
+}

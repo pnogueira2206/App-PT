@@ -5,6 +5,7 @@ import type { BenchmarkKind, BlockType, CardioModality, MetconFormat } from "@pr
 import { submitResultAction } from "@/app/student/actions";
 import { formatDuration, formatPace, parseDuration } from "@/lib/blocks";
 import { useI18n } from "@/i18n/client";
+import { TrophyIcon } from "@/components/icons";
 
 type ExistingResult = {
   done: boolean;
@@ -160,12 +161,25 @@ export function ResultForm({
       {done && benchmark && (
         <div className="rounded-lg border border-amber-300 bg-amber-50 p-3">
           <label className="mb-1 block text-sm font-semibold text-amber-900">
-            🏆{" "}
+            <TrophyIcon className="mr-1" />
             {benchmark === "MAX_LOAD"
               ? t("benchmark.studentLoad", { rm: t("benchmark.rm", { reps: block.benchmarkReps ?? 1 }) })
-              : t("benchmark.studentTime")}
+              : benchmark === "TIME"
+                ? t("benchmark.studentTime")
+                : t("benchmark.studentRoundsTitle")}
           </label>
-          {benchmark === "MAX_LOAD" ? (
+          {benchmark === "ROUNDS_REPS" ? (
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="mb-1 block text-xs text-amber-900">{t("benchmark.studentRounds")}</label>
+                <input name="rounds" inputMode="numeric" defaultValue={existing?.rounds ?? ""} className={`${input} text-lg font-semibold`} />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs text-amber-900">{t("benchmark.studentReps")}</label>
+                <input name="reps" inputMode="numeric" defaultValue={existing?.reps ?? ""} className={`${input} text-lg font-semibold`} />
+              </div>
+            </div>
+          ) : benchmark === "MAX_LOAD" ? (
             <input name="loadKg" inputMode="decimal" defaultValue={existing?.loadKg ?? ""} placeholder="kg" className={`${input} text-lg font-semibold`} />
           ) : (
             <input

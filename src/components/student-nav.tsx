@@ -7,17 +7,18 @@ import { Wordmark } from "@/components/brand";
 import { PreferencesMenu } from "@/components/preferences-menu";
 import { useI18n } from "@/i18n/client";
 import type { MessageKey } from "@/i18n/translator";
+import { ICONS, type IconName } from "@/components/icons";
 
 const links: {
   href: string;
   label: MessageKey;
-  icon: string;
+  icon: IconName;
   isActive: (pathname: string) => boolean;
 }[] = [
   {
     href: "/student",
     label: "nav.training",
-    icon: "🏋️",
+    icon: "dumbbell",
     isActive: (pathname: string) =>
       pathname === "/student" ||
       pathname.startsWith("/student/workouts") ||
@@ -26,7 +27,7 @@ const links: {
   {
     href: "/student/profile",
     label: "nav.profile",
-    icon: "👤",
+    icon: "user",
     isActive: (pathname: string) => pathname.startsWith("/student/profile"),
   },
 ];
@@ -64,7 +65,10 @@ export function StudentBottomNav() {
                 active ? "text-slate-900" : "text-slate-400"
               }`}
             >
-              <span className="text-xl leading-none">{link.icon}</span>
+              {(() => {
+                const Icon = ICONS[link.icon];
+                return <Icon className="text-xl" />;
+              })()}
               {t(link.label)}
 
             </Link>

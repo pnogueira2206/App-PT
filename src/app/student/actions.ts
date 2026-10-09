@@ -89,8 +89,8 @@ export async function submitResultAction(
     timeSeconds: benchmark
       ? benchmark === "TIME" ? timeSeconds : null
       : block.type === "METCON" || block.type === "CARDIO" ? timeSeconds : null,
-    rounds: !benchmark && block.type === "METCON" ? rounds : null,
-    reps: !benchmark && block.type === "METCON" ? reps : null,
+    rounds: benchmark ? (benchmark === "ROUNDS_REPS" ? rounds : null) : block.type === "METCON" ? rounds : null,
+    reps: benchmark ? (benchmark === "ROUNDS_REPS" ? reps : null) : block.type === "METCON" ? reps : null,
     loadKg: benchmark ? (benchmark === "MAX_LOAD" ? loadKg : null) : block.type === "METCON" ? loadKg : null,
     distanceM: !benchmark && block.type === "CARDIO" ? distanceM : null,
     calories: !benchmark && block.type === "CARDIO" ? calories : null,
@@ -203,7 +203,7 @@ export async function addPersonalRecordAction(
   if (!exerciseName || !value) {
     return { error: t("errors.recordRequired") };
   }
-  if (type !== "WEIGHT" && type !== "TIME") {
+  if (type !== "WEIGHT" && type !== "TIME" && type !== "REPS") {
     return { error: t("errors.invalidRecordType") };
   }
 
@@ -249,7 +249,7 @@ export async function updatePersonalRecordAction(
   const recordDateRaw = String(formData.get("recordDate") ?? "");
 
   if (!value) return { error: t("errors.recordValueRequired") };
-  if (type !== "WEIGHT" && type !== "TIME") {
+  if (type !== "WEIGHT" && type !== "TIME" && type !== "REPS") {
     return { error: t("errors.invalidRecordType") };
   }
 

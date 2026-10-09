@@ -11,6 +11,7 @@ import {
   removeStudentFromGroupAction,
   deleteGroupAction,
 } from "@/app/trainer/actions";
+import { CalendarCheckIcon, GroupIcon } from "@/components/icons";
 
 /** Average of the members' percentages (members with nothing planned are skipped). */
 function average(stats: StudentStats[], pick: (s: StudentStats) => Ratio) {
@@ -87,7 +88,7 @@ export default async function GroupDetailPage({
 
         <div className="flex items-center gap-3">
           <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full border-2 border-brand/60 bg-slate-100 text-2xl">
-            👥
+            <GroupIcon />
           </span>
           <div className="min-w-0">
             <h1 className="truncate text-lg font-bold text-slate-900">{group.name}</h1>
@@ -98,7 +99,7 @@ export default async function GroupDetailPage({
 
         <dl className="space-y-2 border-y border-slate-200 py-3 text-sm">
           <div className="flex items-center justify-between">
-            <dt className="text-slate-500">🗓️ {t("students.colProgrammed")}</dt>
+            <dt className="text-slate-500"><CalendarCheckIcon className="mr-1.5" />{t("students.colProgrammed")}</dt>
             <dd className={`font-semibold ${untilTone}`}>
               {until ? formatDate(until, intlLocale, { weekday: "short", day: "numeric", month: "short" }) : t("students.notProgrammed")}
             </dd>

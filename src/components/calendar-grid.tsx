@@ -10,7 +10,7 @@ import {
   todayKey,
   weekDays,
 } from "@/lib/dates";
-import { BLOCK_TYPE_STYLES, formatPrescription, formatResult } from "@/lib/blocks";
+import { BLOCK_TYPE_STYLES, benchmarkLabel, formatPrescription, formatResult } from "@/lib/blocks";
 import type { GridWorkout } from "@/lib/calendar";
 import type { CalendarOwner, CompletionState } from "@/lib/workouts";
 import type { Clipboard } from "@/lib/clipboard";
@@ -26,6 +26,7 @@ import {
   removeRestDayAction,
 } from "@/app/trainer/calendar/actions";
 import { FocusCell } from "@/components/focus-cell";
+import { CheckIcon, CrossIcon, GroupIcon, RestIcon, TrophyIcon } from "@/components/icons";
 
 export const GRID_WEEKS = 6;
 /** The anchor week is shown second, so the previous week stays visible for comparison. */
@@ -224,7 +225,7 @@ export async function CalendarGrid({
                             key={w.id}
                             className="flex items-center justify-between rounded-md border border-dashed border-slate-300 px-2 py-1 text-xs text-slate-500"
                           >
-                            <span>😴 {t("states.rest")}</span>
+                            <span><RestIcon className="mr-1" />{t("states.rest")}</span>
                             {w.owned && (
                               <form action={removeRestDayAction.bind(null, w.id)}>
                                 <button className="text-slate-400 hover:text-red-600" title={t("calendar.removeRest")}>
@@ -257,7 +258,7 @@ export async function CalendarGrid({
                                 </span>
                               )}
                               {w.groupName && (
-                                <span className="rounded-full bg-indigo-100 px-1.5 text-indigo-700">👥 {w.groupName}</span>
+                                <span className="rounded-full bg-indigo-100 px-1.5 text-indigo-700"><GroupIcon className="mr-0.5" />{w.groupName}</span>
                               )}
                               {w.isOverride && (
                                 <span className="rounded-full bg-indigo-100 px-1.5 text-indigo-700">{t("calendar.adjusted")}</span>
@@ -282,7 +283,7 @@ export async function CalendarGrid({
                                     {blockLabel(block.title, index)}
                                     {block.benchmark && (
                                       <span className="ml-1 rounded bg-amber-100 px-1 text-[10px] font-semibold text-amber-800">
-                                        🏆 {block.benchmark === "MAX_LOAD" ? t("benchmark.rm", { reps: block.benchmarkReps ?? 1 }) : t("benchmark.kindTime")}
+                                        <TrophyIcon className="mr-0.5" />{benchmarkLabel(t, block.benchmark, block.benchmarkReps)}
                                       </span>
                                     )}
                                     {block.exerciseName && !block.title.includes(block.exerciseName) && (
@@ -304,7 +305,7 @@ export async function CalendarGrid({
                                     >
                                       <span>{block.result ? formatResult(block, block.result, i18n) : t("editor.noResult")}</span>
                                       <span aria-hidden className={block.result?.done ? "text-emerald-600" : "text-red-500"}>
-                                        {block.result?.done ? "✓" : "✗"}
+                                        {block.result?.done ? <CheckIcon /> : <CrossIcon />}
                                       </span>
                                     </p>
                                   )}

@@ -20,6 +20,7 @@ import {
 } from "@/lib/workouts";
 import { getI18n } from "@/i18n/server";
 import type { MessageKey } from "@/i18n/translator";
+import { CommentIcon, RestIcon } from "@/components/icons";
 
 const STATE_STYLES: Record<CompletionState, { label: MessageKey; className: string }> = {
   done: { label: "states.studentDone", className: "bg-emerald-100 text-emerald-700" },
@@ -130,7 +131,7 @@ export default async function StudentHomePage({ searchParams }: PageProps<"/stud
                           key={w.id}
                           className="rounded-lg border border-dashed border-slate-200 px-3 py-2 text-sm text-slate-500"
                         >
-                          😴 {t("states.rest")}
+                          <RestIcon className="mr-1" />{t("states.rest")}
                         </p>
                       );
                     }
@@ -147,7 +148,7 @@ export default async function StudentHomePage({ searchParams }: PageProps<"/stud
                             {t("common.blocks", { count: w.blocks.length })}
                             {unread > 0 && (
                               <span className="ml-2 font-medium text-brand-text">
-                                💬 {t("comments.unreadFromCoach", { count: unread })}
+                                <CommentIcon className="mr-1" />{t("comments.unreadFromCoach", { count: unread })}
                               </span>
                             )}
 

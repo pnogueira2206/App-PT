@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireTrainer } from "@/lib/require-session";
 import { formatDate } from "@/lib/dates";
 import { getI18n } from "@/i18n/server";
+import { GroupIcon } from "@/components/icons";
 
 export default async function WorkoutsPage() {
   const session = await requireTrainer();
@@ -50,7 +51,7 @@ export default async function WorkoutsPage() {
                     )}
                   </p>
                   <p className="text-xs text-slate-500">
-                    {w.group ? `👥 ${w.group.name}` : (w.student?.name ?? t("common.noTarget"))}
+                    {w.group ? <><GroupIcon className="mr-0.5" />{w.group.name}</> : (w.student?.name ?? t("common.noTarget"))}
                     {w.sourceWorkoutId ? t("workouts.adjustedSuffix") : ""} ·{" "}
                     {t("common.blocks", { count: w._count.blocks })}
                   </p>

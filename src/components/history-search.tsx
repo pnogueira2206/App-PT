@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { useI18n } from "@/i18n/client";
 import type { CalendarOwner } from "@/lib/workouts";
 import { searchHistoryAction, type HistorySearch } from "@/app/trainer/calendar/history-actions";
+import { DoneIcon, MissingIcon, TrophyIcon } from "@/components/icons";
 
 type Tab = "blocks" | "workouts" | "metrics";
 const EMPTY: HistorySearch = { blocks: [], workouts: [], metrics: [] };
@@ -65,7 +66,7 @@ export function HistorySearchDialog({
       }`}
     >
       <span>{summary ?? t("historySearch.noResult")}</span>
-      <span aria-hidden>{done ? "✅" : "❌"}</span>
+      {done ? <DoneIcon className="text-base text-emerald-600" /> : <MissingIcon className="text-base text-red-500" />}
     </p>
   );
 
@@ -165,7 +166,7 @@ export function HistorySearchDialog({
             data.metrics.map((m) => (
               <div key={m.id} className={`${card} flex items-center justify-between gap-3`}>
                 <div>
-                  <p className="font-semibold text-slate-900">🏆 {m.exercise}</p>
+                  <p className="font-semibold text-slate-900"><TrophyIcon className="mr-1 text-amber-600" />{m.exercise}</p>
                   <p className="text-xs text-slate-500 first-letter:uppercase">
                     {m.name ? `${m.name} · ` : ""}
                     {m.date}

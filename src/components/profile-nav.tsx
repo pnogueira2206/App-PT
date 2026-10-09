@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { ICONS, type IconName } from "@/components/icons";
 
 /** Vertical section menu of a student's profile (sidebar). */
-export function ProfileNav({ items }: { items: { href: string; label: string; icon: string }[] }) {
+export function ProfileNav({ items }: { items: { href: string; label: string; icon: IconName }[] }) {
   const pathname = usePathname();
   return (
     <nav className="flex gap-1 overflow-x-auto lg:flex-col">
@@ -19,9 +20,10 @@ export function ProfileNav({ items }: { items: { href: string; label: string; ic
               active ? "bg-brand text-brand-ink" : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
             }`}
           >
-            <span aria-hidden className="w-5 text-center">
-              {item.icon}
-            </span>
+            {(() => {
+              const Icon = ICONS[item.icon];
+              return <Icon className="text-base" />;
+            })()}
             {item.label}
           </Link>
         );

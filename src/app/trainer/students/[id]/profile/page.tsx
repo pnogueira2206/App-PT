@@ -63,7 +63,7 @@ export default async function StudentProfileTabPage({
   ]);
 
   const lifts = records.filter((r) => r.type === "WEIGHT");
-  const timeWorkouts = records.filter((r) => r.type === "TIME");
+  const timeWorkouts = records.filter((r) => r.type === "TIME" || r.type === "REPS");
 
   const boundUpdateProfile = updateStudentProfileAction.bind(null, student.id);
   const boundAddRecord = addStudentRecordAction.bind(null, student.id);

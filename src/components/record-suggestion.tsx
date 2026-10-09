@@ -2,6 +2,7 @@ import { saveRecordFromResultAction } from "@/app/records/actions";
 import { formatNumber } from "@/lib/blocks";
 import type { RecordCandidate } from "@/lib/records";
 import type { Translate } from "@/i18n/translator";
+import { TrophyIcon } from "@/components/icons";
 
 /** "New PR" banner with a button to save it, or the saved state. */
 export function RecordSuggestion({
@@ -20,6 +21,7 @@ export function RecordSuggestion({
   if (saved) {
     return (
       <p className="inline-block rounded-md bg-amber-100 px-2 py-1 text-xs font-medium text-amber-800">
+        <TrophyIcon className="mr-1" />
         {t("recordSuggestion.saved")}
       </p>
     );
@@ -37,6 +39,7 @@ export function RecordSuggestion({
       className="flex flex-wrap items-center gap-2 rounded-md bg-amber-100 px-2 py-1.5 text-sm text-amber-800"
     >
       <span className="font-medium">
+        <TrophyIcon className="mr-1" />
         {candidate.first
           ? t("recordSuggestion.firstRecord", { value })
           : t("recordSuggestion.newRecord", { value })}

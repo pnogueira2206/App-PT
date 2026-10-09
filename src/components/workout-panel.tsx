@@ -8,6 +8,7 @@ import { useI18n } from "@/i18n/client";
 import type { CalendarOwner } from "@/lib/workouts";
 import { deleteWorkoutAction, saveWorkoutEditorAction } from "@/app/trainer/workouts/actions";
 import { HistorySearchDialog } from "@/components/history-search";
+import { DoneIcon, HistoryIcon, MissingIcon, TrashIcon, TrophyIcon } from "@/components/icons";
 
 export type PanelBlock = {
   /** Present for blocks already saved. */
@@ -211,7 +212,7 @@ export function WorkoutPanel({
                     title={t("historySearch.open")}
                     className="hover:text-slate-900"
                   >
-                    🕘
+                    <HistoryIcon className="text-base" />
                   </button>
                   <button
                     type="button"
@@ -219,9 +220,9 @@ export function WorkoutPanel({
                     aria-label={t("benchmark.toggle")}
                     aria-pressed={!!block.benchmark}
                     title={t("benchmark.title")}
-                    className={`rounded px-0.5 ${block.benchmark ? "bg-amber-100" : "opacity-50 grayscale hover:opacity-100 hover:grayscale-0"}`}
+                    className={`rounded p-0.5 ${block.benchmark ? "bg-amber-100 text-amber-700" : "hover:text-slate-900"}`}
                   >
-                    🏆
+                    <TrophyIcon className="text-base" />
                   </button>
                   <button type="button" onClick={() => move(index, -1)} disabled={index === 0} aria-label={t("workouts.moveUp")} className="hover:text-slate-900 disabled:opacity-30">↑</button>
                   <button type="button" onClick={() => move(index, 1)} disabled={index === workout.blocks.length - 1} aria-label={t("workouts.moveDown")} className="hover:text-slate-900 disabled:opacity-30">↓</button>
@@ -238,16 +239,20 @@ export function WorkoutPanel({
               {block.benchmark && (
                 <div className="space-y-2 rounded-md border border-amber-300 bg-amber-50 p-2.5 text-sm">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-semibold text-amber-900">🏆 {t("benchmark.toggle")}</span>
+                    <span className="font-semibold text-amber-900"><TrophyIcon className="mr-1" />{t("benchmark.toggle")}</span>
                     <div className="flex rounded-md bg-white p-0.5 text-xs font-medium">
-                      {(["MAX_LOAD", "TIME"] as const).map((kind) => (
+                      {(["MAX_LOAD", "TIME", "ROUNDS_REPS"] as const).map((kind) => (
                         <button
                           key={kind}
                           type="button"
                           onClick={() => setBlock(block.key, { benchmark: kind, benchmarkReps: kind === "MAX_LOAD" ? block.benchmarkReps ?? 1 : null })}
                           className={`rounded px-2 py-1 ${block.benchmark === kind ? "bg-brand text-brand-ink" : "text-slate-500"}`}
                         >
-                          {kind === "MAX_LOAD" ? t("benchmark.kindMaxLoad") : t("benchmark.kindTime")}
+                          {kind === "MAX_LOAD"
+                            ? t("benchmark.kindMaxLoad")
+                            : kind === "TIME"
+                              ? t("benchmark.kindTime")
+                              : t("benchmark.kindRounds")}
                         </button>
                       ))}
                     </div>
@@ -286,7 +291,7 @@ export function WorkoutPanel({
                   }`}
                 >
                   <span>{block.result ? block.result.summary : t("editor.noResult")}</span>
-                  <span aria-hidden>{block.result?.done ? "✅" : "❌"}</span>
+                  {block.result?.done ? <DoneIcon className="text-base text-emerald-600" /> : <MissingIcon className="text-base text-red-500" />}
                 </p>
               )}
             </div>
@@ -335,7 +340,7 @@ export function WorkoutPanel({
           {workout.id && (
             <form action={deleteWorkoutAction.bind(null, workout.id)} className="ml-auto">
               <button className="text-sm text-slate-400 hover:text-red-600" title={t("editor.deleteWorkout")}>
-                🗑
+                <TrashIcon className="text-base" />
               </button>
             </form>
           )}

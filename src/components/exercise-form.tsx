@@ -9,6 +9,7 @@ import {
   deleteExerciseAction,
   updateExerciseAction,
 } from "@/app/trainer/exercises/actions";
+import { PlayIcon } from "@/components/icons";
 
 type Exercise = {
   id: string;
@@ -157,6 +158,7 @@ export function ExerciseItem({ exercise }: { exercise: Exercise }) {
             rel="noopener noreferrer"
             className="text-xs font-medium text-red-600 hover:text-red-800"
           >
+            <PlayIcon className="mr-0.5" />
             {t("exercises.video")}
           </a>
         ) : (

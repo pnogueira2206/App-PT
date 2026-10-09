@@ -19,11 +19,15 @@ enum Role {
 enum BenchmarkKind {
   MAX_LOAD
   TIME
+  /// Rounds + reps (AMRAP) or max reps.
+  ROUNDS_REPS
 }
 
 enum RecordType {
   WEIGHT
   TIME
+  /// "5+12" (rounds + reps) or "25" reps.
+  REPS
 }
 
 enum WorkoutStatus {

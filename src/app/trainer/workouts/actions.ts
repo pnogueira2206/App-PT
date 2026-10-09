@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import type { Prisma, WorkoutStatus } from "@prisma/client";
+import type { BenchmarkKind, Prisma, WorkoutStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getI18n } from "@/i18n/server";
 import { requireTrainer } from "@/lib/require-session";
@@ -370,7 +370,7 @@ async function findOrCreateExercise(
   tx: Prisma.TransactionClient,
   trainerId: string,
   name: string,
-  benchmark: "MAX_LOAD" | "TIME"
+  benchmark: BenchmarkKind
 ): Promise<string> {
   const clean = name.slice(0, 120);
   const existing = await tx.exercise.findFirst({
@@ -391,7 +391,7 @@ export type EditorBlockInput = {
   type: string;
   title: string;
   description: string;
-  benchmark: "MAX_LOAD" | "TIME" | null;
+  benchmark: BenchmarkKind | null;
   /** MAX_LOAD only (1 = 1RM). */
   benchmarkReps: number | null;
   /** Benchmark only: the exercise whose record it updates (defaults to the title). */
@@ -478,7 +478,10 @@ export async function saveWorkoutEditorAction(
     }
     for (const [index, block] of blocks.entries()) {
       // Type, notes and structured fields set in the full editor are left untouched.
-      const benchmark = block.benchmark === "MAX_LOAD" || block.benchmark === "TIME" ? block.benchmark : null;
+      const benchmark =
+        block.benchmark && (["MAX_LOAD", "TIME", "ROUNDS_REPS"] as string[]).includes(block.benchmark)
+          ? block.benchmark
+          : null;
       const data = {
         order: index + 1,
         title: block.title.trim().slice(0, 200),
@@ -496,7 +499,8 @@ export async function saveWorkoutEditorAction(
       } else {
         const type = isBlockType(block.type) ? block.type : "STRENGTH";
         await tx.workoutBlock.create({
-          data: { ...data, type, metconFormat: type === "METCON" ? "FOR_TIME" : null, workoutId: workoutId! },
+          // No format: the free text says what it is (the full editor can still set one).
+          data: { ...data, type, workoutId: workoutId! },
         });
       }
     }

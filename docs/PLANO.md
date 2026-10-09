@@ -82,6 +82,7 @@ Plano de evolução da app atual (Next.js + Prisma, PWA) para uma ferramenta de 
 
 **Programação avançada**
 - Biblioteca de **templates** e programas de várias semanas, aplicáveis a um aluno a partir de uma data.
+- **Percentagens do 1RM calculadas automaticamente no texto livre**: quando o título ou a prescrição de um bloco referem um exercício com 1RM registado (ex.: "Back Squat 3x5 @ 65%"), o aluno vê logo os quilos ("3x5 @ 65% → 58 kg"), arredondados ao disco mais próximo. O treinador continua a escrever só a percentagem.
 
 ## Alterações principais ao modelo de dados (Fases 0–2)
 
@@ -116,4 +117,9 @@ Plano de evolução da app atual (Next.js + Prisma, PWA) para uma ferramenta de 
   - **Recordes automáticos**: força (série mais pesada com ≥1 rep), Metcon "carga máxima" e Metcon "for time" terminado em Rx (benchmarks). Aluno ou treinador guardam com um clique; aparece 🏆 nas novidades e no histórico.
   - **Gráficos** de evolução por exercício (carga máxima por sessão e tempo por sessão), no histórico do aluno e na nova vista do treinador (perfil do aluno → recorde → exercício).
   - Ao publicar, os resultados que já existiam aparecem como "por ver" uma vez: usa "Marcar tudo como visto".
+- **Ícones minimalistas** (linha fina, cor do texto, biblioteca lucide) em vez de emojis em toda a app.
+- **Perfil e calendário estilo CoachRx implementados**: grelha de 6 semanas com linha Estrutura (alunos e grupos), dias de descanso, notas e objetivos.
+  - **Editor do dia** em painel lateral: aquecimento, notas, blocos A) B) C) só com título e prescrição em texto livre, resultados do aluno por bloco (✓/✗) e retorno à calma. Os treinos herdados de um grupo abrem no editor completo (para ajustar só para o aluno).
+  - Em cada bloco: **🕘 Histórico** (pesquisa do bloco no histórico do aluno/grupo, treinos e métricas) e **🏆 Benchmark** (carga máxima NRM, tempo ou rondas + reps; o resultado do aluno atualiza o recorde automaticamente; os 3RM/5RM ficam separados do 1RM e só o 1RM conta para as percentagens).
+  - O calendário do grupo tem a mesma disposição do aluno, com barra lateral de membros e cumprimento médio.
 - **Próximo passo:** usar com alunos reais e depois avançar para a Fase 3 (check-in de prontidão, comentários por treino e mensagens diretas).

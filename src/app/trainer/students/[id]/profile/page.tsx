@@ -63,7 +63,7 @@ export default async function StudentProfileTabPage({
   ]);
 
   const lifts = records.filter((r) => r.type === "WEIGHT");
-  const timeWorkouts = records.filter((r) => r.type === "TIME");
+  const timeWorkouts = records.filter((r) => r.type === "TIME" || r.type === "REPS");
 
   const boundUpdateProfile = updateStudentProfileAction.bind(null, student.id);
   const boundAddRecord = addStudentRecordAction.bind(null, student.id);
@@ -93,7 +93,7 @@ export default async function StudentProfileTabPage({
                   record={{
                     id: r.id,
                     exerciseId: r.exerciseId,
-                    exerciseName: r.exercise.name,
+                    exerciseName: r.reps && r.reps > 1 ? `${r.exercise.name} · ${t("benchmark.rm", { reps: r.reps })}` : r.exercise.name,
                     type: r.type,
                     value: r.value,
                     unit: r.unit,
@@ -122,7 +122,7 @@ export default async function StudentProfileTabPage({
                   record={{
                     id: r.id,
                     exerciseId: r.exerciseId,
-                    exerciseName: r.exercise.name,
+                    exerciseName: r.reps && r.reps > 1 ? `${r.exercise.name} · ${t("benchmark.rm", { reps: r.reps })}` : r.exercise.name,
                     type: r.type,
                     value: r.value,
                     unit: r.unit,

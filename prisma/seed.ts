@@ -107,6 +107,8 @@ async function main() {
       id: "seed-group-mon",
       title: "Força + Metcon",
       description: "Semana 1 do ciclo de força.",
+      warmup: "2 rondas: 10 air squats, 10 PVC pass-through, 200 m remo\nSquat primer: 2x5 goblet squat com pausa",
+      cooldown: "Mobilidade de anca 5' + respiração 90/90",
       date: weekDay(0),
       status: "PUBLISHED",
       trainerId: trainer.id,
@@ -116,7 +118,7 @@ async function main() {
           {
             order: 1,
             type: "STRENGTH",
-            title: "A. Back Squat",
+            title: "Back Squat",
             exerciseId: exercises["Back Squat"],
             prescribedSets: 5,
             prescribedReps: "5",
@@ -128,7 +130,7 @@ async function main() {
           {
             order: 2,
             type: "METCON",
-            title: "B. Metcon",
+            title: "Metcon",
             exerciseId: exercises["Fran"],
             metconFormat: "FOR_TIME",
             timeCapSeconds: 600,
@@ -145,6 +147,8 @@ async function main() {
       id: "seed-group-mon-bruno",
       title: "Força + Metcon",
       description: "Semana 1 do ciclo de força.",
+      warmup: "2 rondas: 10 air squats, 10 PVC pass-through, 200 m remo\nSquat primer: 2x5 goblet squat com pausa",
+      cooldown: "Mobilidade de anca 5' + respiração 90/90",
       date: weekDay(0),
       status: "PUBLISHED",
       trainerId: trainer.id,
@@ -155,7 +159,7 @@ async function main() {
           {
             order: 1,
             type: "STRENGTH",
-            title: "A. Back Squat",
+            title: "Back Squat",
             exerciseId: exercises["Back Squat"],
             prescribedSets: 5,
             prescribedReps: "5",
@@ -165,7 +169,7 @@ async function main() {
           {
             order: 2,
             type: "METCON",
-            title: "B. Metcon (ombro)",
+            title: "Metcon (ombro)",
             metconFormat: "FOR_TIME",
             timeCapSeconds: 600,
             description: "21-15-9\nFront Squat 40kg\nRing rows",
@@ -189,7 +193,7 @@ async function main() {
           {
             order: 1,
             type: "CARDIO",
-            title: "A. Remo",
+            title: "Remo",
             exerciseId: exercises["Remo"],
             cardioModality: "ROW",
             targetDistanceM: 2000,
@@ -198,7 +202,7 @@ async function main() {
           {
             order: 2,
             type: "METCON",
-            title: "B. AMRAP 12'",
+            title: "AMRAP 12'",
             metconFormat: "AMRAP",
             timeCapSeconds: 720,
             description: "10 Power Cleans 40kg\n15 Wall Balls 6kg\n200m Run",
@@ -206,7 +210,7 @@ async function main() {
           {
             order: 3,
             type: "ACCESSORY",
-            title: "C. Core",
+            title: "Core",
             prescribedSets: 3,
             description: "3 rondas:\n30s Hollow hold\n10 Dead bugs / lado",
           },
@@ -229,12 +233,21 @@ async function main() {
           {
             order: 1,
             type: "STRENGTH",
-            title: "A. Deadlift",
+            title: "Deadlift",
             exerciseId: exercises["Deadlift"],
             prescribedSets: 4,
             prescribedReps: "4",
             percent1RM: 80,
             restSeconds: 150,
+          },
+          {
+            order: 2,
+            type: "STRENGTH",
+            title: "Back Squat",
+            description: "Subir até um 1RM em 15'\n*só com spotter",
+            exerciseId: exercises["Back Squat"],
+            benchmark: "MAX_LOAD",
+            benchmarkReps: 1,
           },
         ],
       },
@@ -278,7 +291,7 @@ async function main() {
             {
               order: 1,
               type: "STRENGTH",
-              title: "A. Back Squat",
+              title: "Back Squat",
               exerciseId: exercises["Back Squat"],
               prescribedSets: 3,
               prescribedReps: "3",
@@ -286,7 +299,7 @@ async function main() {
             {
               order: 2,
               type: "METCON",
-              title: "B. Fran",
+              title: "Fran",
               exerciseId: exercises["Fran"],
               metconFormat: "FOR_TIME",
               timeCapSeconds: 600,
@@ -337,6 +350,15 @@ async function main() {
       where: { studentId_weekday: { studentId: ana.id, weekday } },
       update: { focus },
       create: { studentId: ana.id, weekday, focus },
+    });
+  }
+  const groupStructure = ["Lower\nStr - Squat\nMetcon", "", "Upper\nEngine + Acc", "", "Hinge\nStr - Deadlift"];
+  for (const [weekday, focus] of groupStructure.entries()) {
+    if (!focus) continue;
+    await prisma.trainingDay.upsert({
+      where: { groupId_weekday: { groupId: group.id, weekday } },
+      update: { focus },
+      create: { groupId: group.id, weekday, focus },
     });
   }
   await prisma.workout.create({

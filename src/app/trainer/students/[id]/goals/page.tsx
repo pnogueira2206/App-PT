@@ -7,11 +7,12 @@ import { formatDate } from "@/lib/dates";
 import { addGoalAction, deleteGoalAction, setGoalStatusAction } from "@/app/trainer/actions";
 import { GoalForm } from "@/components/note-form";
 import type { MessageKey } from "@/i18n/translator";
+import { DoneIcon, PauseIcon, TargetIcon } from "@/components/icons";
 
-const SECTIONS: { status: GoalStatus; label: MessageKey; icon: string }[] = [
-  { status: "ACTIVE", label: "goals.active", icon: "🎯" },
-  { status: "ACHIEVED", label: "goals.achieved", icon: "✅" },
-  { status: "DROPPED", label: "goals.dropped", icon: "⏸️" },
+const SECTIONS: { status: GoalStatus; label: MessageKey; icon: React.ReactNode }[] = [
+  { status: "ACTIVE", label: "goals.active", icon: <TargetIcon /> },
+  { status: "ACHIEVED", label: "goals.achieved", icon: <DoneIcon className="text-emerald-600" /> },
+  { status: "DROPPED", label: "goals.dropped", icon: <PauseIcon /> },
 ];
 
 export default async function StudentGoalsPage({ params }: PageProps<"/trainer/students/[id]/goals">) {

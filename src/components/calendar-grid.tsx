@@ -10,7 +10,7 @@ import {
   todayKey,
   weekDays,
 } from "@/lib/dates";
-import { BLOCK_TYPE_STYLES, formatPrescription } from "@/lib/blocks";
+import { BLOCK_TYPE_STYLES, benchmarkLabel, formatPrescription, formatResult } from "@/lib/blocks";
 import type { GridWorkout } from "@/lib/calendar";
 import type { CalendarOwner, CompletionState } from "@/lib/workouts";
 import type { Clipboard } from "@/lib/clipboard";
@@ -26,6 +26,7 @@ import {
   removeRestDayAction,
 } from "@/app/trainer/calendar/actions";
 import { FocusCell } from "@/components/focus-cell";
+import { CheckIcon, CrossIcon, GroupIcon, RestIcon, TrophyIcon } from "@/components/icons";
 
 export const GRID_WEEKS = 6;
 /** The anchor week is shown second, so the previous week stays visible for comparison. */
@@ -42,6 +43,11 @@ const STATE_STYLES: Record<CompletionState, { label: MessageKey; className: stri
 };
 
 const COLUMNS = "grid-cols-[5.5rem_repeat(7,minmax(8.25rem,1fr))]";
+
+/** "A) Back squat"; keeps the trainer's own label when the title already has one ("A1. ..."). */
+function blockLabel(title: string, index: number) {
+  return /^[A-Z]\d*[.)]\s/.test(title) ? title : `${String.fromCharCode(65 + index)}) ${title}`;
+}
 
 /**
  * Spreadsheet-like calendar: one row per week, one column per weekday, and the
@@ -61,7 +67,7 @@ export async function CalendarGrid({
   anchorWeek: Date;
   workouts: GridWorkout[];
   clipboard: Clipboard | null;
-  /** Weekday focus (Monday first), student calendars only. */
+  /** Weekday focus (Monday first). */
   focus?: (string | null)[];
 }) {
   const i18n = await getI18n();
@@ -69,7 +75,8 @@ export async function CalendarGrid({
   const today = todayKey();
   const start = gridStart(anchorWeek);
   const weeks = Array.from({ length: GRID_WEEKS }, (_, i) => addDays(start, i * 7));
-  const targetParam = `${owner.type}:${owner.id}`;
+  const anchorKey = toDateKey(anchorWeek);
+  const panelHref = (param: "new" | "edit", value: string) => `${basePath}?week=${anchorKey}&${param}=${value}`;
 
   const dayMonth = (key: string) => formatDayMonth(parseDateKey(key) ?? start, intlLocale);
   const clipboardLabel = (c: Clipboard) =>
@@ -133,14 +140,14 @@ export async function CalendarGrid({
           ))}
 
           {/* Weekly structure (focus of each weekday) */}
-          {focus && owner.type === "student" && (
+          {focus && (
             <>
               <div className="border-t border-slate-200 bg-emerald-50 px-2 py-2 text-xs font-semibold text-slate-700">
                 {t("calendar.structure")}
               </div>
               {focus.map((text, weekday) => (
                 <div key={weekday} className="border-l border-t border-slate-200 bg-emerald-50 px-2 py-2">
-                  <FocusCell studentId={owner.id} weekday={weekday} focus={text} />
+                  <FocusCell owner={owner} weekday={weekday} focus={text} />
                 </div>
               ))}
             </>
@@ -218,7 +225,7 @@ export async function CalendarGrid({
                             key={w.id}
                             className="flex items-center justify-between rounded-md border border-dashed border-slate-300 px-2 py-1 text-xs text-slate-500"
                           >
-                            <span>😴 {t("states.rest")}</span>
+                            <span><RestIcon className="mr-1" />{t("states.rest")}</span>
                             {w.owned && (
                               <form action={removeRestDayAction.bind(null, w.id)}>
                                 <button className="text-slate-400 hover:text-red-600" title={t("calendar.removeRest")}>
@@ -230,7 +237,7 @@ export async function CalendarGrid({
                         ) : (
                           <Link
                             key={w.id}
-                            href={`/trainer/workouts/${w.id}`}
+                            href={w.owned ? panelHref("edit", w.id) : `/trainer/workouts/${w.id}`}
                             className={`block space-y-1 rounded-md border px-2 py-1.5 text-xs leading-snug hover:border-brand ${
                               w.status === "DRAFT" ? "border-dashed border-amber-400" : "border-slate-200"
                             }`}
@@ -251,22 +258,34 @@ export async function CalendarGrid({
                                 </span>
                               )}
                               {w.groupName && (
-                                <span className="rounded-full bg-indigo-100 px-1.5 text-indigo-700">👥 {w.groupName}</span>
+                                <span className="rounded-full bg-indigo-100 px-1.5 text-indigo-700"><GroupIcon className="mr-0.5" />{w.groupName}</span>
                               )}
                               {w.isOverride && (
                                 <span className="rounded-full bg-indigo-100 px-1.5 text-indigo-700">{t("calendar.adjusted")}</span>
                               )}
                             </div>
+                            {w.warmup && (
+                              <p className="line-clamp-3 whitespace-pre-wrap text-slate-500">
+                                <span className="font-semibold">{t("editor.warmup")}: </span>
+                                {w.warmup}
+                              </p>
+                            )}
                             {w.description && <p className="whitespace-pre-wrap text-slate-600">{w.description}</p>}
-                            {w.blocks.map((block) => {
+                            {w.blocks.map((block, index) => {
                               const prescription = formatPrescription(block, i18n);
+                              const showResult = owner.type === "student" && w.status === "PUBLISHED" && key <= today;
                               return (
-                                <div key={block.id} className="border-l-2 border-slate-200 pl-1.5">
-                                  <p className="font-medium text-slate-800">
+                                <div key={block.id} className="space-y-0.5 border-l-2 border-slate-200 pl-1.5">
+                                  <p className="font-semibold text-slate-800">
                                     <span
                                       className={`mr-1 inline-block h-1.5 w-1.5 rounded-full align-middle ${BLOCK_TYPE_STYLES[block.type].split(" ")[0]}`}
                                     />
-                                    {block.title}
+                                    {blockLabel(block.title, index)}
+                                    {block.benchmark && (
+                                      <span className="ml-1 rounded bg-amber-100 px-1 text-[10px] font-semibold text-amber-800">
+                                        <TrophyIcon className="mr-0.5" />{benchmarkLabel(t, block.benchmark, block.benchmarkReps)}
+                                      </span>
+                                    )}
                                     {block.exerciseName && !block.title.includes(block.exerciseName) && (
                                       <span className="font-normal text-slate-500"> · {block.exerciseName}</span>
                                     )}
@@ -275,16 +294,37 @@ export async function CalendarGrid({
                                   {block.description && (
                                     <p className="whitespace-pre-wrap text-slate-700">{block.description}</p>
                                   )}
+                                  {block.trainerNotes && (
+                                    <p className="whitespace-pre-wrap italic text-slate-500">{block.trainerNotes}</p>
+                                  )}
+                                  {showResult && (
+                                    <p
+                                      className={`flex justify-between gap-1 rounded border-l-2 bg-slate-50 px-1 py-0.5 ${
+                                        block.result?.done ? "border-emerald-500 text-slate-800" : "border-red-400 text-slate-400"
+                                      }`}
+                                    >
+                                      <span>{block.result ? formatResult(block, block.result, i18n) : t("editor.noResult")}</span>
+                                      <span aria-hidden className={block.result?.done ? "text-emerald-600" : "text-red-500"}>
+                                        {block.result?.done ? <CheckIcon /> : <CrossIcon />}
+                                      </span>
+                                    </p>
+                                  )}
                                 </div>
                               );
                             })}
+                            {w.cooldown && (
+                              <p className="line-clamp-3 whitespace-pre-wrap text-slate-500">
+                                <span className="font-semibold">{t("editor.cooldown")}: </span>
+                                {w.cooldown}
+                              </p>
+                            )}
                           </Link>
                         )
                       )}
 
-                      <div className="mt-auto flex flex-wrap gap-x-2 gap-y-0.5 pt-1 opacity-60 transition group-hover/day:opacity-100">
-                        <Link href={`/trainer/workouts/new?target=${targetParam}&date=${key}`} className={smallAction}>
-                          {t("calendar.addWorkout")}
+                      <div className="mt-auto flex flex-wrap items-center gap-x-2 gap-y-0.5 pt-1 opacity-60 transition group-hover/day:opacity-100">
+                        <Link href={panelHref("new", key)} className={smallAction}>
+                          {t("calendar.add")}
                         </Link>
                         {!hasRest && (
                           <form action={createRestDayAction.bind(null, owner, key)}>

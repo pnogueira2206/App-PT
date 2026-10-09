@@ -15,9 +15,19 @@ enum Role {
   STUDENT
 }
 
+/// A block whose score feeds the student's records automatically.
+enum BenchmarkKind {
+  MAX_LOAD
+  TIME
+  /// Rounds + reps (AMRAP) or max reps.
+  ROUNDS_REPS
+}
+
 enum RecordType {
   WEIGHT
   TIME
+  /// "5+12" (rounds + reps) or "25" reps.
+  REPS
 }
 
 enum WorkoutStatus {
@@ -107,16 +117,19 @@ model User {
   goals             Goal[]
 }
 
-/** The student's weekly structure: the focus of each weekday ("Lower / Str - Squat ..."). */
+/** Weekly structure of a student or a group: the focus of each weekday ("Lower / Str - Squat ..."). */
 model TrainingDay {
-  id        String @id @default(cuid())
-  student   User   @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  studentId String
+  id        String  @id @default(cuid())
+  student   User?   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  studentId String?
+  group     Group?  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  groupId   String?
   // 0 = Monday ... 6 = Sunday
   weekday   Int
   focus     String
 
   @@unique([studentId, weekday])
+  @@unique([groupId, weekday])
 }
 
 /** Private notes the trainer keeps about a student. */
@@ -156,8 +169,10 @@ model Group {
   trainerId String
   createdAt DateTime @default(now())
 
-  members   GroupMember[]
-  workouts  Workout[]
+  members      GroupMember[]
+  workouts     Workout[]
+  trainingDays TrainingDay[]
+
 }
 
 model GroupMember {
@@ -195,6 +210,9 @@ model Workout {
   date        DateTime
   status      WorkoutStatus @default(DRAFT)
   kind        WorkoutKind   @default(TRAINING)
+  // Free-text warm-up and cooldown around the blocks (CoachRx-style workout).
+  warmup      String?
+  cooldown    String?
   trainer     User      @relation("TrainerWorkouts", fields: [trainerId], references: [id])
   trainerId   String
   group       Group?    @relation(fields: [groupId], references: [id])
@@ -263,6 +281,11 @@ model WorkoutBlock {
 
   trainerNotes      String?
 
+  // Benchmark: the student logs one number (kg or time) and the record updates itself.
+  benchmark         BenchmarkKind?
+  /// MAX_LOAD only: 1 for a 1RM, 3 for a 3RM...
+  benchmarkReps     Int?
+
   results           BlockResult[]
 }
 
@@ -330,6 +353,8 @@ model PersonalRecord {
   type        RecordType @default(WEIGHT)
   value       String
   unit        String?
+  /// Weight records: the reps of the lift (3 = 3RM). Null for older records (treated as 1RM).
+  reps        Int?
   notes       String?
   recordDate  DateTime @default(now())
   createdAt   DateTime @default(now())

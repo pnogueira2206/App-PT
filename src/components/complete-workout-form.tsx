@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { completeWorkoutAction } from "@/app/student/actions";
 import { useI18n } from "@/i18n/client";
+import { DoneIcon } from "@/components/icons";
 
 export function CompleteWorkoutForm({
   workoutId,
@@ -25,7 +26,14 @@ export function CompleteWorkoutForm({
       }`}
     >
       <h2 className="font-semibold text-slate-900">
-        {existing ? t("completion.done") : t("completion.title")}
+        {existing ? (
+          <>
+            <DoneIcon className="mr-1 text-emerald-600" />
+            {t("completion.done")}
+          </>
+        ) : (
+          t("completion.title")
+        )}
       </h2>
       <div>
         <label className="mb-1 block text-xs font-medium text-slate-500">

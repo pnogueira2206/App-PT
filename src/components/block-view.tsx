@@ -1,7 +1,9 @@
 import Link from "next/link";
 import type { WorkoutBlock, Exercise } from "@prisma/client";
-import { BLOCK_TYPE_STYLES, formatNumber, formatPrescription, loadFromPercent } from "@/lib/blocks";
+import { BLOCK_TYPE_STYLES, benchmarkLabel, formatNumber, formatPrescription, loadFromPercent } from "@/lib/blocks";
 import type { Translate } from "@/i18n/translator";
+import { TrophyIcon } from "@/components/icons";
+import { PlayIcon } from "@/components/icons";
 
 export function BlockView({
   block,
@@ -34,6 +36,11 @@ export function BlockView({
         <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${BLOCK_TYPE_STYLES[block.type]}`}>
           {t(`blocks.types.${block.type}`)}
         </span>
+        {block.benchmark && (
+          <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-800">
+            <TrophyIcon className="mr-0.5" />{benchmarkLabel(t, block.benchmark, block.benchmarkReps)}
+          </span>
+        )}
       </div>
       <h3 className="font-semibold text-slate-900">{block.title}</h3>
 
@@ -56,6 +63,7 @@ export function BlockView({
               rel="noopener noreferrer"
               className="text-xs font-medium text-red-600 hover:text-red-800"
             >
+              <PlayIcon className="mr-0.5" />
               {t("common.watchVideo")}
             </a>
           )}

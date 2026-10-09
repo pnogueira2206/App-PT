@@ -4,6 +4,8 @@ import { formatDate } from "@/lib/dates";
 import { formatResult } from "@/lib/blocks";
 import type { Translate } from "@/i18n/translator";
 import { ProgressChart, type ProgressPoint } from "@/components/progress-chart";
+import { TrophyIcon } from "@/components/icons";
+import { PlayIcon } from "@/components/icons";
 
 /** Records, progress charts and logged results of one exercise for one student. */
 export async function ExerciseHistory({
@@ -66,6 +68,7 @@ export async function ExerciseHistory({
             rel="noopener noreferrer"
             className="text-sm font-medium text-red-600 hover:text-red-800"
           >
+            <PlayIcon className="mr-1" />
             {t("history.watchDemo")}
           </a>
         )}
@@ -87,7 +90,7 @@ export async function ExerciseHistory({
             {records.map((r) => (
               <li key={r.id} className="flex items-center justify-between rounded-lg bg-white px-3 py-2 text-sm">
                 <span className="font-medium text-slate-800">
-                  {r.sourceResultId ? "🏆 " : ""}
+                  {r.sourceResultId && <TrophyIcon className="mr-1 text-amber-600" />}
                   {r.value} {r.unit ?? ""}
                 </span>
                 <span className="text-xs text-slate-400">{formatDate(r.recordDate, intlLocale)}</span>

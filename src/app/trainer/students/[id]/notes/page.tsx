@@ -5,6 +5,7 @@ import { getI18n } from "@/i18n/server";
 import { APP_TIMEZONE } from "@/lib/dates";
 import { addNoteAction, deleteNoteAction, toggleNotePinAction } from "@/app/trainer/actions";
 import { NoteForm } from "@/components/note-form";
+import { PinIcon } from "@/components/icons";
 
 export default async function StudentNotesPage({ params }: PageProps<"/trainer/students/[id]/notes">) {
   const { id } = await params;
@@ -35,7 +36,7 @@ export default async function StudentNotesPage({ params }: PageProps<"/trainer/s
             >
               <div className="mb-1 flex items-center justify-between gap-2 text-xs text-slate-400">
                 <span>
-                  {note.pinned && "📌 "}
+                  {note.pinned && <PinIcon className="mr-1 text-brand-text" />}
                   {note.createdAt.toLocaleString(intlLocale, {
                     day: "numeric",
                     month: "short",

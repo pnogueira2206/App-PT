@@ -14,7 +14,7 @@ export function NewRecordForm({
 }) {
   const { t } = useI18n();
   const [open, setOpen] = useState(false);
-  const [type, setType] = useState<"WEIGHT" | "TIME">("WEIGHT");
+  const [type, setType] = useState<"WEIGHT" | "TIME" | "REPS">("WEIGHT");
   const [state, formAction, isPending] = useActionState(action, undefined);
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -53,11 +53,12 @@ export function NewRecordForm({
       <select
         name="type"
         value={type}
-        onChange={(e) => setType(e.target.value as "WEIGHT" | "TIME")}
+        onChange={(e) => setType(e.target.value as "WEIGHT" | "TIME" | "REPS")}
         className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
       >
         <option value="WEIGHT">{t("records.typeLiftLoad")}</option>
         <option value="TIME">{t("records.typeTimed")}</option>
+        <option value="REPS">{t("records.typeReps")}</option>
       </select>
 
       <input

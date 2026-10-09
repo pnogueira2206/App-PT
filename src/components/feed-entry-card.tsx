@@ -6,6 +6,7 @@ import type { Translate } from "@/i18n/translator";
 import { markEntrySeenAction } from "@/app/trainer/feed/actions";
 import { CommentThread } from "@/components/comment-thread";
 import { RecordSuggestion } from "@/components/record-suggestion";
+import { DoneIcon } from "@/components/icons";
 
 /** One logged session in the trainer's feed: scores, notes, PRs and comments. */
 export function FeedEntryCard({
@@ -55,7 +56,7 @@ export function FeedEntryCard({
       <div className="space-y-3 px-4 py-3">
         {entry.completion ? (
           <p className="text-sm text-slate-700">
-            ✅ {t("feed.sessionCompleted")}
+            <DoneIcon className="mr-1 text-emerald-600" />{t("feed.sessionCompleted")}
             {entry.completion.sessionRpe != null &&
               ` · ${t("common.rpe", { value: entry.completion.sessionRpe })}`}
             {entry.completion.notes && (

@@ -11,7 +11,7 @@ type Record = {
   id: string;
   exerciseId: string;
   exerciseName: string;
-  type: "WEIGHT" | "TIME";
+  type: "WEIGHT" | "TIME" | "REPS";
   value: string;
   unit: string | null;
   notes: string | null;
@@ -56,6 +56,7 @@ export function RecordItem({
             >
               <option value="WEIGHT">{t("records.typeLift")}</option>
               <option value="TIME">{t("records.typeTimed")}</option>
+              <option value="REPS">{t("records.typeReps")}</option>
             </select>
             <input
               name="value"

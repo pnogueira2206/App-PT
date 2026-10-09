@@ -3,14 +3,15 @@
 import { useState } from "react";
 import { saveTrainingDayAction } from "@/app/trainer/calendar/actions";
 import { useI18n } from "@/i18n/client";
+import type { CalendarOwner } from "@/lib/workouts";
 
-/** One weekday of the student's weekly structure ("Lower / Str - Squat"), editable in place. */
+/** One weekday of a student's or group's weekly structure ("Lower / Str - Squat"), editable in place. */
 export function FocusCell({
-  studentId,
+  owner,
   weekday,
   focus,
 }: {
-  studentId: string;
+  owner: CalendarOwner;
   weekday: number;
   focus: string | null;
 }) {
@@ -21,7 +22,7 @@ export function FocusCell({
     return (
       <form
         action={async (formData) => {
-          await saveTrainingDayAction(studentId, weekday, formData);
+          await saveTrainingDayAction(owner, weekday, formData);
           setEditing(false);
         }}
         className="space-y-1"

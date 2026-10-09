@@ -6,6 +6,7 @@ import { getI18n } from "@/i18n/server";
 import { getStudentStats, percent, type Ratio, type StudentStats } from "@/lib/adherence";
 import { addDays, formatDate, parseDateKey, todayKey } from "@/lib/dates";
 import { setStudentArchivedAction } from "@/app/trainer/actions";
+import { GroupIcon } from "@/components/icons";
 
 type Period = "7" | "28";
 
@@ -230,7 +231,7 @@ export default async function StudentsPage({ searchParams }: PageProps<"/trainer
                         href={`/trainer/groups/${m.groupId}`}
                         className="rounded-full bg-indigo-50 px-2 py-0.5 text-xs text-indigo-700 hover:bg-indigo-100"
                       >
-                        👥 {m.group.name}
+                        <GroupIcon className="mr-0.5" />{m.group.name}
                       </Link>
                     ))}
                   </div>

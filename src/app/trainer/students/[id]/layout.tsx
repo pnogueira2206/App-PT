@@ -9,6 +9,7 @@ import { setStudentArchivedAction } from "@/app/trainer/actions";
 import { getStudentStats, percent, type Ratio } from "@/lib/adherence";
 import { addDays, formatDate, formatWeekday, parseDateKey, startOfWeek, todayKey } from "@/lib/dates";
 import { formatNumber } from "@/lib/blocks";
+import { ArchiveIcon, CalendarCheckIcon, FlameIcon, GroupIcon, TargetIcon } from "@/components/icons";
 
 function complianceCell(ratio: Ratio) {
   const value = percent(ratio);
@@ -107,7 +108,7 @@ export default async function StudentLayout({ children, params }: LayoutProps<"/
                 href={`/trainer/groups/${m.groupId}`}
                 className="rounded-full bg-indigo-50 px-2 py-0.5 text-xs text-indigo-700 hover:bg-indigo-100"
               >
-                👥 {m.group.name}
+                <GroupIcon className="mr-0.5" />{m.group.name}
               </Link>
             ))}
           </div>
@@ -115,17 +116,17 @@ export default async function StudentLayout({ children, params }: LayoutProps<"/
 
         {student.archivedAt && (
           <p className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-600">
-            🗄️ {t("students.archivedNotice")}
+            <ArchiveIcon className="mr-1" />{t("students.archivedNotice")}
           </p>
         )}
 
         <dl className="space-y-2 border-y border-slate-200 py-3 text-sm">
           <div className="flex items-center justify-between">
-            <dt className="text-slate-500">🔥 {t("profileSidebar.streak")}</dt>
+            <dt className="text-slate-500"><FlameIcon className="mr-1.5" />{t("profileSidebar.streak")}</dt>
             <dd className="font-semibold text-slate-900">{stats?.streak ?? 0}</dd>
           </div>
           <div className="flex items-center justify-between">
-            <dt className="text-slate-500">🗓️ {t("students.colProgrammed")}</dt>
+            <dt className="text-slate-500"><CalendarCheckIcon className="mr-1.5" />{t("students.colProgrammed")}</dt>
             <dd className={`font-semibold ${untilTone}`}>
               {until ? formatDate(until, intlLocale, { weekday: "short", day: "numeric", month: "short" }) : t("students.notProgrammed")}
             </dd>
@@ -150,7 +151,7 @@ export default async function StudentLayout({ children, params }: LayoutProps<"/
 
         {student.goals.length > 0 && (
           <div className="space-y-1.5">
-            <p className="text-sm font-medium text-slate-700">🎯 {t("goals.active")}</p>
+            <p className="text-sm font-medium text-slate-700"><TargetIcon className="mr-1.5" />{t("goals.active")}</p>
             <ul className="space-y-1 text-sm text-slate-700">
               {student.goals.map((goal) => (
                 <li key={goal.id} className="flex justify-between gap-2">
@@ -168,10 +169,10 @@ export default async function StudentLayout({ children, params }: LayoutProps<"/
 
         <ProfileNav
           items={[
-            { href: base, label: t("students.tabCalendar"), icon: "📅" },
-            { href: `${base}/profile`, label: t("students.tabProfile"), icon: "🏆" },
-            { href: `${base}/notes`, label: t("notes.title"), icon: "📝" },
-            { href: `${base}/goals`, label: t("goals.title"), icon: "🎯" },
+            { href: base, label: t("students.tabCalendar"), icon: "calendar" },
+            { href: `${base}/profile`, label: t("students.tabProfile"), icon: "trophy" },
+            { href: `${base}/notes`, label: t("notes.title"), icon: "notes" },
+            { href: `${base}/goals`, label: t("goals.title"), icon: "target" },
           ]}
         />
 

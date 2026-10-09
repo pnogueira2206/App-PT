@@ -208,7 +208,7 @@ export async function addStudentRecordAction(
   if (!exerciseName || !value) {
     return { error: t("errors.recordRequired") };
   }
-  if (type !== "WEIGHT" && type !== "TIME") {
+  if (type !== "WEIGHT" && type !== "TIME" && type !== "REPS") {
     return { error: t("errors.invalidRecordType") };
   }
 
@@ -256,7 +256,7 @@ export async function updateStudentRecordAction(
   const recordDateRaw = String(formData.get("recordDate") ?? "");
 
   if (!value) return { error: t("errors.recordValueRequired") };
-  if (type !== "WEIGHT" && type !== "TIME") {
+  if (type !== "WEIGHT" && type !== "TIME" && type !== "REPS") {
     return { error: t("errors.invalidRecordType") };
   }
 

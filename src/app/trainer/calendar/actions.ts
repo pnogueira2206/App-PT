@@ -176,21 +176,20 @@ export async function removeRestDayAction(workoutId: string) {
   revalidateAll();
 }
 
-/** Saves the focus of one weekday in the student's weekly structure (empty clears it). */
-export async function saveTrainingDayAction(studentId: string, weekday: number, formData: FormData) {
+/** Saves the focus of one weekday in a student's or group's weekly structure (empty clears it). */
+export async function saveTrainingDayAction(owner: CalendarOwner, weekday: number, formData: FormData) {
   const session = await requireTrainer();
-  await requireOwner(session.user.id, { type: "student", id: studentId });
+  await requireOwner(session.user.id, owner);
   if (!Number.isInteger(weekday) || weekday < 0 || weekday > 6) throw new Error("Invalid weekday");
 
+  const key = owner.type === "student" ? { studentId: owner.id } : { groupId: owner.id };
   const focus = String(formData.get("focus") ?? "").trim().slice(0, 500);
+  const existing = await prisma.trainingDay.findFirst({ where: { ...key, weekday } });
   if (focus) {
-    await prisma.trainingDay.upsert({
-      where: { studentId_weekday: { studentId, weekday } },
-      create: { studentId, weekday, focus },
-      update: { focus },
-    });
-  } else {
-    await prisma.trainingDay.deleteMany({ where: { studentId, weekday } });
+    if (existing) await prisma.trainingDay.update({ where: { id: existing.id }, data: { focus } });
+    else await prisma.trainingDay.create({ data: { ...key, weekday, focus } });
+  } else if (existing) {
+    await prisma.trainingDay.delete({ where: { id: existing.id } });
   }
   revalidatePath("/trainer", "layout");
 }

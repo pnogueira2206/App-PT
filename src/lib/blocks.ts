@@ -1,4 +1,5 @@
 import type {
+  BenchmarkKind,
   BlockType,
   CardioModality,
   ExerciseCategory,
@@ -177,7 +178,13 @@ type ResultLike = {
 
 /** One-line summary of a student's score. */
 export function formatResult(
-  block: { type: BlockType; metconFormat: MetconFormat | null; cardioModality: CardioModality | null },
+  block: {
+    type: BlockType;
+    metconFormat: MetconFormat | null;
+    cardioModality: CardioModality | null;
+    benchmark?: BenchmarkKind | null;
+    benchmarkReps?: number | null;
+  },
   result: ResultLike,
   { t, intlLocale }: I18n
 ): string {
@@ -185,7 +192,20 @@ export function formatResult(
   const parts: (string | null)[] = [];
   if (!result.done) parts.push(t("blocks.result.notDone"));
 
-  switch (block.type) {
+  if (block.benchmark === "MAX_LOAD") {
+    if (result.loadKg != null) parts.push(`${t("benchmark.rm", { reps: block.benchmarkReps ?? 1 })}: ${num(result.loadKg)} kg`);
+  } else if (block.benchmark === "TIME") {
+    if (result.timeSeconds != null) parts.push(formatDuration(result.timeSeconds));
+  } else if (block.benchmark === "ROUNDS_REPS") {
+    if (result.rounds != null) {
+      parts.push(
+        t("blocks.result.rounds", { count: result.rounds }) +
+          (result.reps ? t("blocks.result.plusReps", { count: result.reps }) : "")
+      );
+    } else if (result.reps != null) {
+      parts.push(t("blocks.result.reps", { count: result.reps }));
+    }
+  } else switch (block.type) {
     case "STRENGTH":
     case "ACCESSORY":
       if (result.sets.length > 0) {
@@ -236,4 +256,10 @@ export function parseRecordKg(value: string, unit: string | null): number | null
   if (unit && !/^kg$/i.test(unit.trim())) return null;
   const match = value.trim().match(/^(\d+(?:[.,]\d+)?)\s*(kg)?$/i);
   return match ? Number(match[1].replace(",", ".")) : null;
+}
+
+/** Short label of a benchmark block: "1RM", "Tempo", "Rondas/reps". */
+export function benchmarkLabel(t: Translate, kind: BenchmarkKind, reps: number | null): string {
+  if (kind === "MAX_LOAD") return t("benchmark.rm", { reps: reps ?? 1 });
+  return kind === "TIME" ? t("benchmark.kindTime") : t("benchmark.kindRounds");
 }

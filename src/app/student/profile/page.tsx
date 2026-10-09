@@ -11,6 +11,7 @@ import {
 } from "@/app/student/actions";
 import { getI18n } from "@/i18n/server";
 import { formatDate } from "@/lib/dates";
+import { DoneIcon, TargetIcon } from "@/components/icons";
 
 
 export default async function ProfilePage() {
@@ -43,7 +44,7 @@ export default async function ProfilePage() {
   ]);
 
   const lifts = records.filter((r) => r.type === "WEIGHT");
-  const timeWorkouts = records.filter((r) => r.type === "TIME");
+  const timeWorkouts = records.filter((r) => r.type === "TIME" || r.type === "REPS");
 
   return (
     <div className="space-y-6">
@@ -61,7 +62,7 @@ export default async function ProfilePage() {
 
       {student.goals.length > 0 && (
         <section className="space-y-2">
-          <h2 className="font-semibold text-slate-900">🎯 {t("goals.studentTitle")}</h2>
+          <h2 className="font-semibold text-slate-900"><TargetIcon className="mr-1.5" />{t("goals.studentTitle")}</h2>
           <ul className="space-y-1.5">
             {student.goals.map((goal) => (
               <li
@@ -69,7 +70,7 @@ export default async function ProfilePage() {
                 className="flex items-baseline justify-between gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
               >
                 <span className={goal.status === "ACHIEVED" ? "text-slate-500 line-through" : "font-medium text-slate-900"}>
-                  {goal.status === "ACHIEVED" ? "✅ " : ""}
+                  {goal.status === "ACHIEVED" && <DoneIcon className="mr-1 text-emerald-600" />}
                   {goal.title}
                 </span>
                 {goal.targetDate && (
@@ -100,7 +101,7 @@ export default async function ProfilePage() {
                   record={{
                     id: r.id,
                     exerciseId: r.exerciseId,
-                    exerciseName: r.exercise.name,
+                    exerciseName: r.reps && r.reps > 1 ? `${r.exercise.name} · ${t("benchmark.rm", { reps: r.reps })}` : r.exercise.name,
                     type: r.type,
                     value: r.value,
                     unit: r.unit,
@@ -129,7 +130,7 @@ export default async function ProfilePage() {
                   record={{
                     id: r.id,
                     exerciseId: r.exerciseId,
-                    exerciseName: r.exercise.name,
+                    exerciseName: r.reps && r.reps > 1 ? `${r.exercise.name} · ${t("benchmark.rm", { reps: r.reps })}` : r.exercise.name,
                     type: r.type,
                     value: r.value,
                     unit: r.unit,

@@ -8,6 +8,7 @@ import { formatNumber } from "@/lib/blocks";
 import { getI18n } from "@/i18n/server";
 import type { MessageKey } from "@/i18n/translator";
 import { AdherencePills } from "@/components/adherence";
+import { AlertIcon, CommentIcon, DoneIcon, GroupIcon, TrophyIcon } from "@/components/icons";
 
 type TodayState = "done" | "partial" | "pending";
 
@@ -219,14 +220,21 @@ export default async function TrainerHomePage() {
                           </p>
                           <p className="text-xs text-slate-500">
                             {formatDate(entry.workout.date, intlLocale, { day: "numeric", month: "short" })} ·{" "}
-                            {entry.completion
-                              ? `✅ ${entry.completion.sessionRpe != null ? t("common.rpe", { value: entry.completion.sessionRpe }) : t("feed.sessionCompleted")}`
-                              : t("common.blocks", { count: entry.results.length })}
+                            {entry.completion ? (
+                              <>
+                                <DoneIcon className="mr-0.5 text-emerald-600" />
+                                {entry.completion.sessionRpe != null
+                                  ? t("common.rpe", { value: entry.completion.sessionRpe })
+                                  : t("feed.sessionCompleted")}
+                              </>
+                            ) : (
+                              t("common.blocks", { count: entry.results.length })
+                            )}
                           </p>
                         </div>
                         <span className="flex gap-2 text-xs text-slate-600">
-                          {records > 0 && <span>🏆 {records}</span>}
-                          {comments > 0 && <span>💬 {comments}</span>}
+                          {records > 0 && <span><TrophyIcon className="mr-0.5 text-amber-600" />{records}</span>}
+                          {comments > 0 && <span><CommentIcon className="mr-0.5" />{comments}</span>}
                         </span>
                       </Link>
                     </li>
@@ -250,7 +258,7 @@ export default async function TrainerHomePage() {
                     >
                       <span className="text-sm font-medium text-slate-900">
                         {workout.title}
-                        {workout.group && <span className="font-normal text-slate-500"> · 👥 {workout.group.name}</span>}
+                        {workout.group && <span className="font-normal text-slate-500"> · <GroupIcon className="mr-0.5" />{workout.group.name}</span>}
                       </span>
                       {workout.status === "DRAFT" && (
                         <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-800">
@@ -285,14 +293,14 @@ export default async function TrainerHomePage() {
           <SectionTitle>{t("dashboard.alerts")}</SectionTitle>
           {alerts.length === 0 ? (
             <p className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-500">
-              ✅ {t("dashboard.noAlerts")}
+              <DoneIcon className="mr-1 text-emerald-600" />{t("dashboard.noAlerts")}
             </p>
           ) : (
             <ul className="divide-y divide-slate-100 rounded-xl border border-amber-200 bg-white">
               {alerts.map((alert) => (
                 <li key={alert.key}>
                   <Link href={alert.href} className="flex gap-2 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50">
-                    <span aria-hidden>⚠️</span>
+                    <AlertIcon className="mt-0.5 text-amber-600" />
                     <span>{alert.text}</span>
                   </Link>
                 </li>

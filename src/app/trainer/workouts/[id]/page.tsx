@@ -23,6 +23,7 @@ import {
   setWorkoutStatusAction,
 } from "@/app/trainer/workouts/actions";
 import { copyWorkoutAction } from "@/app/trainer/calendar/actions";
+import { CommentIcon, DoneIcon, GroupIcon } from "@/components/icons";
 
 const smallButton = "text-xs text-slate-400 hover:text-slate-800 disabled:opacity-30";
 
@@ -119,7 +120,7 @@ export default async function WorkoutDetailPage({ params }: PageProps<"/trainer/
             <p className="text-sm text-slate-500 first-letter:uppercase">
               {formatLongDate(workout.date, intlLocale)}
               {" · "}
-              {workout.group ? `👥 ${workout.group.name}` : workout.student?.name}
+              {workout.group ? <><GroupIcon className="mr-0.5" />{workout.group.name}</> : workout.student?.name}
             </p>
           </div>
 
@@ -147,11 +148,25 @@ export default async function WorkoutDetailPage({ params }: PageProps<"/trainer/
         </div>
 
         {workout.description && <p className="text-sm text-slate-600">{workout.description}</p>}
+        {workout.warmup && (
+          <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{t("editor.warmup")}</p>
+            <p className="whitespace-pre-wrap text-slate-700">{workout.warmup}</p>
+          </div>
+        )}
+        {workout.cooldown && (
+          <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{t("editor.cooldown")}</p>
+            <p className="whitespace-pre-wrap text-slate-700">{workout.cooldown}</p>
+          </div>
+        )}
 
         <WorkoutDetailsForm
           workoutId={workout.id}
           title={workout.title}
           description={workout.description}
+          warmup={workout.warmup}
+          cooldown={workout.cooldown}
           date={toDateKey(workout.date)}
         />
       </div>
@@ -257,7 +272,7 @@ export default async function WorkoutDetailPage({ params }: PageProps<"/trainer/
                       {result && (
                         <details className="mt-1 [&_summary]:cursor-pointer">
                           <summary className="text-xs text-slate-500">
-                            💬 {result.comments.length}
+                            <CommentIcon className="mr-0.5" />{result.comments.length}
                           </summary>
                           <div className="mt-2 space-y-2">
                             <RecordSuggestion
@@ -314,6 +329,7 @@ export default async function WorkoutDetailPage({ params }: PageProps<"/trainer/
                   </Link>
                   {completion ? (
                     <span className="text-right text-slate-700">
+                      <DoneIcon className="mr-1 text-emerald-600" />
                       {t("workouts.completedOn", {
                         date: formatDate(completion.completedAt, intlLocale, {
                           day: "numeric",

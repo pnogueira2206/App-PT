@@ -460,6 +460,8 @@ export const ru: Messages = {
       other: "{count} тренировки",
     },
     streak: "Серия",
+    collapse: "Свернуть боковую панель",
+    expand: "Показать боковую панель",
     all: "Всё",
   },
   notes: {
@@ -500,8 +502,7 @@ export const ru: Messages = {
     warmupPlaceholder: "Добавить разминку...",
     cooldown: "Заминка",
     cooldownPlaceholder: "Добавить заминку...",
-    addExercise: "+ Упражнение",
-    addConditioning: "+ Кондиционная работа",
+    addBlock: "+ Блок",
     blockTitle: "Название (напр. Chinese Row)",
     blockText: "Свободное назначение (напр. 4x6-8; отдых 2'\n*стабилизировать плечо перед тягой)",
     removeBlock: "Убрать блок",
@@ -510,7 +511,7 @@ export const ru: Messages = {
     publish: "Видна атлету",
     fullEditor: "Полный редактор ↗",
     noResult: "Нет результата",
-    empty: "Блоков пока нет. Добавь упражнение или кондиционную работу.",
+    empty: "Блоков пока нет. Нажми «+ Блок», чтобы добавить первый.",
   },
   benchmark: {
     toggle: "Бенчмарк",

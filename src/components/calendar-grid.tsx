@@ -10,7 +10,7 @@ import {
   todayKey,
   weekDays,
 } from "@/lib/dates";
-import { BLOCK_TYPE_STYLES, benchmarkLabel, formatPrescription, formatResult } from "@/lib/blocks";
+import { benchmarkLabel, formatPrescription, formatResult } from "@/lib/blocks";
 import type { GridWorkout } from "@/lib/calendar";
 import type { CalendarOwner, CompletionState } from "@/lib/workouts";
 import type { Clipboard } from "@/lib/clipboard";
@@ -42,7 +42,8 @@ const STATE_STYLES: Record<CompletionState, { label: MessageKey; className: stri
   rest: { label: "states.rest", className: "bg-slate-100 text-slate-500" },
 };
 
-const COLUMNS = "grid-cols-[5.5rem_repeat(7,minmax(8.25rem,1fr))]";
+// Wide enough to read a prescription line like in a spreadsheet (scrolls sideways on small screens).
+const COLUMNS = "grid-cols-[4.5rem_repeat(7,minmax(13.5rem,1fr))]";
 
 /** "A) Back squat"; keeps the trainer's own label when the title already has one ("A1. ..."). */
 function blockLabel(title: string, index: number) {
@@ -127,7 +128,7 @@ export async function CalendarGrid({
       )}
 
       <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
-        <div className={`grid min-w-[63rem] ${COLUMNS}`}>
+        <div className={`grid min-w-[99rem] ${COLUMNS}`}>
           {/* Header: weekday names */}
           <div className="bg-slate-50" />
           {weekDays(start).map((day) => (
@@ -238,12 +239,12 @@ export async function CalendarGrid({
                           <Link
                             key={w.id}
                             href={w.owned ? panelHref("edit", w.id) : `/trainer/workouts/${w.id}`}
-                            className={`block space-y-1 rounded-md border px-2 py-1.5 text-xs leading-snug hover:border-brand ${
+                            className={`block space-y-2 rounded-md border px-2.5 py-2 text-[13px] leading-[1.45] hover:border-brand ${
                               w.status === "DRAFT" ? "border-dashed border-amber-400" : "border-slate-200"
                             }`}
                           >
-                            <p className="font-semibold text-slate-900">{w.title}</p>
-                            <div className="flex flex-wrap gap-1 text-[10px]">
+                            <p className="text-sm font-semibold text-slate-900">{w.title}</p>
+                            <div className="flex flex-wrap gap-1 text-[11px]">
                               {w.status === "DRAFT" && (
                                 <span className="rounded-full bg-amber-100 px-1.5 text-amber-800">{t("common.draft")}</span>
                               )}
@@ -265,21 +266,18 @@ export async function CalendarGrid({
                               )}
                             </div>
                             {w.warmup && (
-                              <p className="line-clamp-3 whitespace-pre-wrap text-slate-500">
-                                <span className="font-semibold">{t("editor.warmup")}: </span>
+                              <div className="whitespace-pre-wrap text-slate-600">
+                                <p className="font-semibold text-slate-800">{t("editor.warmup")}</p>
                                 {w.warmup}
-                              </p>
+                              </div>
                             )}
                             {w.description && <p className="whitespace-pre-wrap text-slate-600">{w.description}</p>}
                             {w.blocks.map((block, index) => {
                               const prescription = formatPrescription(block, i18n);
                               const showResult = owner.type === "student" && w.status === "PUBLISHED" && key <= today;
                               return (
-                                <div key={block.id} className="space-y-0.5 border-l-2 border-slate-200 pl-1.5">
-                                  <p className="font-semibold text-slate-800">
-                                    <span
-                                      className={`mr-1 inline-block h-1.5 w-1.5 rounded-full align-middle ${BLOCK_TYPE_STYLES[block.type].split(" ")[0]}`}
-                                    />
+                                <div key={block.id} className="space-y-0.5">
+                                  <p className="font-semibold text-slate-900">
                                     {blockLabel(block.title, index)}
                                     {block.benchmark && (
                                       <span className="ml-1 rounded bg-amber-100 px-1 text-[10px] font-semibold text-amber-800">
@@ -292,10 +290,10 @@ export async function CalendarGrid({
                                   </p>
                                   {prescription && <p className="text-slate-600">{prescription}</p>}
                                   {block.description && (
-                                    <p className="whitespace-pre-wrap text-slate-700">{block.description}</p>
+                                    <p className="whitespace-pre-wrap text-slate-800">{block.description}</p>
                                   )}
                                   {block.trainerNotes && (
-                                    <p className="whitespace-pre-wrap italic text-slate-500">{block.trainerNotes}</p>
+                                    <p className="whitespace-pre-wrap italic text-slate-600">{block.trainerNotes}</p>
                                   )}
                                   {showResult && (
                                     <p
@@ -313,10 +311,10 @@ export async function CalendarGrid({
                               );
                             })}
                             {w.cooldown && (
-                              <p className="line-clamp-3 whitespace-pre-wrap text-slate-500">
-                                <span className="font-semibold">{t("editor.cooldown")}: </span>
+                              <div className="whitespace-pre-wrap text-slate-600">
+                                <p className="font-semibold text-slate-800">{t("editor.cooldown")}</p>
                                 {w.cooldown}
-                              </p>
+                              </div>
                             )}
                           </Link>
                         )

@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { requireTrainer } from "@/lib/require-session";
 import { addDays, formatDate, parseDateKey, todayKey } from "@/lib/dates";
 import { getStudentStats, percent, type Ratio, type StudentStats } from "@/lib/adherence";
+import { cookies } from "next/headers";
+import { SidebarLayout, SIDEBAR_COOKIE } from "@/components/sidebar-layout";
 import { OwnerCalendar, type CalendarSearchParams } from "@/components/owner-calendar";
 import { getI18n } from "@/i18n/server";
 import {
@@ -80,8 +82,18 @@ export default async function GroupDetailPage({
   const removeMember = removeStudentFromGroupAction.bind(null, group.id);
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[17rem_minmax(0,1fr)]">
-      <aside className="space-y-5 lg:sticky lg:top-20 lg:self-start">
+    <SidebarLayout
+      initialCollapsed={(await cookies()).get(SIDEBAR_COOKIE)?.value === "collapsed"}
+      rail={
+        <span
+          title={group.name}
+          className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-brand/60 bg-slate-100 text-lg text-slate-700"
+        >
+          <GroupIcon />
+        </span>
+      }
+      sidebar={
+        <>
         <Link href="/trainer/groups" className="text-sm text-slate-500 hover:text-slate-900">
           {t("groups.back")}
         </Link>
@@ -179,9 +191,9 @@ export default async function GroupDetailPage({
         <form action={deleteGroupAction.bind(null, group.id)} className="border-t border-slate-200 pt-3">
           <button className="text-sm text-red-500 hover:text-red-700">{t("groups.deleteGroup")}</button>
         </form>
-      </aside>
-
-      <div className="min-w-0">
+        </>
+      }
+    >
         <OwnerCalendar
           trainerId={session.user.id}
           owner={{ type: "group", id: group.id }}
@@ -189,7 +201,6 @@ export default async function GroupDetailPage({
           params={(await searchParams) as CalendarSearchParams}
           focus={focus}
         />
-      </div>
-    </div>
+    </SidebarLayout>
   );
 }

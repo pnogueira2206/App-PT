@@ -3,7 +3,10 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireTrainer } from "@/lib/require-session";
 import { ResetPasswordForm } from "@/components/reset-password-form";
+import { cookies } from "next/headers";
 import { ProfileNav } from "@/components/profile-nav";
+import { SidebarLayout, SIDEBAR_COOKIE } from "@/components/sidebar-layout";
+import type { IconName } from "@/components/icons";
 import { getI18n } from "@/i18n/server";
 import { setStudentArchivedAction } from "@/app/trainer/actions";
 import { getStudentStats, percent, type Ratio } from "@/lib/adherence";
@@ -67,9 +70,30 @@ export default async function StudentLayout({ children, params }: LayoutProps<"/
   const untilTone = !until || until < today ? "text-red-600" : until < addDays(today, 3) ? "text-amber-600" : "text-emerald-600";
   const weekdayName = (weekday: number) => formatWeekday(addDays(startOfWeek(today), weekday), intlLocale);
 
+  const navItems: { href: string; label: string; icon: IconName }[] = [
+    { href: base, label: t("students.tabCalendar"), icon: "calendar" },
+    { href: `${base}/profile`, label: t("students.tabProfile"), icon: "trophy" },
+    { href: `${base}/notes`, label: t("notes.title"), icon: "notes" },
+    { href: `${base}/goals`, label: t("goals.title"), icon: "target" },
+    { href: `${base}/onboarding`, label: t("onboarding.title"), icon: "clipboard" },
+  ];
+
   return (
-    <div className="grid gap-6 lg:grid-cols-[17rem_minmax(0,1fr)]">
-      <aside className="space-y-5 lg:sticky lg:top-20 lg:self-start">
+    <SidebarLayout
+      initialCollapsed={(await cookies()).get(SIDEBAR_COOKIE)?.value === "collapsed"}
+      rail={
+        <>
+          <span
+            title={student.name}
+            className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-brand/60 bg-slate-100 text-sm font-semibold text-slate-700"
+          >
+            {initials}
+          </span>
+          <ProfileNav items={navItems} iconsOnly />
+        </>
+      }
+      sidebar={
+        <>
         <Link href="/trainer/students" className="text-sm text-slate-500 hover:text-slate-900">
           {t("students.back")}
         </Link>
@@ -167,15 +191,7 @@ export default async function StudentLayout({ children, params }: LayoutProps<"/
           </div>
         )}
 
-        <ProfileNav
-          items={[
-            { href: base, label: t("students.tabCalendar"), icon: "calendar" },
-            { href: `${base}/profile`, label: t("students.tabProfile"), icon: "trophy" },
-            { href: `${base}/notes`, label: t("notes.title"), icon: "notes" },
-            { href: `${base}/goals`, label: t("goals.title"), icon: "target" },
-            { href: `${base}/onboarding`, label: t("onboarding.title"), icon: "clipboard" },
-          ]}
-        />
+        <ProfileNav items={navItems} />
 
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-slate-200 pt-3">
           <ResetPasswordForm studentId={student.id} />
@@ -185,9 +201,10 @@ export default async function StudentLayout({ children, params }: LayoutProps<"/
             </button>
           </form>
         </div>
-      </aside>
-
-      <div className="min-w-0">{children}</div>
-    </div>
+        </>
+      }
+    >
+      {children}
+    </SidebarLayout>
   );
 }

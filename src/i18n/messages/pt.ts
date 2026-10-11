@@ -486,8 +486,7 @@ export const pt = {
     warmupPlaceholder: "Adicionar aquecimento...",
     cooldown: "Retorno à calma",
     cooldownPlaceholder: "Adicionar retorno à calma...",
-    addExercise: "+ Exercício",
-    addConditioning: "+ Condicionamento",
+    addBlock: "+ Bloco",
     blockTitle: "Nome (ex.: Chinese Row)",
     blockText: "Prescrição livre (ex.: 4x6-8; rest 2'\n*estabilizar o ombro antes de remar)",
     removeBlock: "Remover bloco",
@@ -496,7 +495,7 @@ export const pt = {
     publish: "Visível para o aluno",
     fullEditor: "Editor completo ↗",
     noResult: "Sem resultado",
-    empty: "Ainda sem blocos. Adiciona um exercício ou condicionamento.",
+    empty: "Ainda sem blocos. Carrega em \"+ Bloco\" para adicionar o primeiro.",
   },
   benchmark: {
     toggle: "Benchmark",

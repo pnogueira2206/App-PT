@@ -297,14 +297,13 @@ export function WorkoutPanel({
             </div>
           ))}
 
-          <div className="grid grid-cols-2 gap-2">
-            <button type="button" onClick={() => addBlock("STRENGTH")} className="rounded-lg border border-slate-200 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
-              {t("editor.addExercise")}
-            </button>
-            <button type="button" onClick={() => addBlock("METCON")} className="rounded-lg border border-slate-200 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
-              {t("editor.addConditioning")}
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={() => addBlock("STRENGTH")}
+            className="w-full rounded-lg border border-dashed border-slate-300 py-2 text-sm font-medium text-slate-700 hover:border-brand hover:bg-slate-50"
+          >
+            {t("editor.addBlock")}
+          </button>
 
           <div className={section}>
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{t("editor.cooldown")}</p>

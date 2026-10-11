@@ -486,8 +486,7 @@ export const en: Messages = {
     warmupPlaceholder: "Add warm-up...",
     cooldown: "Cooldown",
     cooldownPlaceholder: "Add cooldown...",
-    addExercise: "+ Exercise",
-    addConditioning: "+ Conditioning",
+    addBlock: "+ Block",
     blockTitle: "Name (e.g. Chinese Row)",
     blockText: "Free-text prescription (e.g. 4x6-8; rest 2'\n*set the shoulder before rowing)",
     removeBlock: "Remove block",
@@ -496,7 +495,7 @@ export const en: Messages = {
     publish: "Visible to the athlete",
     fullEditor: "Full editor ↗",
     noResult: "No result",
-    empty: "No blocks yet. Add an exercise or conditioning.",
+    empty: "No blocks yet. Click \"+ Block\" to add the first one.",
   },
   benchmark: {
     toggle: "Benchmark",

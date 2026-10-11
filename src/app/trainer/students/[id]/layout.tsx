@@ -173,6 +173,7 @@ export default async function StudentLayout({ children, params }: LayoutProps<"/
             { href: `${base}/profile`, label: t("students.tabProfile"), icon: "trophy" },
             { href: `${base}/notes`, label: t("notes.title"), icon: "notes" },
             { href: `${base}/goals`, label: t("goals.title"), icon: "target" },
+            { href: `${base}/onboarding`, label: t("onboarding.title"), icon: "clipboard" },
           ]}
         />
 

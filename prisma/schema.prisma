@@ -96,6 +96,9 @@ model User {
   weightKg     Float?
   heightCm     Float?
 
+  // Trainer: reference levels (Open / QF / SF / Games) shown in every athlete's onboarding.
+  onboardingLevels Json?
+
   // Trainer side
   groupsOwned       Group[]        @relation("TrainerGroups")
   exercisesCreated  Exercise[]     @relation("TrainerExercises")
@@ -115,6 +118,18 @@ model User {
   notesAbout        CoachNote[]   @relation("NotesAbout")
   notesWritten      CoachNote[]   @relation("NotesWritten")
   goals             Goal[]
+  onboarding        Onboarding?
+}
+
+/// The athlete onboarding questionnaire (PN Coaching "Athlete Onboarding" sheet), one per student.
+model Onboarding {
+  id        String   @id @default(cuid())
+  student   User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  studentId String   @unique
+  /// Answers keyed by item (see src/lib/onboarding.ts).
+  data      Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 /** Weekly structure of a student or a group: the focus of each weekday ("Lower / Str - Squat ..."). */
@@ -361,4 +376,6 @@ model PersonalRecord {
   // Set when the record was saved from a workout result (shows 🏆 in the feed).
   sourceResult   BlockResult? @relation(fields: [sourceResultId], references: [id], onDelete: SetNull)
   sourceResultId String?
+  /// Set when the record comes from the athlete's onboarding 1RMs (kept in sync with it).
+  fromOnboarding Boolean @default(false)
 }

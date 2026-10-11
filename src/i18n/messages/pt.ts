@@ -444,6 +444,8 @@ export const pt = {
     clientSince: "Cliente desde {date}",
     sessions: { one: "{count} sessão", other: "{count} sessões" },
     streak: "Sequência",
+    collapse: "Minimizar barra lateral",
+    expand: "Mostrar barra lateral",
     all: "Total",
   },
   notes: {

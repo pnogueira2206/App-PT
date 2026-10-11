@@ -15,6 +15,8 @@ import {
   MessageCircle as LMessageCircle,
   Moon as LMoon,
   NotebookPen as LNotebookPen,
+  PanelLeftClose as LPanelLeftClose,
+  PanelLeftOpen as LPanelLeftOpen,
   Pin as LPin,
   Play as LPlay,
   Target as LTarget,
@@ -56,6 +58,8 @@ export const HistoryIcon = line(LHistory);
 export const CommentIcon = line(LMessageCircle);
 export const RestIcon = line(LMoon);
 export const NotesIcon = line(LNotebookPen);
+export const PanelCloseIcon = line(LPanelLeftClose);
+export const PanelOpenIcon = line(LPanelLeftOpen);
 export const PinIcon = line(LPin);
 export const PlayIcon = line(LPlay);
 export const TargetIcon = line(LTarget);

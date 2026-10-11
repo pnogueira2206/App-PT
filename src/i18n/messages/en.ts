@@ -444,6 +444,8 @@ export const en: Messages = {
     clientSince: "Client since {date}",
     sessions: { one: "{count} session", other: "{count} sessions" },
     streak: "Streak",
+    collapse: "Collapse sidebar",
+    expand: "Show sidebar",
     all: "All",
   },
   notes: {

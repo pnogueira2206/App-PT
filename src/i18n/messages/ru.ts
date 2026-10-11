@@ -460,6 +460,8 @@ export const ru: Messages = {
       other: "{count} тренировки",
     },
     streak: "Серия",
+    collapse: "Свернуть боковую панель",
+    expand: "Показать боковую панель",
     all: "Всё",
   },
   notes: {

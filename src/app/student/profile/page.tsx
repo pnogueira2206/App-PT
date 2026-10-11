@@ -11,7 +11,8 @@ import {
 } from "@/app/student/actions";
 import { getI18n } from "@/i18n/server";
 import { formatDate } from "@/lib/dates";
-import { DoneIcon, TargetIcon } from "@/components/icons";
+import Link from "next/link";
+import { ClipboardIcon, DoneIcon, TargetIcon } from "@/components/icons";
 
 
 export default async function ProfilePage() {
@@ -29,6 +30,10 @@ export default async function ProfilePage() {
     },
   });
 
+  const onboarding = await prisma.onboarding.findUnique({
+    where: { studentId: session.user.id },
+    select: { updatedAt: true },
+  });
   const [records, exercises] = await Promise.all([
     prisma.personalRecord.findMany({
       where: { studentId: session.user.id },
@@ -52,6 +57,24 @@ export default async function ProfilePage() {
         <h1 className="text-xl font-bold text-slate-900">{student.name}</h1>
         <p className="text-sm text-slate-500">{student.email}</p>
       </div>
+
+      <Link
+        href="/student/onboarding"
+        className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 hover:border-brand"
+      >
+        <span>
+          <span className="block font-semibold text-slate-900">
+            <ClipboardIcon className="mr-1.5" />
+            {t("onboarding.title")}
+          </span>
+          <span className="block text-xs text-slate-500">
+            {onboarding
+              ? t("onboarding.updated", { date: formatDate(onboarding.updatedAt, intlLocale) })
+              : t("onboarding.notStarted")}
+          </span>
+        </span>
+        <span className="text-sm font-medium text-brand-text">{onboarding ? t("onboarding.open") : t("onboarding.fill")} →</span>
+      </Link>
 
       <ProfileDataForm
         dateOfBirth={student.dateOfBirth}

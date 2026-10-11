@@ -20,7 +20,7 @@ import {
 } from "@/lib/workouts";
 import { getI18n } from "@/i18n/server";
 import type { MessageKey } from "@/i18n/translator";
-import { CommentIcon, RestIcon } from "@/components/icons";
+import { ClipboardIcon, CommentIcon, RestIcon } from "@/components/icons";
 
 const STATE_STYLES: Record<CompletionState, { label: MessageKey; className: string }> = {
   done: { label: "states.studentDone", className: "bg-emerald-100 text-emerald-700" },
@@ -66,8 +66,22 @@ export default async function StudentHomePage({ searchParams }: PageProps<"/stud
     })
     .then((list) => withoutOverridden(list, studentId));
 
+  const hasOnboarding = await prisma.onboarding.count({ where: { studentId: session.user.id } });
+
   return (
     <div className="space-y-4">
+      {hasOnboarding === 0 && (
+        <Link
+          href="/student/onboarding"
+          className="block rounded-xl border border-brand bg-brand/10 px-4 py-3 text-sm text-slate-800"
+        >
+          <span className="block font-semibold">
+            <ClipboardIcon className="mr-1.5" />
+            {t("onboarding.bannerTitle")}
+          </span>
+          <span className="block text-slate-600">{t("onboarding.bannerText")}</span>
+        </Link>
+      )}
       <div className="flex items-center justify-between">
         <Link
           href={`/student?week=${toDateKey(addDays(weekStart, -7))}`}

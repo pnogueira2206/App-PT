@@ -5,6 +5,7 @@ import {
   CalendarCheck as LCalendarCheck,
   CalendarDays as LCalendarDays,
   Check as LCheck,
+  ClipboardList as LClipboardList,
   CircleCheck as LCircleCheck,
   CirclePause as LCirclePause,
   CircleX as LCircleX,
@@ -45,6 +46,7 @@ export const ArchiveIcon = line(LArchive);
 export const CalendarCheckIcon = line(LCalendarCheck);
 export const CalendarIcon = line(LCalendarDays);
 export const CheckIcon = line(LCheck);
+export const ClipboardIcon = line(LClipboardList);
 export const DoneIcon = line(LCircleCheck);
 export const PauseIcon = line(LCirclePause);
 export const MissingIcon = line(LCircleX);
@@ -72,5 +74,6 @@ export const ICONS = {
   target: TargetIcon,
   dumbbell: DumbbellIcon,
   user: UserIcon,
+  clipboard: ClipboardIcon,
 } as const;
 export type IconName = keyof typeof ICONS;

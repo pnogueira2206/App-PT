@@ -376,4 +376,6 @@ model PersonalRecord {
   // Set when the record was saved from a workout result (shows 🏆 in the feed).
   sourceResult   BlockResult? @relation(fields: [sourceResultId], references: [id], onDelete: SetNull)
   sourceResultId String?
+  /// Set when the record comes from the athlete's onboarding 1RMs (kept in sync with it).
+  fromOnboarding Boolean @default(false)
 }

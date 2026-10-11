@@ -5,7 +5,7 @@ import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireActiveStudent, requireTrainer } from "@/lib/require-session";
 import { parseDateKey } from "@/lib/dates";
-import { sanitizeLevels, sanitizeOnboarding } from "@/lib/onboarding";
+import { MAX_LIFTS, parseKg, sanitizeLevels, sanitizeOnboarding, type OnboardingData } from "@/lib/onboarding";
 import { getI18n } from "@/i18n/server";
 
 export type OnboardingProfile = { dateOfBirth: string; heightCm: string; weightKg: string };
@@ -47,11 +47,14 @@ export async function saveOnboardingAction(
   if (weightKg === "invalid") return { error: t("errors.invalidWeight") };
   const dateOfBirth = payload.profile.dateOfBirth ? parseDateKey(payload.profile.dateOfBirth) : null;
 
-  const data = sanitizeOnboarding(payload.data) as unknown as Prisma.InputJsonValue;
-  await prisma.$transaction([
-    prisma.onboarding.upsert({ where: { studentId: id }, create: { studentId: id, data }, update: { data } }),
-    prisma.user.update({ where: { id }, data: { dateOfBirth, heightCm, weightKg } }),
-  ]);
+  const answers = sanitizeOnboarding(payload.data);
+  const data = answers as unknown as Prisma.InputJsonValue;
+  const trainerId = (await prisma.user.findUniqueOrThrow({ where: { id }, select: { trainerId: true } })).trainerId;
+  await prisma.$transaction(async (tx) => {
+    await tx.onboarding.upsert({ where: { studentId: id }, create: { studentId: id, data }, update: { data } });
+    await tx.user.update({ where: { id }, data: { dateOfBirth, heightCm, weightKg } });
+    if (trainerId) await syncOnboardingRecords(tx, id, trainerId, answers);
+  });
 
   revalidatePath("/student", "layout");
   revalidatePath("/trainer", "layout");
@@ -69,4 +72,42 @@ export async function saveOnboardingLevelsAction(levels: unknown): Promise<Resul
   revalidatePath("/trainer", "layout");
   revalidatePath("/student", "layout");
   return { success: t("onboarding.levelsSaved") };
+}
+
+/**
+ * The 1RMs typed in "Max Lifts / Benchmarks" become the student's 1RM records (one per
+ * lift, marked fromOnboarding and kept in sync: edited when the value changes, removed
+ * when it is cleared), so %1RM loads and benchmarks start from them.
+ */
+async function syncOnboardingRecords(
+  tx: Prisma.TransactionClient,
+  studentId: string,
+  trainerId: string,
+  answers: OnboardingData
+) {
+  for (const row of MAX_LIFTS.liftGroups.flatMap((g) => g.rows)) {
+    const kg = parseKg(answers.lifts[row.id]?.value);
+    const exercise = await tx.exercise.findFirst({
+      where: { trainerId, name: { equals: row.name, mode: "insensitive" } },
+      select: { id: true },
+    });
+    const existing = exercise
+      ? await tx.personalRecord.findFirst({ where: { studentId, exerciseId: exercise.id, fromOnboarding: true } })
+      : null;
+
+    if (kg == null) {
+      if (existing) await tx.personalRecord.delete({ where: { id: existing.id } });
+      continue;
+    }
+    const date = answers.lifts[row.id]?.date ? parseDateKey(answers.lifts[row.id]!.date!) : null;
+    const fields = { type: "WEIGHT" as const, value: String(kg), unit: "kg", reps: 1, ...(date ? { recordDate: date } : {}) };
+    if (existing) {
+      await tx.personalRecord.update({ where: { id: existing.id }, data: fields });
+    } else {
+      const exerciseId =
+        exercise?.id ??
+        (await tx.exercise.create({ data: { trainerId, name: row.name, category: "STRENGTH" }, select: { id: true } })).id;
+      await tx.personalRecord.create({ data: { ...fields, studentId, exerciseId, fromOnboarding: true } });
+    }
+  }
 }

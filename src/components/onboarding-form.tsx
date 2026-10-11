@@ -106,8 +106,11 @@ export function OnboardingForm({
   canEditLevels: boolean;
   updatedLabel: string | null;
 }) {
-  const { t } = useI18n();
+  const { t, intlLocale } = useI18n();
   const router = useRouter();
+  // Like the spreadsheet's "0.0" format: always one decimal.
+  const formatAverage = (value: number) =>
+    value.toLocaleString(intlLocale, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
   const [tab, setTab] = useState<Tab>("profile");
   const [data, setData] = useState(initial);
   const [profile, setProfile] = useState(initialProfile);
@@ -460,7 +463,7 @@ export function OnboardingForm({
                 <tr key={row.label} className="border-t border-slate-100">
                   <td className="py-1.5 text-slate-800">{row.label}</td>
                   <td className="py-1.5 font-semibold tabular-nums text-slate-900">
-                    {row.average == null ? "" : row.average.toFixed(2).replace(/\.?0+$/, "")}
+                    {row.average == null ? "" : formatAverage(row.average)}
                   </td>
                   <td className="py-1.5">
                     {row.average != null && (
@@ -491,7 +494,7 @@ export function OnboardingForm({
                       <li key={item.label} className="flex justify-between gap-2">
                         <span className="text-slate-700">{item.label}</span>
                         <span className="font-semibold tabular-nums text-slate-900">
-                          {item.average.toFixed(2).replace(/\.?0+$/, "")}
+                          {formatAverage(item.average)}
                         </span>
                       </li>
                     ))}

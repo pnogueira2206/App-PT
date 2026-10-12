@@ -26,6 +26,8 @@ import {
   removeRestDayAction,
 } from "@/app/trainer/calendar/actions";
 import { FocusCell } from "@/components/focus-cell";
+import { PercentText } from "@/components/percent-text";
+import type { Maxes } from "@/lib/percent-loads";
 import { CheckIcon, CrossIcon, GroupIcon, RestIcon, TrophyIcon } from "@/components/icons";
 
 export const GRID_WEEKS = 6;
@@ -62,6 +64,7 @@ export async function CalendarGrid({
   workouts,
   clipboard,
   focus,
+  maxes = [],
 }: {
   owner: CalendarOwner;
   basePath: string;
@@ -70,6 +73,8 @@ export async function CalendarGrid({
   clipboard: Clipboard | null;
   /** Weekday focus (Monday first). */
   focus?: (string | null)[];
+  /** Student calendars: 1RMs, to show the kg next to percentages. */
+  maxes?: Maxes;
 }) {
   const i18n = await getI18n();
   const { t, intlLocale } = i18n;
@@ -113,6 +118,14 @@ export async function CalendarGrid({
         >
           ›
         </Link>
+        <a
+          href={`/tv/${owner.type}/${owner.id}`}
+          target="_blank"
+          rel="noreferrer"
+          className={`${navButton} ml-auto text-slate-600`}
+        >
+          {t("tv.open")} ↗
+        </a>
       </div>
 
       {clipboard && (
@@ -290,7 +303,15 @@ export async function CalendarGrid({
                                   </p>
                                   {prescription && <p className="text-slate-600">{prescription}</p>}
                                   {block.description && (
-                                    <p className="whitespace-pre-wrap text-slate-800">{block.description}</p>
+                                    <p className="whitespace-pre-wrap text-slate-800">
+                                      <PercentText
+                                        text={block.description}
+                                        maxes={maxes}
+                                        fallbackNames={[block.exerciseName, block.title]}
+                                        locale={intlLocale}
+                                        kgClassName="ml-0.5 whitespace-nowrap rounded bg-sky-100 px-1 text-[12px] font-semibold text-sky-900"
+                                      />
+                                    </p>
                                   )}
                                   {block.trainerNotes && (
                                     <p className="whitespace-pre-wrap italic text-slate-600">{block.trainerNotes}</p>

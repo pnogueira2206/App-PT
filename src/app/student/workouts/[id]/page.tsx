@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { loadMaxes } from "@/lib/percent-loads";
 import { requireStudent } from "@/lib/require-session";
 import { formatLongDate, toDateKey } from "@/lib/dates";
 import { getI18n } from "@/i18n/server";
@@ -57,7 +58,7 @@ export default async function StudentWorkoutPage({ params }: PageProps<"/student
   });
 
   const exerciseIds = workout.blocks.map((b) => b.exerciseId).filter((e): e is string => !!e);
-  const [oneRepMaxes, records] = await Promise.all([
+  const [oneRepMaxes, records, maxes] = await Promise.all([
     getOneRepMaxes(
       studentId,
       workout.blocks.filter((b) => b.percent1RM && b.exerciseId).map((b) => b.exerciseId!)
@@ -66,6 +67,7 @@ export default async function StudentWorkoutPage({ params }: PageProps<"/student
       where: { studentId, exerciseId: { in: exerciseIds } },
       select: { exerciseId: true, type: true, value: true, unit: true },
     }),
+    loadMaxes(studentId),
   ]);
 
   // Opening the workout counts as reading the coach's comments on it.
@@ -115,6 +117,7 @@ export default async function StudentWorkoutPage({ params }: PageProps<"/student
                 index={idx}
                 oneRepMaxKg={oneRepMax}
                 i18n={i18n}
+                maxes={maxes}
 
                 exerciseHref={block.exercise ? `/student/exercises/${block.exercise.id}/history` : undefined}
               />

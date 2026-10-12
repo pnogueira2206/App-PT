@@ -82,7 +82,7 @@ Plano de evolução da app atual (Next.js + Prisma, PWA) para uma ferramenta de 
 
 **Programação avançada**
 - Biblioteca de **templates** e programas de várias semanas, aplicáveis a um aluno a partir de uma data.
-- **Percentagens do 1RM calculadas automaticamente no texto livre**: quando o título ou a prescrição de um bloco referem um exercício com 1RM registado (ex.: "Back Squat 3x5 @ 65%"), o aluno vê logo os quilos ("3x5 @ 65% → 58 kg"), arredondados ao disco mais próximo. O treinador continua a escrever só a percentagem.
+- ✅ (implementado) **Percentagens do 1RM calculadas automaticamente no texto livre**: quando o título ou a prescrição de um bloco referem um exercício com 1RM registado (ex.: "Back Squat 3x5 @ 65%"), o aluno vê logo os quilos ("3x5 @ 65% → 58 kg"), arredondados ao disco mais próximo. O treinador continua a escrever só a percentagem.
 
 ## Alterações principais ao modelo de dados (Fases 0–2)
 

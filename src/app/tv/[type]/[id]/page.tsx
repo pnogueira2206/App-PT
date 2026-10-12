@@ -4,6 +4,8 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { addDays, formatLongDate, parseDateKey, toDateKey, todayKey } from "@/lib/dates";
 import { loadCalendar } from "@/lib/calendar";
+import { loadMaxes } from "@/lib/percent-loads";
+import { PercentText } from "@/components/percent-text";
 import { formatPrescription } from "@/lib/blocks";
 import type { CalendarOwner } from "@/lib/workouts";
 import { getI18n } from "@/i18n/server";
@@ -37,7 +39,11 @@ export default async function TvDayPage({ params, searchParams }: PageProps<"/tv
   const isToday = !dateParam;
   const date = (dateParam && parseDateKey(dateParam)) || parseDateKey(todayKey())!;
   const owner: CalendarOwner = { type, id };
-  const workouts = (await loadCalendar(trainerId, owner, date, 1)).filter((w) => w.status === "PUBLISHED");
+  const [all, maxes] = await Promise.all([
+    loadCalendar(trainerId, owner, date, 1),
+    type === "student" ? loadMaxes(id) : Promise.resolve([]),
+  ]);
+  const workouts = all.filter((w) => w.status === "PUBLISHED");
   const base = `/tv/${type}/${id}`;
 
   return (
@@ -84,7 +90,17 @@ export default async function TvDayPage({ params, searchParams }: PageProps<"/tv
                 <div key={block.id} className="tv-section">
                   <p className="tv-label">{blockLabel(block.title, index)}</p>
                   {prescription && <p className="tv-text tv-muted">{prescription}</p>}
-                  {block.description && <p className="tv-text">{block.description}</p>}
+                  {block.description && (
+                    <p className="tv-text">
+                      <PercentText
+                        text={block.description}
+                        maxes={maxes}
+                        fallbackNames={[block.exerciseName, block.title]}
+                        locale={intlLocale}
+                        kgClassName="tv-kg"
+                      />
+                    </p>
+                  )}
                   {block.trainerNotes && <p className="tv-text tv-notes">{block.trainerNotes}</p>}
                 </div>
               );

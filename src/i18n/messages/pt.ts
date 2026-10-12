@@ -350,6 +350,8 @@ export const pt = {
     textResult: "Resultado em texto (opcional)",
     textResultPlaceholder: "ex: 21-15-9 com banda verde",
     writeText: "Escrever resultado em texto livre",
+    freePlaceholder: "Como correu? ex.: 3x3 @ 100kg · 12:34 · 5 rondas + 3",
+    logSets: "+ Registar séries (reps × kg)",
     notesPlaceholder: "Notas para o treinador (como te sentiste, dores, escalas...)",
     update: "Atualizar resultado",
     submit: "Guardar resultado",

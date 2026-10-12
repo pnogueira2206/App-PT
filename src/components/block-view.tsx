@@ -2,6 +2,8 @@ import Link from "next/link";
 import type { WorkoutBlock, Exercise } from "@prisma/client";
 import { BLOCK_TYPE_STYLES, benchmarkLabel, formatNumber, formatPrescription, loadFromPercent } from "@/lib/blocks";
 import type { Translate } from "@/i18n/translator";
+import type { Maxes } from "@/lib/percent-loads";
+import { PercentText } from "@/components/percent-text";
 import { TrophyIcon } from "@/components/icons";
 import { PlayIcon } from "@/components/icons";
 
@@ -11,6 +13,7 @@ export function BlockView({
   oneRepMaxKg,
   exerciseHref,
   i18n,
+  maxes = [],
 }: {
   block: WorkoutBlock & { exercise: Exercise | null };
   index: number;
@@ -20,6 +23,8 @@ export function BlockView({
   exerciseHref?: string;
   /** Translator from getI18n() (this is rendered by Server Components). */
   i18n: { t: Translate; intlLocale: string };
+  /** The student's 1RMs: percentages in the free text also show the load in kg. */
+  maxes?: Maxes;
 }) {
   const { t, intlLocale } = i18n;
   const num = (value: number) => formatNumber(value, intlLocale);
@@ -82,7 +87,12 @@ export function BlockView({
 
       {block.description && (
         <p className="whitespace-pre-wrap rounded-lg bg-slate-50 p-2.5 font-mono text-sm text-slate-800">
-          {block.description}
+          <PercentText
+            text={block.description}
+            maxes={maxes}
+            fallbackNames={[block.exercise?.name, block.title]}
+            locale={intlLocale}
+          />
         </p>
       )}
 

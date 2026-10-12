@@ -29,6 +29,7 @@ type BlockInfo = {
   cardioModality: CardioModality | null;
   prescribedSets: number | null;
   prescribedReps: string | null;
+  percent1RM?: number | null;
   benchmark: BenchmarkKind | null;
   benchmarkReps: number | null;
 };
@@ -72,7 +73,18 @@ export function ResultForm({
   const [showText, setShowText] = useState(!!existing?.scoreText);
 
   const benchmark = block.benchmark;
-  const usesSets = !benchmark && (block.type === "STRENGTH" || block.type === "ACCESSORY");
+  // Blocks written as free text (title + prescription, no benchmark): the result is free
+  // text too, like CoachRx's "Add Results"; sets can still be logged on request.
+  const free =
+    !benchmark &&
+    block.prescribedSets == null &&
+    !block.prescribedReps &&
+    !block.percent1RM &&
+    block.metconFormat == null &&
+    block.cardioModality == null;
+  const canLogSets = block.type === "STRENGTH" || block.type === "ACCESSORY";
+  const [setsOpen, setSetsOpen] = useState(!!existing?.sets.length);
+  const usesSets = !benchmark && canLogSets && (!free || setsOpen);
   const format = block.metconFormat ?? "FOR_TIME";
 
   const timeSeconds = parseDuration(time);
@@ -195,7 +207,25 @@ export function ResultForm({
         </div>
       )}
 
-      {done && !benchmark && block.type === "METCON" && (
+      {done && free && (
+        <div className="space-y-1.5">
+          <textarea
+            name="scoreText"
+            rows={2}
+            defaultValue={existing?.scoreText ?? ""}
+            placeholder={t("resultForm.freePlaceholder")}
+            aria-label={t("resultForm.yourResult")}
+            className={`${input} text-base`}
+          />
+          {canLogSets && !setsOpen && (
+            <button type="button" onClick={() => setSetsOpen(true)} className="text-xs text-slate-500 underline">
+              {t("resultForm.logSets")}
+            </button>
+          )}
+        </div>
+      )}
+
+      {done && !benchmark && !free && block.type === "METCON" && (
         <div className="space-y-3">
           <div className="grid grid-cols-2 gap-2">
             {format === "FOR_TIME" && (
@@ -268,7 +298,7 @@ export function ResultForm({
         </div>
       )}
 
-      {done && !benchmark && block.type === "CARDIO" && (
+      {done && !benchmark && !free && block.type === "CARDIO" && (
         <div className="grid grid-cols-3 gap-2">
           <div>
             <label className={label}>{t("blocks.form.time")}</label>
@@ -312,7 +342,7 @@ export function ResultForm({
         </div>
       )}
 
-      {showText ? (
+      {free ? null : showText ? (
         <div>
           <label className={label}>{t("resultForm.textResult")}</label>
           <input

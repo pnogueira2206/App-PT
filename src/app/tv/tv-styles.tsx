@@ -23,6 +23,7 @@ body { margin: 0; background: #0b0b0b; }
 .tv-label { font-size: 1.55vw; font-weight: 700; color: #c8a24a; margin: 0 0 0.3vw; }
 .tv-text { font-size: 1.45vw; line-height: 1.35; white-space: pre-wrap; margin: 0; }
 .tv-muted { color: #bdbdbd; }
+.tv-kg { color: #0b0b0b; background: #c8a24a; border-radius: 4px; padding: 0 0.3vw; margin-left: 0.3vw; font-weight: 700; white-space: nowrap; }
 .tv-notes { font-style: italic; color: #c9c9c9; }
 .tv-empty { font-size: 2vw; color: #bdbdbd; margin-top: 4vw; text-align: center; }
 .tv-list h2 { font-size: 1.6vw; color: #c8a24a; margin: 2vw 0 0.8vw; }

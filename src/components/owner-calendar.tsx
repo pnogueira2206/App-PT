@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { formatLongDate, parseDateKey, resolveWeekStart, toDateKey } from "@/lib/dates";
 import { loadCalendar } from "@/lib/calendar";
+import { loadMaxes } from "@/lib/percent-loads";
 import { readClipboard } from "@/lib/clipboard";
 import { formatResult } from "@/lib/blocks";
 import type { CalendarOwner } from "@/lib/workouts";
@@ -30,9 +31,10 @@ export async function OwnerCalendar({
 }) {
   const i18n = await getI18n();
   const anchorWeek = resolveWeekStart(params.week);
-  const [workouts, clipboard] = await Promise.all([
+  const [workouts, clipboard, maxes] = await Promise.all([
     loadCalendar(trainerId, owner, gridStart(anchorWeek), GRID_WEEKS * 7),
     readClipboard(),
+    owner.type === "student" ? loadMaxes(owner.id) : Promise.resolve([]),
   ]);
   const closeHref = `${basePath}?week=${toDateKey(anchorWeek)}`;
 
@@ -105,6 +107,7 @@ export async function OwnerCalendar({
         workouts={workouts}
         clipboard={clipboard}
         focus={focus}
+        maxes={maxes}
       />
       {panel && (
         <WorkoutPanel

@@ -350,6 +350,8 @@ export const en: Messages = {
     textResult: "Result as text (optional)",
     textResultPlaceholder: "e.g. 21-15-9 with green band",
     writeText: "Write the result as free text",
+    freePlaceholder: "How did it go? e.g. 3x3 @ 100kg · 12:34 · 5 rounds + 3",
+    logSets: "+ Log sets (reps × kg)",
     notesPlaceholder: "Notes for your coach (how you felt, pain, scaling...)",
     update: "Update result",
     submit: "Save result",

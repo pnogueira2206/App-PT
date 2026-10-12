@@ -113,6 +113,14 @@ export async function CalendarGrid({
         >
           ›
         </Link>
+        <a
+          href={`/tv/${owner.type}/${owner.id}`}
+          target="_blank"
+          rel="noreferrer"
+          className={`${navButton} ml-auto text-slate-600`}
+        >
+          {t("tv.open")} ↗
+        </a>
       </div>
 
       {clipboard && (

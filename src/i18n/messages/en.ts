@@ -547,6 +547,17 @@ export const en: Messages = {
     bannerTitle: "Fill in your onboarding",
     bannerText: "Movements, maxes, mindset and goals: the starting point for your training.",
   },
+  tv: {
+    title: "TV mode",
+    open: "TV mode",
+    choose: "Choose the calendar to show on the TV",
+    groups: "Groups",
+    students: "Athletes",
+    previous: "‹ Previous day",
+    next: "Next day ›",
+    change: "Change",
+    empty: "No published workout for this day.",
+  },
   errors: {
     noteEmpty: "Write the note.",
     goalTitle: "Enter the goal.",

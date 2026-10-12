@@ -547,6 +547,17 @@ export const pt = {
     bannerTitle: "Preenche o teu onboarding",
     bannerText: "Movimentos, máximos, mentalidade e objetivos: o ponto de partida para o teu treino.",
   },
+  tv: {
+    title: "Modo TV",
+    open: "Modo TV",
+    choose: "Escolhe o calendário a mostrar na TV",
+    groups: "Grupos",
+    students: "Alunos",
+    previous: "‹ Dia anterior",
+    next: "Dia seguinte ›",
+    change: "Mudar",
+    empty: "Sem treino publicado para este dia.",
+  },
   errors: {
     noteEmpty: "Escreve a nota.",
     goalTitle: "Indica o objetivo.",

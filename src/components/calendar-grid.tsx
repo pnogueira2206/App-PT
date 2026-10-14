@@ -27,6 +27,7 @@ import {
 } from "@/app/trainer/calendar/actions";
 import { FocusCell } from "@/components/focus-cell";
 import { PercentText } from "@/components/percent-text";
+import { SheetImport } from "@/components/sheet-import";
 import type { Maxes } from "@/lib/percent-loads";
 import { CheckIcon, CrossIcon, GroupIcon, RestIcon, TrophyIcon } from "@/components/icons";
 
@@ -118,11 +119,13 @@ export async function CalendarGrid({
         >
           ›
         </Link>
+        <span className="ml-auto" />
+        <SheetImport owner={owner} anchorWeek={toDateKey(anchorWeek)} />
         <a
           href={`/tv/${owner.type}/${owner.id}`}
           target="_blank"
           rel="noreferrer"
-          className={`${navButton} ml-auto text-slate-600`}
+          className={`${navButton} text-slate-600`}
         >
           {t("tv.open")} ↗
         </a>

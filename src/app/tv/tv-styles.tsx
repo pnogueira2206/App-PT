@@ -37,6 +37,9 @@ body { margin: 0; background: #0b0b0b; }
 .tv-input-wide { width: 34vw; }
 .tv-plus { font-size: 1.6vw; margin: 0 0.6vw; color: #9a9a9a; }
 .tv-button { font-size: 1.6vw; font-weight: 700; color: #0b0b0b; background: #c8a24a; border: 0; border-radius: 8px; padding: 0.7vw 2vw; cursor: pointer; }
+.tv-scores { margin-top: 0.4vw; padding: 0.4vw 0.7vw; border-left: 3px solid #3a3a3a; font-size: 1.15vw; line-height: 1.35; color: #a8a8a8; }
+.tv-scores p { margin: 0; }
+.tv-scores b { color: #d6d6d6; }
 .tv-notes { font-style: italic; color: #c9c9c9; }
 .tv-empty { font-size: 2vw; color: #bdbdbd; margin-top: 4vw; text-align: center; }
 .tv-list h2 { font-size: 1.6vw; color: #c8a24a; margin: 2vw 0 0.8vw; }

@@ -6,7 +6,7 @@ import { addDays, formatLongDate, parseDateKey, toDateKey, todayKey } from "@/li
 import { loadCalendar } from "@/lib/calendar";
 import { loadMaxes } from "@/lib/percent-loads";
 import { PercentText } from "@/components/percent-text";
-import { formatPrescription } from "@/lib/blocks";
+import { formatPrescription, formatResult, shortNames } from "@/lib/blocks";
 import type { CalendarOwner } from "@/lib/workouts";
 import { getI18n } from "@/i18n/server";
 import { TvStyles } from "../../tv-styles";
@@ -107,6 +107,15 @@ export default async function TvDayPage({ params, searchParams }: PageProps<"/tv
                     </p>
                   )}
                   {block.trainerNotes && <p className="tv-text tv-notes">{block.trainerNotes}</p>}
+                  {block.memberResults.length > 0 && (
+                    <div className="tv-scores">
+                      {block.memberResults.map((r) => (
+                        <p key={r.name}>
+                          <b>{shortNames(block.memberResults.map((m) => m.name)).get(r.name)}</b> {formatResult(block, r, i18n)}
+                        </p>
+                      ))}
+                    </div>
+                  )}
                 </div>
               );
             })}

@@ -10,7 +10,7 @@ import {
   todayKey,
   weekDays,
 } from "@/lib/dates";
-import { benchmarkLabel, formatPrescription, formatResult } from "@/lib/blocks";
+import { benchmarkLabel, formatPrescription, formatResult, shortNames } from "@/lib/blocks";
 import type { GridWorkout } from "@/lib/calendar";
 import type { CalendarOwner, CompletionState } from "@/lib/workouts";
 import type { Clipboard } from "@/lib/clipboard";
@@ -319,6 +319,20 @@ export async function CalendarGrid({
                                   {block.trainerNotes && (
                                     <p className="whitespace-pre-wrap italic text-slate-600">{block.trainerNotes}</p>
                                   )}
+                                  {owner.type === "group" && block.memberResults.length > 0 && (() => {
+                                    // What each member did, right under the block (lighter, like a note on the sheet).
+                                    const names = shortNames(block.memberResults.map((r) => r.name));
+                                    return (
+                                      <div className="mt-1 space-y-0.5 rounded bg-slate-50 px-1.5 py-1 text-[12px] leading-snug text-slate-500">
+                                        {block.memberResults.map((r) => (
+                                          <p key={r.name}>
+                                            <span className="font-semibold text-slate-600">{names.get(r.name)}</span>{" "}
+                                            {formatResult(block, r, i18n)}
+                                          </p>
+                                        ))}
+                                      </div>
+                                    );
+                                  })()}
                                   {showResult && (
                                     <p
                                       className={`flex justify-between gap-1 rounded border-l-2 bg-slate-50 px-1 py-0.5 ${

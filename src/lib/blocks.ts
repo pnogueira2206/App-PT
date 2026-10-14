@@ -263,3 +263,14 @@ export function benchmarkLabel(t: Translate, kind: BenchmarkKind, reps: number |
   if (kind === "MAX_LOAD") return t("benchmark.rm", { reps: reps ?? 1 });
   return kind === "TIME" ? t("benchmark.kindTime") : t("benchmark.kindRounds");
 }
+
+/**
+ * Short names for a list of people: the first name, or the full name when two
+ * people share it ("Ana", "Bruno", "Oleg K.", "Oleg P." stays readable in a small cell).
+ */
+export function shortNames(names: string[]): Map<string, string> {
+  const first = (n: string) => n.trim().split(/\s+/)[0] ?? n;
+  const counts = new Map<string, number>();
+  for (const n of names) counts.set(first(n), (counts.get(first(n)) ?? 0) + 1);
+  return new Map(names.map((n) => [n, (counts.get(first(n)) ?? 0) > 1 ? n : first(n)]));
+}

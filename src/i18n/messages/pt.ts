@@ -196,6 +196,7 @@ export const pt = {
   calendar: {
     defaultTitle: "Treino",
     add: "+ Adicionar",
+    scores: "scores",
     structure: "Estrutura",
     focusPlaceholder: "ex.:\nLower\nStr - Squat\nWL - Snatch",
     editFocus: "Editar o foco deste dia",

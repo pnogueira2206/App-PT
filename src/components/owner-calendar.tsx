@@ -4,17 +4,20 @@ import { formatLongDate, parseDateKey, resolveWeekStart, toDateKey } from "@/lib
 import { loadCalendar } from "@/lib/calendar";
 import { loadMaxes } from "@/lib/percent-loads";
 import { readClipboard } from "@/lib/clipboard";
-import { formatResult } from "@/lib/blocks";
+import { formatDuration, formatPrescription, formatResult } from "@/lib/blocks";
+import { loadTvBlock } from "@/lib/tv-scores";
 import type { CalendarOwner } from "@/lib/workouts";
 import { getI18n } from "@/i18n/server";
 import { CalendarGrid, GRID_WEEKS, gridStart } from "@/components/calendar-grid";
 import { WorkoutPanel, type PanelWorkout } from "@/components/workout-panel";
+import { ScoresPanel } from "@/components/scores-panel";
 
-export type CalendarSearchParams = { week?: string; edit?: string; new?: string };
+export type CalendarSearchParams = { week?: string; edit?: string; new?: string; scores?: string };
 
 /**
  * Calendar of a student or group: the multi-week grid plus, when `?new=<date>` or
- * `?edit=<workoutId>` is set, the side panel to build that day's workout in place.
+ * `?edit=<workoutId>` is set, the side panel to build that day's workout in place,
+ * and with `?scores=<blockId>` the panel to type each athlete's score for a block.
  */
 export async function OwnerCalendar({
   trainerId,
@@ -98,6 +101,8 @@ export async function OwnerCalendar({
     };
   }
 
+  const scores = params.scores ? await loadTvBlock(trainerId, owner, params.scores) : null;
+
   return (
     <>
       <CalendarGrid
@@ -119,6 +124,30 @@ export async function OwnerCalendar({
           initial={panel.initial}
           showResults={owner.type === "student"}
           exercises={exercises.map((e) => e.name)}
+        />
+      )}
+      {scores && (
+        <ScoresPanel
+          key={scores.block.id}
+          owner={owner}
+          blockId={scores.block.id}
+          label={/^[A-Z]\d*[.)]\s/.test(scores.block.title) ? scores.block.title : `${String.fromCharCode(64 + scores.block.order)}) ${scores.block.title}`}
+          subtitle={`${scores.workout.title} · ${formatLongDate(scores.workout.date, i18n.intlLocale)}`}
+          prescription={[formatPrescription(scores.block, i18n), scores.block.description].filter(Boolean).join("\n")}
+          kind={scores.kind}
+          closeHref={closeHref}
+          athletes={scores.athletes.map((a) => ({
+            id: a.id,
+            name: a.name,
+            current: a.result ? formatResult(scores.block, a.result, i18n) : "",
+            values: {
+              kg: a.result?.loadKg != null ? String(a.result.loadKg) : "",
+              time: a.result?.timeSeconds != null ? formatDuration(a.result.timeSeconds) : "",
+              rounds: a.result?.rounds != null ? String(a.result.rounds) : "",
+              reps: a.result?.reps != null ? String(a.result.reps) : "",
+              text: a.result?.scoreText ?? "",
+            },
+          }))}
         />
       )}
     </>

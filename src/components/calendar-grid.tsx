@@ -28,6 +28,8 @@ import {
 import { FocusCell } from "@/components/focus-cell";
 import { PercentText } from "@/components/percent-text";
 import { SheetImport } from "@/components/sheet-import";
+import { DayDropCell, DraggableCard } from "@/components/calendar-dnd";
+import { linkify } from "@/components/linkify";
 import type { Maxes } from "@/lib/percent-loads";
 import { CheckIcon, CrossIcon, GroupIcon, RestIcon, TrophyIcon } from "@/components/icons";
 
@@ -83,7 +85,7 @@ export async function CalendarGrid({
   const start = gridStart(anchorWeek);
   const weeks = Array.from({ length: GRID_WEEKS }, (_, i) => addDays(start, i * 7));
   const anchorKey = toDateKey(anchorWeek);
-  const panelHref = (param: "new" | "edit", value: string) => `${basePath}?week=${anchorKey}&${param}=${value}`;
+  const panelHref = (param: "new" | "edit" | "scores", value: string) => `${basePath}?week=${anchorKey}&${param}=${value}`;
 
   const dayMonth = (key: string) => formatDayMonth(parseDateKey(key) ?? start, intlLocale);
   const clipboardLabel = (c: Clipboard) =>
@@ -222,8 +224,9 @@ export async function CalendarGrid({
                   const hasRest = dayWorkouts.some((w) => w.kind === "REST");
 
                   return (
-                    <div
+                    <DayDropCell
                       key={key}
+                      date={key}
                       className={`group/day flex min-h-32 flex-col gap-1.5 border-l border-l-slate-200 border-t-2 px-1.5 pb-1.5 pt-1 ${
                         isCurrent ? "border-t-brand" : "border-t-slate-300"
                       } ${isToday ? "bg-brand/5" : ""}`}
@@ -252,14 +255,23 @@ export async function CalendarGrid({
                             )}
                           </div>
                         ) : (
-                          <Link
+                          <DraggableCard
                             key={w.id}
-                            href={w.owned ? panelHref("edit", w.id) : `/trainer/workouts/${w.id}`}
-                            className={`block space-y-2 rounded-md border px-2.5 py-2 text-[13px] leading-[1.45] hover:border-brand ${
+                            workoutId={w.id}
+                            date={key}
+                            enabled={w.owned}
+                            className={`relative space-y-2 rounded-md border bg-white px-2.5 py-2 text-[13px] leading-[1.45] hover:border-brand ${
                               w.status === "DRAFT" ? "border-dashed border-amber-400" : "border-slate-200"
                             }`}
                           >
-                            <p className="text-sm font-semibold text-slate-900">{w.title}</p>
+                            {/* The title's link covers the whole card; links inside the card sit above it. */}
+                            <Link
+                              href={w.owned ? panelHref("edit", w.id) : `/trainer/workouts/${w.id}`}
+                              draggable={false}
+                              className="block text-sm font-semibold text-slate-900 after:absolute after:inset-0"
+                            >
+                              {w.title}
+                            </Link>
                             <div className="flex flex-wrap gap-1 text-[11px]">
                               {w.status === "DRAFT" && (
                                 <span className="rounded-full bg-amber-100 px-1.5 text-amber-800">{t("common.draft")}</span>
@@ -284,10 +296,10 @@ export async function CalendarGrid({
                             {w.warmup && (
                               <div className="whitespace-pre-wrap text-slate-600">
                                 <p className="font-semibold text-slate-800">{t("editor.warmup")}</p>
-                                {w.warmup}
+                                {linkify(w.warmup)}
                               </div>
                             )}
-                            {w.description && <p className="whitespace-pre-wrap text-slate-600">{w.description}</p>}
+                            {w.description && <p className="whitespace-pre-wrap text-slate-600">{linkify(w.description)}</p>}
                             {w.blocks.map((block, index) => {
                               const prescription = formatPrescription(block, i18n);
                               const showResult = owner.type === "student" && w.status === "PUBLISHED" && key <= today;
@@ -317,7 +329,7 @@ export async function CalendarGrid({
                                     </p>
                                   )}
                                   {block.trainerNotes && (
-                                    <p className="whitespace-pre-wrap italic text-slate-600">{block.trainerNotes}</p>
+                                    <p className="whitespace-pre-wrap italic text-slate-600">{linkify(block.trainerNotes)}</p>
                                   )}
                                   {owner.type === "group" && block.memberResults.length > 0 && (() => {
                                     // What each member did, right under the block (lighter, like a note on the sheet).
@@ -333,6 +345,15 @@ export async function CalendarGrid({
                                       </div>
                                     );
                                   })()}
+                                  {key <= today && (
+                                    <Link
+                                      href={panelHref("scores", block.id)}
+                                      draggable={false}
+                                      className="relative z-10 inline-block text-[11px] font-medium text-slate-400 hover:text-brand-text"
+                                    >
+                                      + {t("calendar.scores")}
+                                    </Link>
+                                  )}
                                   {showResult && (
                                     <p
                                       className={`flex justify-between gap-1 rounded border-l-2 bg-slate-50 px-1 py-0.5 ${
@@ -351,10 +372,10 @@ export async function CalendarGrid({
                             {w.cooldown && (
                               <div className="whitespace-pre-wrap text-slate-600">
                                 <p className="font-semibold text-slate-800">{t("editor.cooldown")}</p>
-                                {w.cooldown}
+                                {linkify(w.cooldown)}
                               </div>
                             )}
-                          </Link>
+                          </DraggableCard>
                         )
                       )}
 
@@ -382,7 +403,7 @@ export async function CalendarGrid({
                           </form>
                         )}
                       </div>
-                    </div>
+                    </DayDropCell>
                   );
                 })}
               </div>

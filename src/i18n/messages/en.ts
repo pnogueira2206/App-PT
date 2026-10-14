@@ -196,6 +196,7 @@ export const en: Messages = {
   calendar: {
     defaultTitle: "Workout",
     add: "+ Add",
+    scores: "scores",
     structure: "Structure",
     focusPlaceholder: "e.g.\nLower\nStr - Squat\nWL - Snatch",
     editFocus: "Edit this day's focus",

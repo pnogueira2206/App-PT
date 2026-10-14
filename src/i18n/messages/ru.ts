@@ -205,6 +205,7 @@ export const ru: Messages = {
   calendar: {
     defaultTitle: "Тренировка",
     add: "+ Добавить",
+    scores: "результаты",
     structure: "Структура",
     focusPlaceholder: "напр.\nLower\nStr - Squat\nWL - Snatch",
     editFocus: "Изменить фокус дня",

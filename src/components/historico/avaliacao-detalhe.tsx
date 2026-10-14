@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import type { Papel } from "@prisma/client";
-import { confirmarComoTreinadorAction } from "@/lib/avaliacoes-actions";
+import { apagarAvaliacaoAction, confirmarComoTreinadorAction } from "@/lib/avaliacoes-actions";
 import { AvaliacaoGuardada } from "@/types/avaliacao";
 import { ResumoAvaliacao } from "@/components/nova-avaliacao/resumo-avaliacao";
 import { RelatorioAvaliacaoButtons } from "@/components/historico/relatorio-avaliacao-buttons";
@@ -12,6 +12,8 @@ import { RelatorioAvaliacaoButtons } from "@/components/historico/relatorio-aval
 export function AvaliacaoDetalhe({ avaliacao, papel }: { avaliacao: AvaliacaoGuardada | null; papel: Papel }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
+  const [aConfirmarApagar, setAConfirmarApagar] = useState(false);
+  const [erroApagar, setErroApagar] = useState("");
 
   if (avaliacao === null) {
     return (
@@ -66,6 +68,56 @@ export function AvaliacaoDetalhe({ avaliacao, papel }: { avaliacao: AvaliacaoGua
       <div className="mt-4">
         <ResumoAvaliacao draft={avaliacao} seccoes={avaliacao.grelhaSnapshot} />
       </div>
+
+      {papel === "ADMIN" && (
+        <div className="mt-4 rounded-none border border-line p-3">
+          {aConfirmarApagar ? (
+            <div className="space-y-2">
+              <p className="text-xs text-neutral-700 dark:text-neutral-300">
+                Tens a certeza? Esta avaliação é apagada em definitivo e não pode ser recuperada.
+              </p>
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  disabled={pending}
+                  onClick={() =>
+                    startTransition(async () => {
+                      const resultado = await apagarAvaliacaoAction(avaliacao.id);
+                      if (resultado.erro) {
+                        setErroApagar(resultado.erro);
+                        return;
+                      }
+                      router.push("/historico");
+                    })
+                  }
+                  className="text-xs font-medium text-red-600 dark:text-red-400 underline"
+                >
+                  Confirmar, apagar definitivamente
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAConfirmarApagar(false);
+                    setErroApagar("");
+                  }}
+                  className="text-xs text-muted underline"
+                >
+                  Cancelar
+                </button>
+              </div>
+              {erroApagar && <p className="text-xs text-red-600 dark:text-red-400">{erroApagar}</p>}
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setAConfirmarApagar(true)}
+              className="text-xs font-medium text-red-600 dark:text-red-400 underline"
+            >
+              Apagar esta avaliação
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }

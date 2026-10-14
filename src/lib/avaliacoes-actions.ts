@@ -135,3 +135,24 @@ export async function confirmarComoTreinadorAction(avaliacaoId: string) {
   await registarAuditoria(session.user.id, "CONFIRMOU_AVALIACAO", avaliacaoId);
   revalidatePath("/historico");
 }
+
+export async function apagarAvaliacaoAction(avaliacaoId: string): Promise<{ erro?: string }> {
+  const session = await auth();
+  if (!session || session.user.papel !== "ADMIN") return { erro: "Não autorizado." };
+
+  const avaliacao = await prisma.avaliacao.findUnique({
+    where: { id: avaliacaoId },
+    include: { treinador: true },
+  });
+  if (!avaliacao) return { erro: "Avaliação não encontrada." };
+
+  await prisma.avaliacao.delete({ where: { id: avaliacaoId } });
+  await registarAuditoria(
+    session.user.id,
+    "APAGOU_AVALIACAO",
+    `${avaliacaoId} (${avaliacao.treinador.nome}, ${avaliacao.data})`
+  );
+  revalidatePath("/historico");
+  revalidatePath("/por-treinador");
+  return {};
+}

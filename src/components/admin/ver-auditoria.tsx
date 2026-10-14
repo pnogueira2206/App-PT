@@ -15,6 +15,7 @@ const ROTULOS_ACAO: Record<string, string> = {
   VIU_AVALIACAO: "Viu avaliação",
   CRIOU_AVALIACAO: "Criou avaliação",
   CONFIRMOU_AVALIACAO: "Confirmou avaliação",
+  APAGOU_AVALIACAO: "Apagou avaliação",
   EXPORTOU_CSV: "Exportou CSV",
   REPOS_PASSWORD: "Repôs palavra-passe",
   MUDOU_PASSWORD_PROPRIA: "Mudou a própria palavra-passe",
@@ -25,7 +26,8 @@ const ROTULOS_ACAO: Record<string, string> = {
 };
 
 function corAcao(acao: string): string {
-  if (acao === "LOGIN_FALHOU" || acao === "LOGIN_BLOQUEADO") return "text-red-600 dark:text-red-400";
+  if (acao === "LOGIN_FALHOU" || acao === "LOGIN_BLOQUEADO" || acao === "APAGOU_AVALIACAO")
+    return "text-red-600 dark:text-red-400";
   if (
     acao === "EXPORTOU_CSV" ||
     acao === "REPOS_PASSWORD" ||

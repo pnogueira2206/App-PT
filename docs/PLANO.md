@@ -61,7 +61,7 @@ Plano de evolução da app atual (Next.js + Prisma, PWA) para uma ferramenta de 
 - **Check-in de prontidão** antes do treino (sono, energia, stress, dor muscular, de 1 a 5, e dores/lesões em texto), visível no calendário do treinador.
 - **Comentários por treino**: conversa entre o treinador e o aluno associada a um treino.
 - **Mensagens diretas** treinador ↔ aluno.
-- **Scores no Modo TV**: no Modo TV de um grupo, clicar num bloco abre a lista dos membros do grupo com um campo para o score de cada um (kg, tempo, rondas/reps ou texto livre, conforme o bloco), para o treinador registar os resultados de todos no fim da aula. Os scores ficam no histórico de cada aluno como se fossem registados por ele (contam para recordes e benchmarks). Tem de funcionar no Chromebox do ginásio (Chrome 76): formulários HTML simples, sem depender do JavaScript da app.
+- ✅ (implementado) **Scores no Modo TV**: no Modo TV de um grupo, clicar num bloco abre a lista dos membros do grupo com um campo para o score de cada um (kg, tempo, rondas/reps ou texto livre, conforme o bloco), para o treinador registar os resultados de todos no fim da aula. Os scores ficam no histórico de cada aluno como se fossem registados por ele (contam para recordes e benchmarks). Tem de funcionar no Chromebox do ginásio (Chrome 76): formulários HTML simples, sem depender do JavaScript da app.
 
 ### Fase 4 — Notificações e vídeos
 - **Notificações push** da PWA (Web Push):

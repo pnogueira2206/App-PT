@@ -24,6 +24,19 @@ body { margin: 0; background: #0b0b0b; }
 .tv-text { font-size: 1.45vw; line-height: 1.35; white-space: pre-wrap; margin: 0; }
 .tv-muted { color: #bdbdbd; }
 .tv-kg { color: #0b0b0b; background: #c8a24a; border-radius: 4px; padding: 0 0.3vw; margin-left: 0.3vw; font-weight: 700; white-space: nowrap; }
+.tv-block-link { border-bottom: 2px dotted #6b5a2a; }
+.tv-score-hint { font-size: 1.1vw; color: #8a8a8a; }
+.tv-flash { font-size: 1.4vw; color: #0b0b0b; background: #c8a24a; border-radius: 6px; padding: 0.6vw 1vw; display: inline-block; margin: 0 0 1.2vw; }
+.tv-table { border-collapse: collapse; margin: 0.6vw 0 1.4vw; }
+.tv-table td { padding: 0.5vw 1.2vw 0.5vw 0; border-bottom: 1px solid #2a2a2a; vertical-align: middle; }
+.tv-athlete { font-size: 1.7vw; font-weight: 700; min-width: 20vw; }
+.tv-current { font-size: 1.2vw; color: #9a9a9a; }
+.tv-input { font-size: 1.6vw; width: 12vw; padding: 0.4vw 0.6vw; background: #1b1b1b; color: #ffffff; border: 2px solid #555; border-radius: 6px; }
+.tv-input:focus { border-color: #c8a24a; outline: none; }
+.tv-input-small { width: 7vw; }
+.tv-input-wide { width: 34vw; }
+.tv-plus { font-size: 1.6vw; margin: 0 0.6vw; color: #9a9a9a; }
+.tv-button { font-size: 1.6vw; font-weight: 700; color: #0b0b0b; background: #c8a24a; border: 0; border-radius: 8px; padding: 0.7vw 2vw; cursor: pointer; }
 .tv-notes { font-style: italic; color: #c9c9c9; }
 .tv-empty { font-size: 2vw; color: #bdbdbd; margin-top: 4vw; text-align: center; }
 .tv-list h2 { font-size: 1.6vw; color: #c8a24a; margin: 2vw 0 0.8vw; }

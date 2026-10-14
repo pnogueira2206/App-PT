@@ -88,7 +88,12 @@ export default async function TvDayPage({ params, searchParams }: PageProps<"/tv
               const prescription = formatPrescription(block, i18n);
               return (
                 <div key={block.id} className="tv-section">
-                  <p className="tv-label">{blockLabel(block.title, index)}</p>
+                  <p className="tv-label">
+                    {/* Tap a block to type the athletes' scores. */}
+                    <a href={`${base}/block/${block.id}`} className="tv-block-link">
+                      {blockLabel(block.title, index)} <span className="tv-score-hint">✎</span>
+                    </a>
+                  </p>
                   {prescription && <p className="tv-text tv-muted">{prescription}</p>}
                   {block.description && (
                     <p className="tv-text">

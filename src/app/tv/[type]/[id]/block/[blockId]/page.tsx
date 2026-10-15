@@ -46,6 +46,7 @@ export default async function TvBlockPage({ params, searchParams }: PageProps<"/
         </div>
         <div className="tv-nav">
           <a href={back}>{t("tvScores.back")}</a>
+          <a href={`/tv/${type}/${id}/block/${block.id}/history`}>{t("tvHistory.open")}</a>
         </div>
       </div>
 

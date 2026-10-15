@@ -40,6 +40,11 @@ body { margin: 0; background: #0b0b0b; }
 .tv-scores { margin-top: 0.4vw; padding: 0.4vw 0.7vw; border-left: 3px solid #3a3a3a; font-size: 1.15vw; line-height: 1.35; color: #a8a8a8; }
 .tv-scores p { margin: 0; }
 .tv-scores b { color: #d6d6d6; }
+.tv-search { margin: 0 0 1.6vw; }
+.tv-search .tv-input { margin-right: 1vw; }
+.tv-hist { border-left: 3px solid #c8a24a; padding-left: 1vw; }
+.tv-hist-date { font-size: 1.1vw; margin: 0 0 0.3vw; }
+.tv-hist-value { font-size: 1.7vw; font-weight: 700; color: #c8a24a; padding-right: 1.5vw; }
 .tv-notes { font-style: italic; color: #c9c9c9; }
 .tv-empty { font-size: 2vw; color: #bdbdbd; margin-top: 4vw; text-align: center; }
 .tv-list h2 { font-size: 1.6vw; color: #c8a24a; margin: 2vw 0 0.8vw; }

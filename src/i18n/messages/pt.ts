@@ -580,6 +580,12 @@ export const pt = {
     kept: { one: "{count} mantido por já ter resultados.", other: "{count} mantidos por já terem resultados." },
     nothing: "Não encontrei treinos no texto colado.",
   },
+  tvHistory: {
+    open: "Histórico",
+    title: "Histórico: {name}",
+    back: "‹ Voltar ao bloco",
+    search: "Pesquisar",
+  },
   tvScores: {
     back: "‹ Voltar ao treino",
     kg: "Carga máxima (kg)",

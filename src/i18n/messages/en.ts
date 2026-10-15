@@ -580,6 +580,12 @@ export const en: Messages = {
     kept: { one: "{count} kept because it has results.", other: "{count} kept because they have results." },
     nothing: "No workouts found in the pasted text.",
   },
+  tvHistory: {
+    open: "History",
+    title: "History: {name}",
+    back: "‹ Back to the block",
+    search: "Search",
+  },
   tvScores: {
     back: "‹ Back to the workout",
     kg: "Max load (kg)",

@@ -165,6 +165,8 @@ export async function updateStudentProfileAction(
   const dateOfBirthRaw = String(formData.get("dateOfBirth") ?? "");
   const weightRaw = String(formData.get("weightKg") ?? "").trim();
   const heightRaw = String(formData.get("heightCm") ?? "").trim();
+  const name = formData.has("name") ? String(formData.get("name")).trim().slice(0, 100) : undefined;
+  if (name === "") return { error: t("errors.nameRequired") };
 
   const weightKg = weightRaw ? Number(weightRaw.replace(",", ".")) : null;
   const heightCm = heightRaw ? Number(heightRaw.replace(",", ".")) : null;
@@ -179,13 +181,15 @@ export async function updateStudentProfileAction(
   await prisma.user.update({
     where: { id: studentId },
     data: {
+      ...(name ? { name } : {}),
       dateOfBirth: dateOfBirthRaw ? new Date(dateOfBirthRaw) : null,
       weightKg,
       heightCm,
     },
   });
 
-  revalidatePath(`/trainer/students/${studentId}`);
+  // The name shows everywhere (lists, groups, calendars, TV).
+  revalidatePath("/trainer", "layout");
   return { success: t("success.dataUpdated") };
 }
 

@@ -12,11 +12,14 @@ function toDateInputValue(date: Date | null) {
 }
 
 export function ProfileDataForm({
+  name,
   dateOfBirth,
   weightKg,
   heightCm,
   action,
 }: {
+  /** Trainer side: the student's name can be corrected here too. */
+  name?: string;
   dateOfBirth: Date | null;
   weightKg: number | null;
   heightCm: number | null;
@@ -45,6 +48,12 @@ export function ProfileDataForm({
           </button>
         </div>
         <dl className="mt-2 grid grid-cols-3 gap-2 text-sm">
+          {name != null && (
+            <div className="col-span-3">
+              <dt className="text-xs text-slate-400">{t("profile.name")}</dt>
+              <dd className="font-medium text-slate-800">{name}</dd>
+            </div>
+          )}
           <div>
             <dt className="text-xs text-slate-400">{t("profile.birth")}</dt>
             <dd className="font-medium text-slate-800">
@@ -80,6 +89,18 @@ export function ProfileDataForm({
         </button>
       </div>
 
+      {name != null && (
+        <div>
+          <label className="block text-xs text-slate-500">{t("profile.name")}</label>
+          <input
+            name="name"
+            required
+            maxLength={100}
+            defaultValue={name}
+            className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          />
+        </div>
+      )}
       <div>
         <label className="block text-xs text-slate-500">{t("profile.dateOfBirth")}</label>
         <input

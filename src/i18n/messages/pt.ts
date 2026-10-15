@@ -148,6 +148,7 @@ export const pt = {
   },
   profile: {
     personalData: "Dados pessoais",
+    name: "Nome",
     birth: "Nascimento",
     weight: "Peso",
     height: "Altura",
@@ -607,6 +608,7 @@ export const pt = {
     commentTooLong: "O comentário tem mais de {max} caracteres.",
     resultNotFound: "Resultado não encontrado.",
     fillAll: "Preenche todos os campos.",
+    nameRequired: "Indica o nome.",
     fillStudent: "Preenche nome, email e palavra-passe.",
     passwordMin6: "A palavra-passe deve ter pelo menos 6 caracteres.",
     passwordMin8: "A palavra-passe deve ter pelo menos 8 caracteres.",

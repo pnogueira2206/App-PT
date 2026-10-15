@@ -157,6 +157,7 @@ export const ru: Messages = {
   },
   profile: {
     personalData: "Личные данные",
+    name: "Имя",
     birth: "Дата рождения",
     weight: "Вес",
     height: "Рост",
@@ -623,6 +624,7 @@ export const ru: Messages = {
     commentTooLong: "Комментарий длиннее {max} символов.",
     resultNotFound: "Результат не найден.",
     fillAll: "Заполни все поля.",
+    nameRequired: "Укажи имя.",
     fillStudent: "Заполни имя, email и пароль.",
     passwordMin6: "Пароль должен содержать не менее 6 символов.",
     passwordMin8: "Пароль должен содержать не менее 8 символов.",

@@ -148,6 +148,7 @@ export const en: Messages = {
   },
   profile: {
     personalData: "Personal details",
+    name: "Name",
     birth: "Born",
     weight: "Weight",
     height: "Height",
@@ -607,6 +608,7 @@ export const en: Messages = {
     commentTooLong: "The comment is longer than {max} characters.",
     resultNotFound: "Result not found.",
     fillAll: "Please fill in every field.",
+    nameRequired: "Enter the name.",
     fillStudent: "Please fill in name, email and password.",
     passwordMin6: "The password must have at least 6 characters.",
     passwordMin8: "The password must have at least 8 characters.",

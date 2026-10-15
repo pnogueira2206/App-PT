@@ -157,6 +157,7 @@ export const ru: Messages = {
   },
   profile: {
     personalData: "Личные данные",
+    name: "Имя",
     birth: "Дата рождения",
     weight: "Вес",
     height: "Рост",
@@ -205,7 +206,8 @@ export const ru: Messages = {
   calendar: {
     defaultTitle: "Тренировка",
     add: "+ Добавить",
-    structure: "Структура",
+    scores: "результаты",
+    structure: "Шаблон",
     focusPlaceholder: "напр.\nLower\nStr - Squat\nWL - Snatch",
     editFocus: "Изменить фокус дня",
     setFocus: "+ фокус",
@@ -595,6 +597,12 @@ export const ru: Messages = {
     kept: { one: "{count} оставлена (есть результаты).", few: "{count} оставлены (есть результаты).", many: "{count} оставлено (есть результаты).", other: "{count} оставлены (есть результаты)." },
     nothing: "В вставленном тексте нет тренировок.",
   },
+  tvHistory: {
+    open: "История",
+    title: "История: {name}",
+    back: "‹ Назад к блоку",
+    search: "Искать",
+  },
   tvScores: {
     back: "‹ Назад к тренировке",
     kg: "Максимальный вес (кг)",
@@ -616,6 +624,7 @@ export const ru: Messages = {
     commentTooLong: "Комментарий длиннее {max} символов.",
     resultNotFound: "Результат не найден.",
     fillAll: "Заполни все поля.",
+    nameRequired: "Укажи имя.",
     fillStudent: "Заполни имя, email и пароль.",
     passwordMin6: "Пароль должен содержать не менее 6 символов.",
     passwordMin8: "Пароль должен содержать не менее 8 символов.",

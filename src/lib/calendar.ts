@@ -53,6 +53,8 @@ export type GridWorkout = {
     benchmarkReps: number | null;
     /** The student's result (student calendars only). */
     result: GridResult | null;
+    /** Group calendars: each member's result (from their adjusted version when they have one). */
+    memberResults: (GridResult & { name: string })[];
   }[];
 };
 
@@ -78,7 +80,7 @@ const blockSelect = {
 type GridBlock = GridWorkout["blocks"][number];
 
 function toBlocks(
-  blocks: (Omit<GridBlock, "exerciseName" | "result"> & {
+  blocks: (Omit<GridBlock, "exerciseName" | "result" | "memberResults"> & {
     exercise: { name: string } | null;
     results?: GridResult[];
   })[]
@@ -107,6 +109,7 @@ function toBlocks(
     benchmark: b.benchmark,
     benchmarkReps: b.benchmarkReps,
     result: b.results?.[0] ?? null,
+    memberResults: [],
   }));
 }
 
@@ -168,18 +171,35 @@ export async function loadCalendar(
 
   const group = await prisma.group.findFirstOrThrow({
     where: { id: owner.id, trainerId },
-    include: { members: { where: { student: { archivedAt: null } }, select: { studentId: true } } },
+    include: {
+      members: {
+        where: { student: { archivedAt: null } },
+        select: { studentId: true, student: { select: { name: true } } },
+      },
+    },
   });
   const memberIds = new Set(group.members.map((m) => m.studentId));
+  const memberResults = {
+    where: { studentId: { in: [...memberIds] } },
+    include: { sets: true, student: { select: { name: true } } },
+  };
   const workouts = await prisma.workout.findMany({
     where: { trainerId, groupId: owner.id, date: { gte: start, lt: end } },
     include: {
       completions: { select: { studentId: true } },
-      overrides: { select: { completions: { select: { studentId: true } } } },
-      blocks: blockSelect,
+      overrides: {
+        select: {
+          studentId: true,
+          completions: { select: { studentId: true } },
+          blocks: { select: { order: true, results: memberResults } },
+        },
+      },
+      blocks: { ...blockSelect, include: { ...blockSelect.include, results: memberResults } },
     },
     orderBy: [{ date: "asc" }, { createdAt: "asc" }],
   });
+  // Members are listed in name order under each block.
+  const byName = (a: { name: string }, b: { name: string }) => a.name.localeCompare(b.name);
 
   return workouts.map((w) => {
     // Members who completed the group workout or their adjusted version of it.
@@ -205,7 +225,20 @@ export async function loadCalendar(
         w.kind === "TRAINING" && w.status === "PUBLISHED" && memberIds.size > 0
           ? { done: done.size, total: memberIds.size }
           : null,
-      blocks: toBlocks(w.blocks),
+      blocks: toBlocks(w.blocks.map((b) => ({ ...b, results: undefined }))).map((block, i) => {
+        // A member with an adjusted version scores on that version's block in the same position.
+        const adjusted = new Set(w.overrides.map((o) => o.studentId));
+        const direct = w.blocks[i].results.filter((r) => !adjusted.has(r.studentId));
+        const fromOverrides = w.overrides.flatMap(
+          (o) => o.blocks.find((ob) => ob.order === w.blocks[i].order)?.results.filter((r) => r.studentId === o.studentId) ?? []
+        );
+        return {
+          ...block,
+          memberResults: [...direct, ...fromOverrides]
+            .map(({ student, ...r }) => ({ ...r, name: student.name }))
+            .sort(byName),
+        };
+      }),
     };
   });
 }

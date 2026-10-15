@@ -71,6 +71,7 @@ export default async function StudentProfileTabPage({
   return (
     <div className="space-y-6">
       <ProfileDataForm
+        name={student.name}
         dateOfBirth={student.dateOfBirth}
         weightKg={student.weightKg}
         heightCm={student.heightCm}

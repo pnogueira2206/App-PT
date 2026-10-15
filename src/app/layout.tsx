@@ -1,7 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { Suspense } from "react";
 import { ServiceWorkerRegister } from "@/components/service-worker-register";
+import { NavProgress } from "@/components/nav-progress";
 import { I18nProvider } from "@/i18n/client";
 import { INTL_LOCALE } from "@/i18n/config";
 import { MESSAGES } from "@/i18n/messages";
@@ -59,6 +61,9 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <I18nProvider locale={locale} messages={MESSAGES[locale]}>
           {children}
         </I18nProvider>
+        <Suspense>
+          <NavProgress />
+        </Suspense>
         <ServiceWorkerRegister />
       </body>
     </html>

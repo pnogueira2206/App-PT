@@ -7,6 +7,7 @@ import { requireTrainer } from "@/lib/require-session";
 import { addDays, diffInDays, parseDateKey, startOfWeek } from "@/lib/dates";
 import { readClipboard, writeClipboard } from "@/lib/clipboard";
 import { duplicateWorkout, type CalendarOwner } from "@/lib/workouts";
+import { saveTvScores } from "@/lib/tv-scores";
 
 function revalidateAll() {
   revalidatePath("/trainer", "layout");
@@ -192,4 +193,38 @@ export async function saveTrainingDayAction(owner: CalendarOwner, weekday: numbe
     await prisma.trainingDay.delete({ where: { id: existing.id } });
   }
   revalidatePath("/trainer", "layout");
+}
+
+/**
+ * Drag & drop in the calendar: moves one of the calendar's own workouts (or rest day)
+ * to another date. A group workout takes its members' adjusted versions with it.
+ */
+export async function moveWorkoutAction(workoutId: string, dateKey: string): Promise<{ error?: string }> {
+  const session = await requireTrainer();
+  const date = parseDateKey(dateKey);
+  if (!date) return { error: "invalid date" };
+  const workout = await prisma.workout.findFirst({
+    where: { id: workoutId, trainerId: session.user.id },
+    select: { id: true, groupId: true },
+  });
+  if (!workout) return { error: "not found" };
+  await prisma.$transaction([
+    prisma.workout.update({ where: { id: workout.id }, data: { date } }),
+    ...(workout.groupId ? [prisma.workout.updateMany({ where: { sourceWorkoutId: workout.id }, data: { date } })] : []),
+  ]);
+  revalidateAll();
+  return {};
+}
+
+/** Scores typed from the calendar's "+ scores" panel (same rules as the TV). */
+export async function saveScoresAction(
+  owner: CalendarOwner,
+  blockId: string,
+  formData: FormData
+): Promise<{ saved: number; invalid: number } | { error: string }> {
+  const session = await requireTrainer();
+  const outcome = await saveTvScores(session.user.id, owner, blockId, formData);
+  if (!outcome) return { error: "not found" };
+  revalidateAll();
+  return outcome;
 }

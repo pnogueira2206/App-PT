@@ -148,6 +148,7 @@ export const en: Messages = {
   },
   profile: {
     personalData: "Personal details",
+    name: "Name",
     birth: "Born",
     weight: "Weight",
     height: "Height",
@@ -196,7 +197,8 @@ export const en: Messages = {
   calendar: {
     defaultTitle: "Workout",
     add: "+ Add",
-    structure: "Structure",
+    scores: "scores",
+    structure: "Template",
     focusPlaceholder: "e.g.\nLower\nStr - Squat\nWL - Snatch",
     editFocus: "Edit this day's focus",
     setFocus: "+ focus",
@@ -579,6 +581,12 @@ export const en: Messages = {
     kept: { one: "{count} kept because it has results.", other: "{count} kept because they have results." },
     nothing: "No workouts found in the pasted text.",
   },
+  tvHistory: {
+    open: "History",
+    title: "History: {name}",
+    back: "‹ Back to the block",
+    search: "Search",
+  },
   tvScores: {
     back: "‹ Back to the workout",
     kg: "Max load (kg)",
@@ -600,6 +608,7 @@ export const en: Messages = {
     commentTooLong: "The comment is longer than {max} characters.",
     resultNotFound: "Result not found.",
     fillAll: "Please fill in every field.",
+    nameRequired: "Enter the name.",
     fillStudent: "Please fill in name, email and password.",
     passwordMin6: "The password must have at least 6 characters.",
     passwordMin8: "The password must have at least 8 characters.",

@@ -13,6 +13,8 @@ import { CompleteWorkoutForm } from "@/components/complete-workout-form";
 import { CommentThread } from "@/components/comment-thread";
 import { RecordSuggestion } from "@/components/record-suggestion";
 import { detectRecord } from "@/lib/records";
+import { matchExercise } from "@/lib/exercise-match";
+import { linkify } from "@/components/linkify";
 
 
 export default async function StudentWorkoutPage({ params }: PageProps<"/student/workouts/[id]">) {
@@ -58,7 +60,7 @@ export default async function StudentWorkoutPage({ params }: PageProps<"/student
   });
 
   const exerciseIds = workout.blocks.map((b) => b.exerciseId).filter((e): e is string => !!e);
-  const [oneRepMaxes, records, maxes] = await Promise.all([
+  const [oneRepMaxes, records, maxes, library] = await Promise.all([
     getOneRepMaxes(
       studentId,
       workout.blocks.filter((b) => b.percent1RM && b.exerciseId).map((b) => b.exerciseId!)
@@ -68,6 +70,10 @@ export default async function StudentWorkoutPage({ params }: PageProps<"/student
       select: { exerciseId: true, type: true, value: true, unit: true },
     }),
     loadMaxes(studentId),
+    // Blocks written as free text still get the exercise's video when the title names one.
+    workout.blocks.some((b) => !b.exercise)
+      ? prisma.exercise.findMany({ where: { trainerId: workout.trainerId } })
+      : Promise.resolve([]),
   ]);
 
   // Opening the workout counts as reading the coach's comments on it.
@@ -95,14 +101,14 @@ export default async function StudentWorkoutPage({ params }: PageProps<"/student
           {workout.trainer.name}
         </p>
         {workout.description && (
-          <p className="mt-2 whitespace-pre-wrap text-sm text-slate-600">{workout.description}</p>
+          <p className="mt-2 whitespace-pre-wrap text-sm text-slate-600">{linkify(workout.description)}</p>
         )}
       </div>
 
       {workout.warmup && (
           <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm">
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{t("editor.warmup")}</p>
-            <p className="whitespace-pre-wrap text-slate-700">{workout.warmup}</p>
+            <p className="whitespace-pre-wrap text-slate-700">{linkify(workout.warmup)}</p>
           </div>
         )}
 
@@ -110,16 +116,16 @@ export default async function StudentWorkoutPage({ params }: PageProps<"/student
         {workout.blocks.map((block, idx) => {
           const oneRepMax = block.exerciseId ? oneRepMaxes.get(block.exerciseId) : undefined;
           const result = block.results[0] ?? null;
+          const exercise = block.exercise ?? matchExercise(block.title, library);
           return (
             <div key={block.id} className="rounded-xl border border-slate-200 bg-white p-4">
               <BlockView
-                block={block}
+                block={{ ...block, exercise }}
                 index={idx}
                 oneRepMaxKg={oneRepMax}
                 i18n={i18n}
                 maxes={maxes}
-
-                exerciseHref={block.exercise ? `/student/exercises/${block.exercise.id}/history` : undefined}
+                exerciseHref={exercise ? `/student/exercises/${exercise.id}/history` : undefined}
               />
               <ResultForm
                 block={block}
@@ -165,7 +171,7 @@ export default async function StudentWorkoutPage({ params }: PageProps<"/student
       {workout.cooldown && (
         <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm">
           <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{t("editor.cooldown")}</p>
-          <p className="whitespace-pre-wrap text-slate-700">{workout.cooldown}</p>
+          <p className="whitespace-pre-wrap text-slate-700">{linkify(workout.cooldown)}</p>
         </div>
       )}
 

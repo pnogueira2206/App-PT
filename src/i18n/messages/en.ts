@@ -198,7 +198,7 @@ export const en: Messages = {
     defaultTitle: "Workout",
     add: "+ Add",
     scores: "scores",
-    structure: "Structure",
+    structure: "Template",
     focusPlaceholder: "e.g.\nLower\nStr - Squat\nWL - Snatch",
     editFocus: "Edit this day's focus",
     setFocus: "+ focus",

@@ -145,14 +145,15 @@ export async function CalendarGrid({
         </div>
       )}
 
-      <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
+      {/* Scrolls inside its own box so the weekday names and the template stay on top (and the weeks on the left). */}
+      <div className="max-h-[calc(100dvh-8.5rem)] overflow-auto overscroll-contain rounded-xl border border-slate-200 bg-white">
         <div className={`grid min-w-[99rem] ${COLUMNS}`}>
           {/* Header: weekday names */}
-          <div className="bg-slate-50" />
+          <div className="sticky left-0 top-0 z-30 h-9 bg-slate-50" />
           {weekDays(start).map((day) => (
             <div
               key={day.getUTCDay()}
-              className="border-l border-slate-200 bg-slate-50 px-2 py-2 text-center text-xs font-semibold uppercase tracking-wide text-slate-600"
+              className="sticky top-0 z-20 flex h-9 items-center justify-center border-l border-slate-200 bg-slate-50 px-2 text-xs font-semibold uppercase tracking-wide text-slate-600"
             >
               {formatWeekday(day, intlLocale)}
             </div>
@@ -161,11 +162,11 @@ export async function CalendarGrid({
           {/* Weekly structure (focus of each weekday) */}
           {focus && (
             <>
-              <div className="border-t border-slate-200 bg-emerald-50 px-2 py-2 text-xs font-semibold text-slate-700">
+              <div className="sticky left-0 top-9 z-30 border-b border-t border-slate-200 [background:linear-gradient(var(--color-emerald-50),var(--color-emerald-50)),var(--color-white)] px-2 py-2 text-xs font-semibold text-slate-700 shadow-[0_2px_4px_-2px_rgb(0_0_0/0.15)]">
                 {t("calendar.structure")}
               </div>
               {focus.map((text, weekday) => (
-                <div key={weekday} className="border-l border-t border-slate-200 bg-emerald-50 px-2 py-2">
+                <div key={weekday} className="sticky top-9 z-20 border-b border-l border-t border-slate-200 [background:linear-gradient(var(--color-emerald-50),var(--color-emerald-50)),var(--color-white)] px-2 py-2 shadow-[0_2px_4px_-2px_rgb(0_0_0/0.15)]">
                   <FocusCell owner={owner} weekday={weekday} focus={text} />
                 </div>
               ))}
@@ -185,8 +186,8 @@ export async function CalendarGrid({
               <div key={weekKey} className="contents">
                 {/* Week label + week actions */}
                 <div
-                  className={`space-y-1.5 border-t-2 px-2 py-2 ${
-                    isCurrent ? "border-t-brand bg-brand/5" : "border-t-slate-300"
+                  className={`sticky left-0 z-10 space-y-1.5 border-r border-r-slate-200 border-t-2 px-2 py-2 ${
+                    isCurrent ? "border-t-brand bg-[color-mix(in_srgb,var(--color-brand)_5%,var(--color-white))]" : "border-t-slate-300 bg-white"
                   }`}
                 >
                   <p className="text-sm font-semibold text-slate-900">
@@ -227,7 +228,7 @@ export async function CalendarGrid({
                     <DayDropCell
                       key={key}
                       date={key}
-                      className={`group/day flex min-h-32 flex-col gap-1.5 border-l border-l-slate-200 border-t-2 px-1.5 pb-1.5 pt-1 ${
+                      className={`group/day flex min-h-32 min-w-0 flex-col gap-1.5 border-l border-l-slate-200 border-t-2 px-1.5 pb-1.5 pt-1 ${
                         isCurrent ? "border-t-brand" : "border-t-slate-300"
                       } ${isToday ? "bg-brand/5" : ""}`}
                     >
@@ -260,7 +261,7 @@ export async function CalendarGrid({
                             workoutId={w.id}
                             date={key}
                             enabled={w.owned}
-                            className={`relative space-y-2 rounded-md border bg-white px-2.5 py-2 text-[13px] leading-[1.45] hover:border-brand ${
+                            className={`relative min-w-0 space-y-2 rounded-md border bg-white px-2 py-2 text-[12px] leading-[1.45] [overflow-wrap:anywhere] hover:border-brand ${
                               w.status === "DRAFT" ? "border-dashed border-amber-400" : "border-slate-200"
                             }`}
                           >
@@ -268,7 +269,7 @@ export async function CalendarGrid({
                             <Link
                               href={w.owned ? panelHref("edit", w.id) : `/trainer/workouts/${w.id}`}
                               draggable={false}
-                              className="block text-sm font-semibold text-slate-900 after:absolute after:inset-0"
+                              className="block text-[13px] font-semibold text-slate-900 after:absolute after:inset-0"
                             >
                               {w.title}
                             </Link>
@@ -324,7 +325,7 @@ export async function CalendarGrid({
                                         maxes={maxes}
                                         fallbackNames={[block.exerciseName, block.title]}
                                         locale={intlLocale}
-                                        kgClassName="ml-0.5 whitespace-nowrap rounded bg-sky-100 px-1 text-[12px] font-semibold text-sky-900"
+                                        kgClassName="ml-0.5 whitespace-nowrap rounded bg-sky-100 px-1 text-[11px] font-semibold text-sky-900"
                                       />
                                     </p>
                                   )}
@@ -335,10 +336,15 @@ export async function CalendarGrid({
                                     // What each member did, right under the block (lighter, like a note on the sheet).
                                     const names = shortNames(block.memberResults.map((r) => r.name));
                                     return (
-                                      <div className="mt-1 space-y-0.5 rounded bg-slate-50 px-1.5 py-1 text-[12px] leading-snug text-slate-500">
+                                      <div className="mt-1 space-y-0.5">
                                         {block.memberResults.map((r) => (
-                                          <p key={r.name}>
-                                            <span className="font-semibold text-slate-600">{names.get(r.name)}</span>{" "}
+                                          <p
+                                            key={r.name}
+                                            className={`rounded border-l-2 bg-slate-50 px-1 py-0.5 leading-snug ${
+                                              r.done ? "border-emerald-500 text-slate-800" : "border-red-400 text-slate-500"
+                                            }`}
+                                          >
+                                            <span className="font-semibold">{names.get(r.name)}</span>{" "}
                                             {formatResult(block, r, i18n)}
                                           </p>
                                         ))}

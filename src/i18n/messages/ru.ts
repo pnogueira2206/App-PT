@@ -207,7 +207,7 @@ export const ru: Messages = {
     defaultTitle: "Тренировка",
     add: "+ Добавить",
     scores: "результаты",
-    structure: "Структура",
+    structure: "Шаблон",
     focusPlaceholder: "напр.\nLower\nStr - Squat\nWL - Snatch",
     editFocus: "Изменить фокус дня",
     setFocus: "+ фокус",

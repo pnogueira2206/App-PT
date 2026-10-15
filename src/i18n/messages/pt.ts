@@ -198,7 +198,7 @@ export const pt = {
     defaultTitle: "Treino",
     add: "+ Adicionar",
     scores: "scores",
-    structure: "Estrutura",
+    structure: "Template",
     focusPlaceholder: "ex.:\nLower\nStr - Squat\nWL - Snatch",
     editFocus: "Editar o foco deste dia",
     setFocus: "+ foco",

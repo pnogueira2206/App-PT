@@ -33,6 +33,12 @@ export function AvaliacaoDetalhe({ avaliacao, papel }: { avaliacao: AvaliacaoGua
       </Link>
       <div className="rounded-none bg-panel px-3 py-2 text-xs text-muted">Consulta apenas de leitura</div>
 
+      {avaliacao.editadoPor && (
+        <p className="mt-2 text-xs text-dim">
+          Editado por {avaliacao.editadoPor} em {avaliacao.editadoEm ? new Date(avaliacao.editadoEm).toLocaleDateString("pt-PT") : ""}.
+        </p>
+      )}
+
       {papel === "TREINADOR" && (
         <div className="mt-3 rounded-none border border-line p-3">
           {avaliacao.confirmacaoTreinador.data ? (
@@ -71,6 +77,12 @@ export function AvaliacaoDetalhe({ avaliacao, papel }: { avaliacao: AvaliacaoGua
 
       {papel === "ADMIN" && (
         <div className="mt-4 rounded-none border border-line p-3">
+          <Link
+            href={`/historico/${avaliacao.id}/editar`}
+            className="mb-3 block text-xs font-medium text-muted underline"
+          >
+            Editar esta avaliação
+          </Link>
           {aConfirmarApagar ? (
             <div className="space-y-2">
               <p className="text-xs text-neutral-700 dark:text-neutral-300">

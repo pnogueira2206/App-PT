@@ -48,6 +48,7 @@ model Utilizador {
 
   avaliacoesComoTreinador Avaliacao[]        @relation("AvaliacaoTreinador")
   avaliacoesComoAvaliador Avaliacao[]        @relation("AvaliacaoAvaliador")
+  avaliacoesEditadas     Avaliacao[]        @relation("AvaliacaoEditadoPor")
   registosAuditoria      RegistoAuditoria[]
 }
 
@@ -142,6 +143,11 @@ model Avaliacao {
   confirmacaoTreinadorData String?
 
   relatorioEnviadoEm DateTime?
+
+  /// Preenchido quando um Admin edita a avaliação depois de gravada — mantém o registo de quem e quando.
+  editadoPor   Utilizador? @relation("AvaliacaoEditadoPor", fields: [editadoPorId], references: [id])
+  editadoPorId String?
+  editadoEm    DateTime?
 
   guardadaEm DateTime @default(now())
 }

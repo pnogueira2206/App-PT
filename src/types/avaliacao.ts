@@ -46,6 +46,9 @@ export interface AvaliacaoGuardada extends AvaliacaoDraft {
   grelhaSnapshot: Seccao[];
   /** Data/hora em que o relatório foi enviado por email ao treinador, se alguma vez foi. */
   relatorioEnviadoEm: string | null;
+  /** Quem editou a avaliação depois de gravada, e quando — null se nunca foi editada. */
+  editadoPor: string | null;
+  editadoEm: string | null;
 }
 
 export function cabecalhoVazio(): Cabecalho {

@@ -7,7 +7,7 @@ import { registarAuditoria } from "@/lib/auditoria";
 import { Seccao } from "@/data/grelha";
 import { AvaliacaoDraft, AvaliacaoGuardada, PlanoAcaoItem, Respostas } from "@/types/avaliacao";
 
-const INCLUDE = { treinador: true, avaliador: true, espaco: true, tipoAula: true } as const;
+const INCLUDE = { treinador: true, avaliador: true, espaco: true, tipoAula: true, editadoPor: true } as const;
 
 type LinhaComRelacoes = {
   id: string;
@@ -27,6 +27,8 @@ type LinhaComRelacoes = {
   confirmacaoAvaliadorData: string | null;
   confirmacaoTreinadorData: string | null;
   relatorioEnviadoEm: Date | null;
+  editadoPor: { nome: string } | null;
+  editadoEm: Date | null;
   guardadaEm: Date;
 };
 
@@ -35,6 +37,8 @@ function paraAvaliacaoGuardada(row: LinhaComRelacoes): AvaliacaoGuardada {
     id: row.id,
     guardadaEm: row.guardadaEm.toISOString(),
     relatorioEnviadoEm: row.relatorioEnviadoEm ? row.relatorioEnviadoEm.toISOString() : null,
+    editadoPor: row.editadoPor?.nome ?? null,
+    editadoEm: row.editadoEm ? row.editadoEm.toISOString() : null,
     grelhaSnapshot: JSON.parse(row.grelhaSnapshot) as Seccao[],
     cabecalho: {
       treinador: row.treinador.nome,
@@ -134,6 +138,70 @@ export async function confirmarComoTreinadorAction(avaliacaoId: string) {
   });
   await registarAuditoria(session.user.id, "CONFIRMOU_AVALIACAO", avaliacaoId);
   revalidatePath("/historico");
+}
+
+export interface PatchEdicaoAvaliacao {
+  cabecalho: {
+    treinador: string;
+    espaco: string;
+    data: string;
+    hora: string;
+    tipoAula: string;
+    nAlunos: string;
+  };
+  respostas: Respostas;
+  observacoes: Record<string, string>;
+  classificacaoGeral: string;
+  comentarioGeral: string;
+  planoAcao: PlanoAcaoItem[];
+}
+
+export async function editarAvaliacaoAction(
+  avaliacaoId: string,
+  patch: PatchEdicaoAvaliacao
+): Promise<{ erro?: string }> {
+  const session = await auth();
+  if (!session || session.user.papel !== "ADMIN") return { erro: "Não autorizado." };
+
+  const existente = await prisma.avaliacao.findUnique({ where: { id: avaliacaoId } });
+  if (!existente) return { erro: "Avaliação não encontrada." };
+
+  const treinador = await prisma.utilizador.findFirst({
+    where: { nome: patch.cabecalho.treinador, papel: "TREINADOR" },
+  });
+  if (!treinador) return { erro: "Treinador não encontrado." };
+  const tipoAula = await prisma.tipoAula.findFirst({ where: { nome: patch.cabecalho.tipoAula } });
+  if (!tipoAula) return { erro: "Tipo de aula não encontrado." };
+  const espaco = await prisma.espaco.findFirst({ where: { nome: patch.cabecalho.espaco } });
+  if (!espaco) return { erro: "Espaço não encontrado." };
+
+  await prisma.avaliacao.update({
+    where: { id: avaliacaoId },
+    data: {
+      treinadorId: treinador.id,
+      espacoId: espaco.id,
+      tipoAulaId: tipoAula.id,
+      data: patch.cabecalho.data,
+      hora: patch.cabecalho.hora,
+      nAlunos: Number(patch.cabecalho.nAlunos),
+      respostas: JSON.stringify(patch.respostas),
+      observacoes: JSON.stringify(patch.observacoes),
+      classificacaoGeral: Number(patch.classificacaoGeral),
+      comentarioGeral: patch.comentarioGeral,
+      planoAcao: JSON.stringify(patch.planoAcao.filter((p) => p.texto.trim() !== "")),
+      editadoPorId: session.user.id,
+      editadoEm: new Date(),
+    },
+  });
+  await registarAuditoria(
+    session.user.id,
+    "EDITOU_AVALIACAO",
+    `${avaliacaoId} (${treinador.nome}, ${patch.cabecalho.data})`
+  );
+  revalidatePath("/historico");
+  revalidatePath(`/historico/${avaliacaoId}`);
+  revalidatePath("/por-treinador");
+  return {};
 }
 
 export async function apagarAvaliacaoAction(avaliacaoId: string): Promise<{ erro?: string }> {

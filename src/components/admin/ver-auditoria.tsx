@@ -16,6 +16,7 @@ const ROTULOS_ACAO: Record<string, string> = {
   CRIOU_AVALIACAO: "Criou avaliação",
   CONFIRMOU_AVALIACAO: "Confirmou avaliação",
   APAGOU_AVALIACAO: "Apagou avaliação",
+  EDITOU_AVALIACAO: "Editou avaliação",
   EXPORTOU_CSV: "Exportou CSV",
   REPOS_PASSWORD: "Repôs palavra-passe",
   MUDOU_PASSWORD_PROPRIA: "Mudou a própria palavra-passe",
@@ -32,7 +33,8 @@ function corAcao(acao: string): string {
     acao === "EXPORTOU_CSV" ||
     acao === "REPOS_PASSWORD" ||
     acao === "ANONIMIZOU_CONTA" ||
-    acao === "ENVIOU_RELATORIO"
+    acao === "ENVIOU_RELATORIO" ||
+    acao === "EDITOU_AVALIACAO"
   )
     return "text-amber-700 dark:text-amber-400";
   return "text-neutral-900 dark:text-neutral-100";

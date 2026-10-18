@@ -6,12 +6,14 @@
     priorities: { strength: "", gymnastics: "", conditioning: "", sportSpecific: "", movement: "" },
     season: {}, // { "2026-01-05": "phase text" } keyed by the Monday of each week
     hrMax: null,
-    targets: {}, // weekly targets per exercise, filled in later by the Coverage tab
+    targets: {}, // { "Burpee": { min: 36, max: 180 } } weekly, per movement
+    priorityBuckets: {}, // { gymnastics: ["barRingRope"] } links priorities to Coverage buckets
   });
 
   const GLOBAL_DEFAULTS = () => ({
     panelOpen: true,
     activeTab: "template",
+    movements: window.CRX.defaultMovements(), // movement list and synonyms, shared by all athletes
     zones: [
       { name: "Z1", low: null, high: null },
       { name: "Z2", low: null, high: null },

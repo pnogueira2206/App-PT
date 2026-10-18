@@ -1,14 +1,14 @@
 {
   "manifest_version": 3,
   "name": "CoachRx Athlete Panel",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Side panel for CoachRx: template, priorities, season, zones and volume coverage per athlete.",
   "permissions": ["storage"],
   "host_permissions": ["https://dashboard.coachrx.app/*"],
   "content_scripts": [
     {
       "matches": ["https://dashboard.coachrx.app/*"],
-      "js": ["src/storage.js", "src/api.js", "src/tabs.js", "src/coverage.js", "src/content.js"],
+      "js": ["src/movements.js", "src/parse.js", "src/storage.js", "src/api.js", "src/tabs.js", "src/coverage.js", "src/content.js"],
       "run_at": "document_idle"
     }
   ],

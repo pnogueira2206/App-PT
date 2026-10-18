@@ -85,10 +85,8 @@
     );
   }
 
-  function bucketAlerts(stats, ctx) {
+  function bucketAlerts(stats) {
     const alerts = [];
-    const linked = (bucketId) =>
-      CRX.PRIORITIES.filter(([key]) => (ctx.athlete.priorityBuckets[key] || []).includes(bucketId)).map(([, label]) => label);
     for (const b of BUCKETS) {
       const st = stats.byBucket.get(b.id);
       if (!(st.usual > 0)) continue;
@@ -100,11 +98,9 @@
       else if (ratio > 1.5) [text, major] = ["well above usual", true];
       else if (ratio > 1.3) text = "above usual";
       if (!text) continue;
-      const pr = linked(b.id);
       alerts.push({
-        major: major || pr.length > 0,
-        text: `${b.label} ${text}: ${fmt(st.wk, b.unit)} vs ${fmt(st.usual, b.unit)} (last 7d vs 4-wk avg)` +
-          (pr.length ? ` · linked to priority ${pr.join(", ")}` : ""),
+        major,
+        text: `${b.label} ${text}: ${fmt(st.wk, b.unit)} vs ${fmt(st.usual, b.unit)} (last 7d vs 4-wk avg)`,
       });
     }
     return alerts;
@@ -257,7 +253,7 @@
       ...targetRows(stats, ctx)
         .filter((r) => r.status !== "OK")
         .map((r) => ({ major: true, text: `${r.name}: ${fmt(r.st.wk, r.unit)} last 7d (prev 7d ${fmt(r.st.prev, r.unit)}), target ${r.range}` })),
-      ...bucketAlerts(stats, ctx),
+      ...bucketAlerts(stats),
     ];
     const majors = alerts.filter((a) => a.major);
     const minors = alerts.filter((a) => !a.major);
@@ -276,7 +272,6 @@
     const tbody = h("tbody");
     for (const b of BUCKETS) {
       const st = stats.byBucket.get(b.id);
-      const linked = CRX.PRIORITIES.some(([key]) => (ctx.athlete.priorityBuckets[key] || []).includes(b.id));
       const children = ctx.global.movements
         .filter((m) => m.bucket === b.id)
         .map((m) => ({ m, st: stats.byMovement.get(m) }))
@@ -285,7 +280,7 @@
       const down = st.usual > 0 && st.wk < st.usual * 0.8;
       const up = st.usual > 0 && st.wk > st.usual * 1.3;
       const row = h("tr", { class: "bucket" },
-        h("td", {}, h("span", { class: "caret" }, children.length ? "▸" : " "), b.label, linked ? h("span", { class: "dot", title: "Linked to a priority" }) : null),
+        h("td", {}, h("span", { class: "caret" }, children.length ? "▸" : " "), b.label),
         h("td", {}, strip(st.days)),
         h("td", {}, st.last === null ? "–" : `${st.last}d`),
         h("td", { class: down ? "down" : up ? "up" : "" }, `${fmt(st.wk, b.unit)} / ${fmt(st.usual, b.unit)}`, down ? " ▾" : up ? " ▴" : "")

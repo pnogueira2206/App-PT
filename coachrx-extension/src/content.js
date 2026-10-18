@@ -40,6 +40,12 @@
     td.date { white-space: nowrap; color: #4b5563; width: 70px; font-variant-numeric: tabular-nums; }
     td input { margin: 0; }
     tr.current td { background: #ecfdf5; }
+    .season-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    table.season { font-size: 12px; }
+    table.season th { padding: 0 2px 2px; }
+    table.season td { padding: 1px 2px; border-top: 0; }
+    table.season td.date { width: 44px; }
+    table.season input { padding: 1px 4px; font-size: 12px; height: 20px; border-color: #e5e7eb; border-radius: 3px; }
     .year { display: flex; align-items: center; justify-content: center; gap: 16px; margin-bottom: 8px; }
     .year button { border: 1px solid #d1d5db; background: #fff; border-radius: 4px; width: 28px; cursor: pointer; }
     .field { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; font-weight: 600; }
@@ -47,9 +53,6 @@
     input.hrmax { width: 80px; margin: 0; }
     input.pct { width: 56px; margin: 0; display: inline-block; }
     td.bpm { white-space: nowrap; font-variant-numeric: tabular-nums; }
-    .chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 2px; }
-    .chip { border: 1px solid #d1d5db; background: #fff; border-radius: 10px; padding: 1px 8px; font-size: 11px; color: #6b7280; cursor: pointer; }
-    .chip.on { background: #dbeafe; border-color: #93c5fd; color: #1e40af; }
     button.link { border: 0; background: none; color: #2563eb; cursor: pointer; font-size: 12px; padding: 2px 0; }
     select { border: 1px solid #d1d5db; border-radius: 4px; padding: 3px; font-size: 12px; background: #fff; color: inherit; max-width: 100%; }
     .cov-head { display: flex; align-items: baseline; gap: 8px; margin-bottom: 8px; }
@@ -62,7 +65,6 @@
     table.cov tr.mov td:first-child { padding-left: 18px; color: #374151; }
     table.cov td:nth-child(3), table.cov td:nth-child(4) { white-space: nowrap; font-variant-numeric: tabular-nums; }
     .caret { display: inline-block; width: 12px; color: #9ca3af; }
-    .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #2563eb; margin-left: 4px; vertical-align: middle; }
     .muted { color: #6b7280; font-weight: 400; }
     .down { color: #b45309; } .up { color: #b91c1c; }
     .strip { display: inline-flex; gap: 1px; vertical-align: middle; }

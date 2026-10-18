@@ -61,32 +61,14 @@
 
   function renderPriorities(root, ctx) {
     const p = ctx.athlete.priorities;
-    const links = ctx.athlete.priorityBuckets;
-    const chips = (key) =>
-      h("div", { class: "chips" },
-        CRX.BUCKETS.map((b) => {
-          const chip = h("button", { class: (links[key] || []).includes(b.id) ? "chip on" : "chip" }, b.label);
-          chip.addEventListener("click", () => {
-            const list = (links[key] = links[key] || []);
-            const i = list.indexOf(b.id);
-            if (i >= 0) list.splice(i, 1);
-            else list.push(b.id);
-            chip.classList.toggle("on", i < 0);
-            ctx.saveAthlete();
-          });
-          return chip;
-        })
-      );
     root.append(
-      h("p", { class: "hint" }, "Select the Coverage buckets each priority covers; their alerts are flagged as linked to the priority."),
       ...PRIORITIES.map(([key, label]) =>
         h("div", { class: "day" },
           h("div", { class: "label" }, label),
           autoText(p[key], "", (v) => {
             p[key] = v;
             ctx.saveAthlete();
-          }),
-          chips(key)
+          })
         )
       )
     );
@@ -135,18 +117,21 @@
       );
     });
 
+    // two columns (first and second half of the year) so the whole season fits on screen
+    const half = Math.ceil(rows.length / 2);
+    const column = (part) =>
+      h("table", { class: "season" },
+        h("thead", {}, h("tr", {}, h("th", {}, "Week"), h("th", {}, "Phase"))),
+        h("tbody", {}, part)
+      );
     root.append(
       h("div", { class: "year" },
         h("button", { onclick: () => rerender(year - 1), title: "Previous year" }, "‹"),
         h("strong", {}, String(year)),
         h("button", { onclick: () => rerender(year + 1), title: "Next year" }, "›")
       ),
-      h("table", { class: "season" },
-        h("thead", {}, h("tr", {}, h("th", {}, "Week"), h("th", {}, "Phase"))),
-        h("tbody", {}, rows)
-      )
+      h("div", { class: "season-cols" }, column(rows.slice(0, half)), column(rows.slice(half)))
     );
-    root.querySelector("tr.current")?.scrollIntoView({ block: "center" });
   }
 
   function renderReadiness(root) {
@@ -205,7 +190,6 @@
 
   window.CRX = window.CRX || {};
   window.CRX.h = h;
-  window.CRX.PRIORITIES = PRIORITIES;
   window.CRX.tabs = [
     { id: "template", label: "Template", render: renderTemplate },
     { id: "priorities", label: "Priorities", render: renderPriorities },

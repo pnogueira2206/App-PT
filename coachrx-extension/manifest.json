@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "CoachRx Athlete Panel",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Side panel for CoachRx: template, priorities, season, zones and volume coverage per athlete.",
   "permissions": ["storage"],
   "host_permissions": ["https://dashboard.coachrx.app/*"],

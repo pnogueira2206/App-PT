@@ -7,7 +7,6 @@
     season: {}, // { "2026-01-05": "phase text" } keyed by the Monday of each week
     hrMax: null,
     targets: {}, // { "Burpee": { min: 36, max: 180 } } weekly, per movement
-    priorityBuckets: {}, // { gymnastics: ["barRingRope"] } links priorities to Coverage buckets
   });
 
   const GLOBAL_DEFAULTS = () => ({

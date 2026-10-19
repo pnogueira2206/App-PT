@@ -83,7 +83,7 @@ export function PilaresRadarChart({
                 </tspan>
               ))}
               <tspan x={p.x} dy={14} fontSize={13} fontWeight={700} fill="var(--foreground)">
-                {Math.round(ultima[i])}
+                {Math.round(ultima[i])}%
               </tspan>
             </text>
           );

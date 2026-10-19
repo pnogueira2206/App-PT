@@ -44,7 +44,7 @@ export function ResumoAvaliacao({ draft, seccoes }: { draft: AvaliacaoDraft; sec
               return <Linha key={dim} label={dim} valor={`${dst.obtidos} / ${dst.max}`} />;
             })}
             {draft.observacoes[seccao.id]?.trim() && (
-              <p className="mt-2 text-xs italic text-muted">&quot;{draft.observacoes[seccao.id]}&quot;</p>
+              <p className="mt-2 whitespace-pre-wrap text-xs italic text-muted">&quot;{draft.observacoes[seccao.id]}&quot;</p>
             )}
           </section>
         );
@@ -55,7 +55,7 @@ export function ResumoAvaliacao({ draft, seccoes }: { draft: AvaliacaoDraft; sec
         <Linha label="Pontuação calculada (informativa)" valor={`${total.obtidos} / ${total.max}`} />
         <Linha label="Classificação geral do avaliador" valor={draft.classificacaoGeral ? `${draft.classificacaoGeral} / 100` : "—"} />
         {draft.comentarioGeral.trim() && (
-          <p className="mt-2 text-xs italic text-muted">&quot;{draft.comentarioGeral}&quot;</p>
+          <p className="mt-2 whitespace-pre-wrap text-xs italic text-muted">&quot;{draft.comentarioGeral}&quot;</p>
         )}
       </section>
 
@@ -66,7 +66,7 @@ export function ResumoAvaliacao({ draft, seccoes }: { draft: AvaliacaoDraft; sec
             {draft.planoAcao.map((item) => (
               <div key={item.origem}>
                 <p className="text-xs font-medium text-neutral-700 dark:text-neutral-300">{item.origem}</p>
-                <p className="text-sm text-muted">{item.texto}</p>
+                <p className="whitespace-pre-wrap text-sm text-muted">{item.texto}</p>
               </div>
             ))}
           </div>

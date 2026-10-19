@@ -2,7 +2,7 @@ import { PILARES } from "@/data/pilares";
 
 const SIZE = 320;
 const CENTER = SIZE / 2;
-const RAIO_MAX = 108;
+const RAIO_MAX = 90;
 const NIVEIS = [25, 50, 75, 100];
 
 function ponto(indice: number, valorPct: number) {
@@ -17,7 +17,7 @@ function poligono(valores: number[]) {
 
 function labelPos(indice: number) {
   const angulo = -Math.PI / 2 + (indice * 2 * Math.PI) / PILARES.length;
-  const r = RAIO_MAX + 26;
+  const r = RAIO_MAX + 22;
   return { x: CENTER + r * Math.cos(angulo), y: CENTER + r * Math.sin(angulo) };
 }
 
@@ -29,7 +29,7 @@ export function PilaresRadarChart({
   anterior: number[] | null;
 }) {
   return (
-    <div>
+    <div className="mx-auto w-full max-w-[260px]">
       <svg viewBox={`0 0 ${SIZE} ${SIZE}`} className="w-full" role="img" aria-label="Notas por pilar: última avaliação vs. anterior">
         {NIVEIS.map((n) => (
           <polygon
@@ -82,6 +82,9 @@ export function PilaresRadarChart({
                   {parte}
                 </tspan>
               ))}
+              <tspan x={p.x} dy={14} fontSize={13} fontWeight={700} fill="var(--foreground)">
+                {Math.round(ultima[i])}
+              </tspan>
             </text>
           );
         })}

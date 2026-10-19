@@ -5,12 +5,13 @@ import { listarTiposAula } from "@/lib/tipos-aula-actions";
 import { auth } from "@/lib/auth";
 
 export default async function HistoricoPage() {
-  const [avaliacoes, treinadores, tiposAula, session] = await Promise.all([
-    listarAvaliacoes(),
-    listarTreinadores(),
-    listarTiposAula(),
-    auth(),
-  ]);
+  // Consultas sequenciais (não Promise.all) — o Neon usa um pooler de ligações
+  // em modo transação, que não lida bem com várias queries em paralelo na
+  // mesma ligação partilhada.
+  const avaliacoes = await listarAvaliacoes();
+  const treinadores = await listarTreinadores();
+  const tiposAula = await listarTiposAula();
+  const session = await auth();
 
   return (
     <HistoricoList

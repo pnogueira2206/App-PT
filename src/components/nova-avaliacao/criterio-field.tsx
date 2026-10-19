@@ -3,15 +3,23 @@
 import { Criterio } from "@/data/grelha";
 import { Resposta } from "@/types/avaliacao";
 
-/** Sempre 3 hipóteses por critério: zero, metade ou o valor total do peso. */
+/** Sempre 5 hipóteses por critério: 0, 1/4, 1/2, 3/4 e o valor total do peso. */
 function opcoesPontos(pesoMaximo: number): number[] {
-  return [0, pesoMaximo / 2, pesoMaximo];
+  return [0, pesoMaximo * 0.25, pesoMaximo * 0.5, pesoMaximo * 0.75, pesoMaximo];
 }
 
 function formatarValor(v: number): string {
   if (Number.isInteger(v)) return String(v);
-  return v.toFixed(2).replace(/0$/, "").replace(/\.$/, "");
+  return v.toFixed(3).replace(/0+$/, "").replace(/\.$/, "");
 }
+
+const LEGENDA_ESCALA = [
+  { fracao: "0", texto: "não faz" },
+  { fracao: "¼", texto: "faz raramente" },
+  { fracao: "½", texto: "faz às vezes" },
+  { fracao: "¾", texto: "faz habitualmente" },
+  { fracao: "total", texto: "faz sempre" },
+];
 
 export function CriterioField({
   criterio,
@@ -112,6 +120,15 @@ export function CriterioField({
           </>
         )}
       </div>
+      {!semPeso && (
+        <div className="mt-1.5 flex flex-wrap gap-x-2.5 gap-y-0.5 text-[10px] text-faint">
+          {LEGENDA_ESCALA.map((l) => (
+            <span key={l.fracao}>
+              {l.fracao} = {l.texto}
+            </span>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

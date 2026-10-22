@@ -1,4 +1,3 @@
-import path from "node:path";
 import {
   Document,
   Page,
@@ -18,14 +17,13 @@ import { AvaliacaoGuardada, subtotalSeccao } from "@/types/avaliacao";
 import { PILARES } from "@/data/pilares";
 import { AtribuicoesPilares } from "@/lib/pilares-actions";
 import { percentagemPorPilar, temPilaresCategorizados } from "@/lib/pilares-notas";
-
-const FONTS_DIR = path.join(process.cwd(), "src/lib/pdf/fonts");
+import { JETBRAINS_MONO_REGULAR_DATA_URI, JETBRAINS_MONO_BOLD_DATA_URI, LOGO_CFA_DATA_URI } from "./pdf-assets";
 
 Font.register({
   family: "JetBrains Mono",
   fonts: [
-    { src: path.join(FONTS_DIR, "JetBrainsMono-Regular.ttf"), fontWeight: "normal" },
-    { src: path.join(FONTS_DIR, "JetBrainsMono-Bold.ttf"), fontWeight: "bold" },
+    { src: JETBRAINS_MONO_REGULAR_DATA_URI, fontWeight: "normal" },
+    { src: JETBRAINS_MONO_BOLD_DATA_URI, fontWeight: "bold" },
   ],
 });
 
@@ -169,14 +167,12 @@ export function RelatorioAvaliacaoDocument({
     ? PILARES.map((p) => percentagemPorPilar(seccoes, avaliacao.respostas, p, atribuicoes))
     : [];
 
-  const logoPath = path.join(process.cwd(), "public/logo-cfa.jpg");
-
   return (
     <Document title={`Relatório de Avaliação — ${avaliacao.cabecalho.treinador}`}>
       <Page size="A4" style={styles.page}>
         <View style={styles.header}>
           {/* eslint-disable-next-line jsx-a11y/alt-text -- react-pdf's Image, não um <img> DOM */}
-          <Image src={logoPath} style={styles.logo} />
+          <Image src={LOGO_CFA_DATA_URI} style={styles.logo} />
           <View>
             <Text style={styles.titulo}>CFA AVALIAÇÕES</Text>
             <Text style={styles.subtitulo}>RELATÓRIO DE AVALIAÇÃO DE DESEMPENHO</Text>

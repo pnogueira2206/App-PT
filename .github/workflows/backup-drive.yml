@@ -1,0 +1,40 @@
+name: Backup diário da base de dados para o Google Drive
+
+on:
+  schedule:
+    # 03:00 UTC todos os dias (~03:00/04:00 em Lisboa, consoante hora de verão)
+    - cron: "0 3 * * *"
+  workflow_dispatch: {}
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instalar cliente PostgreSQL
+        run: sudo apt-get update -y && sudo apt-get install -y postgresql-client
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instalar dependências Python
+        run: pip install --quiet google-api-python-client google-auth
+
+      - name: Exportar base de dados (pg_dump)
+        env:
+          DATABASE_URL: ${{ secrets.BACKUP_DATABASE_URL }}
+        run: |
+          set -euo pipefail
+          DATA="$(date -u +'%Y-%m-%d_%H%M')"
+          FICHEIRO="backup-cfa-${DATA}.sql.gz"
+          pg_dump "$DATABASE_URL" --no-owner --no-acl | gzip > "$FICHEIRO"
+          echo "NOME_FICHEIRO=$FICHEIRO" >> "$GITHUB_ENV"
+          echo "Backup criado: $FICHEIRO ($(du -h "$FICHEIRO" | cut -f1))"
+
+      - name: Enviar para o Google Drive e limpar backups antigos
+        env:
+          GDRIVE_SERVICE_ACCOUNT_JSON: ${{ secrets.GDRIVE_SERVICE_ACCOUNT_JSON }}
+          GDRIVE_FOLDER_ID: ${{ secrets.GDRIVE_FOLDER_ID }}
+        run: python3 .github/scripts/enviar_backup_drive.py "$NOME_FICHEIRO"

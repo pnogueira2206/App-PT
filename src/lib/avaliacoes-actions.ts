@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { registarAuditoria } from "@/lib/auditoria";
+import { ligarAvaliacaoAoPlano, desligarAvaliacaoDoPlano } from "@/lib/plano-ligacao";
 import { Seccao } from "@/data/grelha";
 import { AvaliacaoDraft, AvaliacaoGuardada, PlanoAcaoItem, Respostas } from "@/types/avaliacao";
 
@@ -112,6 +113,11 @@ export async function guardarAvaliacaoAction(draft: AvaliacaoDraft, grelhaSnapsh
     },
   });
   await registarAuditoria(session.user.id, "CRIOU_AVALIACAO", `${avaliacao.id} (${treinador.nome})`);
+  try {
+    await ligarAvaliacaoAoPlano(avaliacao.id, treinador.id, avaliacao.data);
+  } catch {
+    // o plano é só um apoio — uma falha aqui não pode impedir a gravação da avaliação.
+  }
   revalidatePath("/historico");
   revalidatePath("/por-treinador");
 }
@@ -214,6 +220,7 @@ export async function apagarAvaliacaoAction(avaliacaoId: string): Promise<{ erro
   });
   if (!avaliacao) return { erro: "Avaliação não encontrada." };
 
+  await desligarAvaliacaoDoPlano(avaliacaoId);
   await prisma.avaliacao.delete({ where: { id: avaliacaoId } });
   await registarAuditoria(
     session.user.id,

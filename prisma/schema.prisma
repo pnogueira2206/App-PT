@@ -48,8 +48,12 @@ model Utilizador {
 
   avaliacoesComoTreinador Avaliacao[]        @relation("AvaliacaoTreinador")
   avaliacoesComoAvaliador Avaliacao[]        @relation("AvaliacaoAvaliador")
-  avaliacoesEditadas     Avaliacao[]        @relation("AvaliacaoEditadoPor")
-  registosAuditoria      RegistoAuditoria[]
+  avaliacoesEditadas      Avaliacao[]        @relation("AvaliacaoEditadoPor")
+  registosAuditoria       RegistoAuditoria[]
+
+  planosComoTreinador AvaliacaoPlaneada[] @relation("PlanoTreinador")
+  planosComoAvaliador AvaliacaoPlaneada[] @relation("PlanoAvaliador")
+  planosCriados       AvaliacaoPlaneada[] @relation("PlanoCriadoPor")
 }
 
 model RegistoAuditoria {
@@ -78,6 +82,7 @@ model Espaco {
   ativo Boolean @default(true)
 
   avaliacoes Avaliacao[]
+  planos     AvaliacaoPlaneada[]
 }
 
 model Seccao {
@@ -127,9 +132,9 @@ model Avaliacao {
   nAlunos     Int
 
   /// JSON: Record<criterioId, { tipo, valor?, na?, texto? }>
-  respostas String
+  respostas      String
   /// JSON: Record<seccaoId, string>
-  observacoes String
+  observacoes    String
   /// JSON: cópia da grelha (secções ativas + critérios) no momento em que foi preenchida
   grelhaSnapshot String
 
@@ -150,4 +155,42 @@ model Avaliacao {
   editadoEm    DateTime?
 
   guardadaEm DateTime @default(now())
+
+  planeada AvaliacaoPlaneada?
+}
+
+enum EstadoPlano {
+  POR_AVALIAR
+  AVALIADO
+  /// Feedback e plano de desenvolvimento já passados ao treinador — marcado à mão.
+  FINALIZADO
+}
+
+/// Agendamento no Plano de Avaliações (Admin): que treinador avaliar em que semana.
+model AvaliacaoPlaneada {
+  id String @id @default(cuid())
+
+  treinador   Utilizador @relation("PlanoTreinador", fields: [treinadorId], references: [id])
+  treinadorId String
+  avaliador   Utilizador @relation("PlanoAvaliador", fields: [avaliadorId], references: [id])
+  avaliadorId String
+  espaco      Espaco?    @relation(fields: [espacoId], references: [id])
+  espacoId    String?
+
+  /// Segunda-feira da semana planeada, "YYYY-MM-DD".
+  semana String
+  /// Dia concreto dentro da semana, "YYYY-MM-DD" — opcional.
+  dia    String?
+  notas  String      @default("")
+  estado EstadoPlano @default(POR_AVALIAR)
+
+  /// Avaliação gravada que cumpriu este agendamento (ligada automaticamente ao gravar).
+  avaliacao   Avaliacao? @relation(fields: [avaliacaoId], references: [id], onDelete: SetNull)
+  avaliacaoId String?    @unique
+
+  criadoPor   Utilizador @relation("PlanoCriadoPor", fields: [criadoPorId], references: [id])
+  criadoPorId String
+  criadoEm    DateTime   @default(now())
+
+  @@index([semana])
 }

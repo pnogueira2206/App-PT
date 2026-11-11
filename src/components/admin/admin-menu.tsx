@@ -2,6 +2,11 @@ import Link from "next/link";
 import { ExportarCsvButton } from "./exportar-csv-button";
 
 const areas = [
+  {
+    href: "/admin/plano",
+    nome: "Plano de Avaliações",
+    descricao: "Agendar por semana que treinador avaliar e acompanhar o estado de cada avaliação.",
+  },
   { href: "/admin/treinadores", nome: "Treinadores", descricao: "Adicionar, editar, desativar e repor palavra-passe." },
   { href: "/admin/avaliadores", nome: "Avaliadores", descricao: "Adicionar, editar, desativar e repor palavra-passe." },
   {

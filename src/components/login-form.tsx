@@ -4,7 +4,7 @@ import { useActionState } from "react";
 import { loginAction } from "@/app/login/actions";
 
 const inputClasses =
-  "w-full rounded-none border border-line bg-transparent px-3 py-2 text-sm text-neutral-900 dark:text-neutral-100 focus:border-black dark:focus:border-white focus:outline-none focus:ring-1 focus:ring-black dark:focus:ring-white";
+  "w-full rounded-lg border border-line bg-transparent px-3 py-2 text-sm text-neutral-900 dark:text-neutral-100 focus:border-black dark:focus:border-white focus:outline-none focus:ring-1 focus:ring-black dark:focus:ring-white";
 
 export function LoginForm() {
   const [state, formAction, pending] = useActionState(loginAction, {});
@@ -24,7 +24,7 @@ export function LoginForm() {
       <button
         type="submit"
         disabled={pending}
-        className="w-full rounded-none bg-black dark:bg-white px-4 py-2 text-sm font-medium text-white dark:text-black disabled:opacity-50"
+        className="w-full rounded-lg bg-black dark:bg-white px-4 py-2 text-sm font-medium text-white dark:text-black disabled:opacity-50"
       >
         {pending ? "A entrar..." : "Entrar"}
       </button>

@@ -55,7 +55,7 @@ export function RelatorioAvaliacaoButtons({
   };
 
   return (
-    <div className="rounded-none border border-line p-3">
+    <div className="rounded-lg border border-line p-3">
       <p className="mb-2 text-sm font-semibold text-neutral-900 dark:text-neutral-100">Relatório</p>
       {relatorioEnviadoEm && (
         <p className="mb-2 text-xs text-green-700 dark:text-green-400">
@@ -67,7 +67,7 @@ export function RelatorioAvaliacaoButtons({
           type="button"
           disabled={pendingPdf}
           onClick={descarregar}
-          className="rounded-none border border-line px-3 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 disabled:opacity-40"
+          className="rounded-lg border border-line px-3 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 disabled:opacity-40"
         >
           {pendingPdf ? "A gerar..." : "Descarregar PDF"}
         </button>
@@ -75,7 +75,7 @@ export function RelatorioAvaliacaoButtons({
           type="button"
           disabled={pendingEnvio}
           onClick={enviar}
-          className="rounded-none bg-black dark:bg-white px-3 py-2 text-xs font-medium text-white dark:text-black disabled:opacity-40"
+          className="rounded-lg bg-black dark:bg-white px-3 py-2 text-xs font-medium text-white dark:text-black disabled:opacity-40"
         >
           {pendingEnvio ? "A enviar..." : relatorioEnviadoEm ? "Reenviar por email" : "Enviar por email ao treinador"}
         </button>

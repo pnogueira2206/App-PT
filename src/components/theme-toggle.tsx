@@ -33,7 +33,7 @@ export function ThemeToggle() {
       type="button"
       onClick={() => aplicarTema(!escuro)}
       aria-label={escuro ? "Ativar modo claro" : "Ativar modo escuro"}
-      className="font-mono shrink-0 rounded-none border border-line px-2 py-1 text-[10px] font-bold tracking-wide text-muted transition hover:border-black hover:text-black dark:hover:border-white dark:hover:text-white"
+      className="font-mono shrink-0 rounded-lg border border-neutral-700 px-2 py-1 text-xs font-bold tracking-wider text-neutral-300 transition hover:border-white hover:text-white"
     >
       {escuro ? "☀ CLARO" : "☾ ESCURO"}
     </button>

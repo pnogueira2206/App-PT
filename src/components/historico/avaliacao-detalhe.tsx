@@ -31,7 +31,7 @@ export function AvaliacaoDetalhe({ avaliacao, papel }: { avaliacao: AvaliacaoGua
       <Link href="/historico" className="mb-4 inline-block text-sm font-medium text-muted underline">
         ← Voltar ao histórico
       </Link>
-      <div className="rounded-none bg-panel px-3 py-2 text-xs text-muted">Consulta apenas de leitura</div>
+      <div className="rounded-lg bg-panel px-3 py-2 text-xs text-muted">Consulta apenas de leitura</div>
 
       {avaliacao.editadoPor && (
         <p className="mt-2 text-xs text-dim">
@@ -40,7 +40,7 @@ export function AvaliacaoDetalhe({ avaliacao, papel }: { avaliacao: AvaliacaoGua
       )}
 
       {papel === "TREINADOR" && (
-        <div className="mt-3 rounded-none border border-line p-3">
+        <div className="mt-3 rounded-lg border border-line p-3">
           {avaliacao.confirmacaoTreinador.data ? (
             <p className="text-sm text-green-700 dark:text-green-400">Confirmaste esta avaliação em {avaliacao.confirmacaoTreinador.data}.</p>
           ) : (
@@ -53,7 +53,7 @@ export function AvaliacaoDetalhe({ avaliacao, papel }: { avaliacao: AvaliacaoGua
                   router.refresh();
                 })
               }
-              className="w-full rounded-none bg-black dark:bg-white px-4 py-2 text-sm font-medium text-white dark:text-black"
+              className="w-full rounded-lg bg-black dark:bg-white px-4 py-2 text-sm font-medium text-white dark:text-black"
             >
               Confirmar esta avaliação
             </button>
@@ -76,7 +76,7 @@ export function AvaliacaoDetalhe({ avaliacao, papel }: { avaliacao: AvaliacaoGua
       </div>
 
       {papel === "ADMIN" && (
-        <div className="mt-4 rounded-none border border-line p-3">
+        <div className="mt-4 rounded-lg border border-line p-3">
           <Link
             href={`/historico/${avaliacao.id}/editar`}
             className="mb-3 block text-xs font-medium text-muted underline"

@@ -15,9 +15,9 @@ export function ResumoAvaliacao({ draft, seccoes }: { draft: AvaliacaoDraft; sec
 
   return (
     <div className="space-y-6">
-      <h1 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">Resumo</h1>
+      <h1 className="font-mono text-3xl font-bold uppercase tracking-wide text-neutral-900 dark:text-neutral-100">Resumo</h1>
 
-      <section className="rounded-none border border-line p-3">
+      <section className="rounded-lg border border-line p-3">
         <p className="mb-1 text-sm font-semibold text-neutral-900 dark:text-neutral-100">Cabeçalho</p>
         <Linha label="Treinador" valor={draft.cabecalho.treinador || "—"} />
         <Linha label="Avaliador" valor={draft.cabecalho.avaliador || "—"} />
@@ -32,7 +32,7 @@ export function ResumoAvaliacao({ draft, seccoes }: { draft: AvaliacaoDraft; sec
         const st = subtotalSeccao(seccao, draft.respostas);
         const dims = dimensoesDaSeccao(seccao);
         return (
-          <section key={seccao.id} className="rounded-none border border-line p-3">
+          <section key={seccao.id} className="rounded-lg border border-line p-3">
             <div className="mb-1 flex items-baseline justify-between">
               <p className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">{seccao.nome}</p>
               <span className="text-xs text-muted">
@@ -50,7 +50,7 @@ export function ResumoAvaliacao({ draft, seccoes }: { draft: AvaliacaoDraft; sec
         );
       })}
 
-      <section className="rounded-none border border-line p-3">
+      <section className="rounded-lg border border-line p-3">
         <p className="mb-1 text-sm font-semibold text-neutral-900 dark:text-neutral-100">Classificação</p>
         <Linha label="Pontuação calculada (informativa)" valor={`${total.obtidos} / ${total.max}`} />
         <Linha label="Classificação geral do avaliador" valor={draft.classificacaoGeral ? `${draft.classificacaoGeral} / 100` : "—"} />
@@ -60,7 +60,7 @@ export function ResumoAvaliacao({ draft, seccoes }: { draft: AvaliacaoDraft; sec
       </section>
 
       {draft.planoAcao.length > 0 && (
-        <section className="rounded-none border border-line p-3">
+        <section className="rounded-lg border border-line p-3">
           <p className="mb-2 text-sm font-semibold text-neutral-900 dark:text-neutral-100">Plano de Ação</p>
           <div className="space-y-2">
             {draft.planoAcao.map((item) => (
@@ -73,7 +73,7 @@ export function ResumoAvaliacao({ draft, seccoes }: { draft: AvaliacaoDraft; sec
         </section>
       )}
 
-      <section className="rounded-none border border-line p-3">
+      <section className="rounded-lg border border-line p-3">
         <p className="mb-1 text-sm font-semibold text-neutral-900 dark:text-neutral-100">Confirmações</p>
         <Linha
           label="Avaliador"

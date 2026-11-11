@@ -31,7 +31,7 @@ export function ExportarMeusDadosButton() {
             }
           })
         }
-        className="w-full rounded-none border border-line px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 disabled:opacity-40"
+        className="w-full rounded-lg border border-line px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 disabled:opacity-40"
       >
         {pending ? "A preparar..." : "Descarregar os meus dados (JSON)"}
       </button>

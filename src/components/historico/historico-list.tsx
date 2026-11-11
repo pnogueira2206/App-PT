@@ -8,7 +8,7 @@ import { confirmarComoTreinadorAction } from "@/lib/avaliacoes-actions";
 import { AvaliacaoGuardada } from "@/types/avaliacao";
 
 const inputClasses =
-  "w-full rounded-none border border-line bg-transparent px-3 py-2 text-sm text-neutral-900 dark:text-neutral-100 focus:border-black dark:focus:border-white focus:outline-none focus:ring-1 focus:ring-black dark:focus:ring-white";
+  "w-full rounded-lg border border-line bg-transparent px-3 py-2 text-sm text-neutral-900 dark:text-neutral-100 focus:border-black dark:focus:border-white focus:outline-none focus:ring-1 focus:ring-black dark:focus:ring-white";
 
 function Campo({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -60,9 +60,9 @@ export function HistoricoList({
 
   return (
     <div className="mx-auto max-w-lg px-4 py-4 md:max-w-2xl lg:max-w-3xl md:px-6 md:py-6">
-      <h1 className="mb-4 text-lg font-semibold text-neutral-900 dark:text-neutral-100">Histórico de avaliações</h1>
+      <h1 className="mb-4 font-mono text-3xl font-bold uppercase tracking-wide text-neutral-900 dark:text-neutral-100">Histórico de avaliações</h1>
 
-      <div className="mb-5 space-y-3 rounded-none border border-line p-3 md:space-y-0 md:grid md:grid-cols-2 md:gap-3 lg:grid-cols-3">
+      <div className="mb-5 space-y-3 rounded-lg border border-line p-3 md:space-y-0 md:grid md:grid-cols-2 md:gap-3 lg:grid-cols-3">
         {papel !== "TREINADOR" && (
           <Campo label="Treinador">
             <select className={inputClasses} value={treinador} onChange={(e) => setTreinador(e.target.value)}>
@@ -144,7 +144,7 @@ export function HistoricoList({
       </p>
 
       {filtradas.length === 0 ? (
-        <div className="rounded-none border border-dashed border-line px-4 py-10 text-center">
+        <div className="rounded-lg border border-dashed border-line px-4 py-10 text-center">
           <p className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Sem resultados</p>
           <p className="mt-1 text-xs text-muted">
             {avaliacoesIniciais.length === 0
@@ -155,11 +155,11 @@ export function HistoricoList({
       ) : (
         <ul className="grid grid-cols-1 gap-2 md:grid-cols-2">
           {filtradas.map((a) => (
-            <li key={a.id} className="rounded-none border border-line px-3 py-3 transition hover:border-black dark:hover:border-white">
+            <li key={a.id} className="rounded-lg border border-line px-3 py-3 transition hover:border-black dark:hover:border-white">
               <Link href={`/historico/${a.id}`} className="block">
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">{a.cabecalho.treinador}</p>
-                  <span className="rounded-none bg-black dark:bg-white px-2 py-0.5 text-xs font-semibold text-white dark:text-black">
+                  <span className="rounded-lg bg-black dark:bg-white px-2 py-0.5 text-xs font-semibold text-white dark:text-black">
                     {a.classificacaoGeral}/100
                   </span>
                 </div>

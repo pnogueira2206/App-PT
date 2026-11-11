@@ -16,7 +16,7 @@ import {
 } from "@/lib/grelha-actions";
 
 const inputClasses =
-  "rounded-none border border-line bg-transparent px-2 py-1 text-sm text-neutral-900 dark:text-neutral-100 focus:border-black dark:focus:border-white focus:outline-none focus:ring-1 focus:ring-black dark:focus:ring-white";
+  "rounded-lg border border-line bg-transparent px-2 py-1 text-sm text-neutral-900 dark:text-neutral-100 focus:border-black dark:focus:border-white focus:outline-none focus:ring-1 focus:ring-black dark:focus:ring-white";
 
 export function GerirGrelha({ seccoes }: { seccoes: Seccao[] }) {
   return (
@@ -24,8 +24,8 @@ export function GerirGrelha({ seccoes }: { seccoes: Seccao[] }) {
       <Link href="/admin" className="mb-3 inline-block text-sm font-medium text-muted underline">
         ← Voltar ao Admin
       </Link>
-      <h1 className="mb-2 text-lg font-semibold text-neutral-900 dark:text-neutral-100">Secções &amp; Critérios</h1>
-      <div className="mb-5 rounded-none bg-panel px-3 py-2 text-xs text-muted">
+      <h1 className="mb-2 font-mono text-3xl font-bold uppercase tracking-wide text-neutral-900 dark:text-neutral-100">Secções &amp; Critérios</h1>
+      <div className="mb-5 rounded-lg bg-panel px-3 py-2 text-xs text-muted">
         As alterações aqui feitas <strong>não mudam avaliações já guardadas</strong> — cada avaliação fica com uma
         cópia da grelha tal como estava no momento em que foi preenchida.
       </div>
@@ -50,7 +50,7 @@ function SeccaoCard({ seccao, podeSubir, podeDescer }: { seccao: Seccao; podeSub
   const ativa = seccao.ativa !== false;
 
   return (
-    <section className={`rounded-none border p-3 ${ativa ? "border-line" : "border-line bg-panel"}`}>
+    <section className={`rounded-lg border p-3 ${ativa ? "border-line" : "border-line bg-panel"}`}>
       {aEditar ? (
         <form
           className="flex flex-wrap items-center gap-2"
@@ -238,7 +238,7 @@ function NovoCriterioForm({ seccaoId }: { seccaoId: string }) {
 
   return (
     <form
-      className="mt-2 space-y-2 rounded-none bg-panel p-2"
+      className="mt-2 space-y-2 rounded-lg bg-panel p-2"
       onSubmit={(e) => {
         e.preventDefault();
         if (!texto.trim()) return;
@@ -278,7 +278,7 @@ function NovoCriterioForm({ seccaoId }: { seccaoId: string }) {
             onChange={(e) => setPeso(e.target.value)}
           />
         )}
-        <button type="submit" className="rounded-none bg-black dark:bg-white px-3 py-1 text-xs font-medium text-white dark:text-black">
+        <button type="submit" className="rounded-lg bg-black dark:bg-white px-3 py-1 text-xs font-medium text-white dark:text-black">
           Adicionar
         </button>
         <button type="button" onClick={() => setAAbrir(false)} className="text-xs text-muted underline">
@@ -306,7 +306,7 @@ function NovaSeccaoForm() {
 
   return (
     <form
-      className="mt-5 space-y-2 rounded-none border border-line p-3"
+      className="mt-5 space-y-2 rounded-lg border border-line p-3"
       onSubmit={(e) => {
         e.preventDefault();
         if (!nome.trim()) return;
@@ -328,7 +328,7 @@ function NovaSeccaoForm() {
           value={percentagem}
           onChange={(e) => setPercentagem(e.target.value)}
         />
-        <button type="submit" className="rounded-none bg-black dark:bg-white px-3 py-1 text-xs font-medium text-white dark:text-black">
+        <button type="submit" className="rounded-lg bg-black dark:bg-white px-3 py-1 text-xs font-medium text-white dark:text-black">
           Adicionar secção
         </button>
         <button type="button" onClick={() => setAAbrir(false)} className="text-xs text-muted underline">

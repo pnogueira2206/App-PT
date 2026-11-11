@@ -8,7 +8,7 @@ export default async function PerfilPage() {
 
   return (
     <div className="mx-auto max-w-sm px-4 py-8 md:max-w-md md:py-12">
-      <h1 className="mb-1 text-lg font-semibold text-neutral-900 dark:text-neutral-100">O meu perfil</h1>
+      <h1 className="mb-1 font-mono text-3xl font-bold uppercase tracking-wide text-neutral-900 dark:text-neutral-100">O meu perfil</h1>
       <p className="mb-6 text-sm text-muted">{session?.user.name}</p>
 
       <MudarPasswordForm />

@@ -40,9 +40,9 @@ export function StepperNav({
         <p className="text-xs text-muted">
           {concluidos} de {steps.length} secções concluídas
         </p>
-        <div className="mt-1 h-1.5 w-full rounded-none bg-line">
+        <div className="mt-1 h-1.5 w-full rounded-lg bg-line">
           <div
-            className="h-1.5 rounded-none bg-black transition-all dark:bg-white"
+            className="h-1.5 rounded-lg bg-black transition-all dark:bg-white"
             style={{ width: `${(concluidos / steps.length) * 100}%` }}
           />
         </div>
@@ -61,7 +61,7 @@ export function StepperNav({
               key={step.label}
               type="button"
               onClick={() => onSelect(i)}
-              className={`flex shrink-0 items-center gap-1 whitespace-nowrap rounded-none border px-3 py-1.5 text-xs font-medium transition ${
+              className={`flex shrink-0 items-center gap-1 whitespace-nowrap rounded-lg border px-3 py-1.5 text-xs font-medium transition ${
                 i === currentStep
                   ? "border-black bg-black text-white dark:border-white dark:bg-white dark:text-black"
                   : step.completo

@@ -28,7 +28,7 @@ interface Item {
 }
 
 const inputClasses =
-  "w-full rounded-none border border-line bg-transparent px-3 py-2 text-sm text-neutral-900 dark:text-neutral-100 focus:border-black dark:focus:border-white focus:outline-none focus:ring-1 focus:ring-black dark:focus:ring-white";
+  "w-full rounded-lg border border-line bg-transparent px-3 py-2 text-sm text-neutral-900 dark:text-neutral-100 focus:border-black dark:focus:border-white focus:outline-none focus:ring-1 focus:ring-black dark:focus:ring-white";
 
 export function GerirPessoas({
   itens,
@@ -84,7 +84,7 @@ export function GerirPessoas({
       <Link href="/admin" className="mb-3 inline-block text-sm font-medium text-muted underline">
         ← Voltar ao Admin
       </Link>
-      <h1 className="mb-4 text-lg font-semibold text-neutral-900 dark:text-neutral-100">{titulo}</h1>
+      <h1 className="mb-4 font-mono text-3xl font-bold uppercase tracking-wide text-neutral-900 dark:text-neutral-100">{titulo}</h1>
 
       <form
         onSubmit={(e) => {
@@ -106,7 +106,7 @@ export function GerirPessoas({
             router.refresh();
           });
         }}
-        className="mb-5 space-y-2 rounded-none border border-line p-3"
+        className="mb-5 space-y-2 rounded-lg border border-line p-3"
       >
         <input className={inputClasses} placeholder="Nome" value={nome} onChange={(e) => setNome(e.target.value)} />
         <input
@@ -124,14 +124,14 @@ export function GerirPessoas({
           onChange={(e) => setPassword(e.target.value)}
         />
         {erro && <p className="text-xs text-red-600 dark:text-red-400">{erro}</p>}
-        <button type="submit" className="w-full rounded-none bg-black dark:bg-white px-4 py-2 text-sm font-medium text-white dark:text-black">
+        <button type="submit" className="w-full rounded-lg bg-black dark:bg-white px-4 py-2 text-sm font-medium text-white dark:text-black">
           Adicionar {singular}
         </button>
       </form>
 
       <ul className="space-y-2 md:grid md:grid-cols-2 md:gap-2 md:space-y-0">
         {itens.map((item) => (
-          <li key={item.id} className="rounded-none border border-line px-3 py-2">
+          <li key={item.id} className="rounded-lg border border-line px-3 py-2">
             {aEditar === item.id ? (
               <form
                 className="flex gap-2"
@@ -147,7 +147,7 @@ export function GerirPessoas({
                 }}
               >
                 <input
-                  className="flex-1 rounded-none border border-line px-2 py-1 text-sm"
+                  className="flex-1 rounded-lg border border-line px-2 py-1 text-sm"
                   value={nomeEdicao}
                   onChange={(e) => setNomeEdicao(e.target.value)}
                   autoFocus
@@ -182,7 +182,7 @@ export function GerirPessoas({
                 <div className="flex gap-2">
                   <input
                     type="text"
-                    className="flex-1 rounded-none border border-line px-2 py-1 text-sm"
+                    className="flex-1 rounded-lg border border-line px-2 py-1 text-sm"
                     value={novaPassword}
                     onChange={(e) => setNovaPassword(e.target.value)}
                     autoFocus

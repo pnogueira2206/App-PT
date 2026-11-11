@@ -92,7 +92,7 @@ export function PilaresRadarChart({
 
       <div className="mt-2 flex items-center justify-center gap-5 text-xs text-muted">
         <span className="flex items-center gap-1.5">
-          <span className="inline-block h-2.5 w-2.5 rounded-none bg-black dark:bg-white" /> Última avaliação
+          <span className="inline-block h-2.5 w-2.5 rounded-lg bg-black dark:bg-white" /> Última avaliação
         </span>
         {anterior && (
           <span className="flex items-center gap-1.5">

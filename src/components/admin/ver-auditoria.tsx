@@ -50,7 +50,7 @@ export function VerAuditoria({ registos }: { registos: Registo[] }) {
       <Link href="/admin" className="mb-3 inline-block text-sm font-medium text-muted underline">
         ← Voltar ao Admin
       </Link>
-      <h1 className="mb-1 text-lg font-semibold text-neutral-900 dark:text-neutral-100">Registo de Atividade</h1>
+      <h1 className="mb-1 font-mono text-3xl font-bold uppercase tracking-wide text-neutral-900 dark:text-neutral-100">Registo de Atividade</h1>
       <p className="mb-4 text-xs text-muted">
         Últimas {registos.length} ações — logins, avaliações vistas ou criadas, exportações e alterações de conta.
         Apagado automaticamente ao fim de 12 meses.
@@ -61,7 +61,7 @@ export function VerAuditoria({ registos }: { registos: Registo[] }) {
       ) : (
         <ul className="space-y-2">
           {registos.map((r) => (
-            <li key={r.id} className="rounded-none border border-line px-3 py-2">
+            <li key={r.id} className="rounded-lg border border-line px-3 py-2">
               <div className="flex items-center justify-between gap-2">
                 <span className={`text-sm font-medium ${corAcao(r.acao)}`}>{ROTULOS_ACAO[r.acao] ?? r.acao}</span>
                 <span className="shrink-0 text-xs text-dim">

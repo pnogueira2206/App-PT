@@ -27,7 +27,7 @@ export function GerirTiposAula({ itens }: { itens: Item[] }) {
       <Link href="/admin" className="mb-3 inline-block text-sm font-medium text-muted underline">
         ← Voltar ao Admin
       </Link>
-      <h1 className="mb-4 text-lg font-semibold text-neutral-900 dark:text-neutral-100">Tipos de Aula</h1>
+      <h1 className="mb-4 font-mono text-3xl font-bold uppercase tracking-wide text-neutral-900 dark:text-neutral-100">Tipos de Aula</h1>
 
       <form
         onSubmit={(e) => {
@@ -42,19 +42,19 @@ export function GerirTiposAula({ itens }: { itens: Item[] }) {
         className="mb-5 flex gap-2"
       >
         <input
-          className="flex-1 rounded-none border border-line bg-transparent px-3 py-2 text-sm text-neutral-900 dark:text-neutral-100 focus:border-black dark:focus:border-white focus:outline-none focus:ring-1 focus:ring-black dark:focus:ring-white"
+          className="flex-1 rounded-lg border border-line bg-transparent px-3 py-2 text-sm text-neutral-900 dark:text-neutral-100 focus:border-black dark:focus:border-white focus:outline-none focus:ring-1 focus:ring-black dark:focus:ring-white"
           placeholder="Novo tipo de aula"
           value={novoNome}
           onChange={(e) => setNovoNome(e.target.value)}
         />
-        <button type="submit" className="rounded-none bg-black dark:bg-white px-4 py-2 text-sm font-medium text-white dark:text-black">
+        <button type="submit" className="rounded-lg bg-black dark:bg-white px-4 py-2 text-sm font-medium text-white dark:text-black">
           Adicionar
         </button>
       </form>
 
       <ul className="space-y-2 md:grid md:grid-cols-2 md:gap-2 md:space-y-0">
         {itens.map((item) => (
-          <li key={item.id} className="flex items-center justify-between gap-2 rounded-none border border-line px-3 py-2">
+          <li key={item.id} className="flex items-center justify-between gap-2 rounded-lg border border-line px-3 py-2">
             {aEditar === item.id ? (
               <form
                 className="flex flex-1 gap-2"
@@ -70,7 +70,7 @@ export function GerirTiposAula({ itens }: { itens: Item[] }) {
                 }}
               >
                 <input
-                  className="flex-1 rounded-none border border-line px-2 py-1 text-sm"
+                  className="flex-1 rounded-lg border border-line px-2 py-1 text-sm"
                   value={nomeEdicao}
                   onChange={(e) => setNomeEdicao(e.target.value)}
                   autoFocus

@@ -38,7 +38,7 @@ const ESTADOS: { valor: EstadoPlano; rotulo: string; classes: string }[] = [
 ];
 
 const inputClasses =
-  "w-full rounded-none border border-line bg-transparent px-2 py-1.5 text-sm text-neutral-900 dark:text-neutral-100 focus:border-black dark:focus:border-white focus:outline-none";
+  "w-full rounded-lg border border-line bg-transparent px-2 py-1.5 text-sm text-neutral-900 dark:text-neutral-100 focus:border-black dark:focus:border-white focus:outline-none";
 
 function estadoInfo(estado: EstadoPlano) {
   return ESTADOS.find((e) => e.valor === estado)!;
@@ -79,7 +79,7 @@ export function GerirPlano({
       <Link href="/admin" className="mb-3 inline-block text-sm font-medium text-muted underline">
         ← Voltar ao Admin
       </Link>
-      <h1 className="mb-4 text-lg font-semibold text-neutral-900 dark:text-neutral-100">Plano de Avaliações</h1>
+      <h1 className="mb-4 font-mono text-3xl font-bold uppercase tracking-wide text-neutral-900 dark:text-neutral-100">Plano de Avaliações</h1>
 
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div className="flex border border-line text-sm">
@@ -197,7 +197,7 @@ function Semana({
   const [aAgendar, setAAgendar] = useState(false);
 
   return (
-    <section className={`border px-3 py-3 ${atual ? "border-black dark:border-white" : "border-line"} ${foraDoMes ? "opacity-60" : ""}`}>
+    <section className={`rounded-xl border bg-panel px-3 py-3 ${atual ? "border-accent" : "border-line"} ${foraDoMes ? "opacity-60" : ""}`}>
       <div className="mb-2 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <Link
@@ -206,7 +206,7 @@ function Semana({
           >
             {rotuloSemana(semana)}
           </Link>
-          {atual && <span className="bg-black px-1.5 py-0.5 text-[10px] font-semibold uppercase text-white dark:bg-white dark:text-black">Esta semana</span>}
+          {atual && <span className="rounded bg-accent px-1.5 py-0.5 text-[10px] font-semibold uppercase text-white">Esta semana</span>}
         </div>
         {!aAgendar && (
           <button type="button" onClick={() => setAAgendar(true)} className="text-xs font-medium underline">
@@ -283,7 +283,7 @@ function Cartao({
   const detalhes = [item.dia ? rotuloDia(item.dia) : null, item.espaco, `Avaliador: ${item.avaliador}`].filter(Boolean).join(" · ");
 
   return (
-    <li className={`border ${estado.classes} ${pendente ? "opacity-60" : ""} ${aberto ? "sm:col-span-2" : ""}`}>
+    <li className={`rounded-lg border ${estado.classes} ${pendente ? "opacity-60" : ""} ${aberto ? "sm:col-span-2" : ""}`}>
       <button type="button" onClick={() => setAberto(!aberto)} className="w-full px-3 py-2 text-left">
         <div className="flex items-center justify-between gap-2">
           <span className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">{item.treinador}</span>
@@ -454,7 +454,7 @@ function FormPlano({
         <button
           type="submit"
           disabled={pendente}
-          className="rounded-none bg-black px-4 py-2 text-sm font-medium text-white disabled:opacity-60 dark:bg-white dark:text-black"
+          className="rounded-lg bg-black px-4 py-2 text-sm font-medium text-white disabled:opacity-60 dark:bg-white dark:text-black"
         >
           {rotuloGuardar}
         </button>

@@ -19,7 +19,7 @@ import { CriterioField } from "@/components/nova-avaliacao/criterio-field";
 import { DimensaoBadge } from "@/components/nova-avaliacao/dimensao-badge";
 
 const inputClasses =
-  "w-full rounded-none border border-line bg-transparent px-3 py-2 text-sm text-neutral-900 dark:text-neutral-100 focus:border-black dark:focus:border-white focus:outline-none focus:ring-1 focus:ring-black dark:focus:ring-white";
+  "w-full rounded-lg border border-line bg-transparent px-3 py-2 text-sm text-neutral-900 dark:text-neutral-100 focus:border-black dark:focus:border-white focus:outline-none focus:ring-1 focus:ring-black dark:focus:ring-white";
 
 function Campo({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -83,13 +83,13 @@ export function EditarAvaliacaoForm({
       <Link href={`/historico/${avaliacao.id}`} className="mb-4 inline-block text-sm font-medium text-muted underline">
         ← Cancelar e voltar
       </Link>
-      <h1 className="mb-1 text-lg font-semibold text-neutral-900 dark:text-neutral-100">Editar avaliação</h1>
+      <h1 className="mb-1 font-mono text-3xl font-bold uppercase tracking-wide text-neutral-900 dark:text-neutral-100">Editar avaliação</h1>
       <p className="mb-5 text-xs text-muted">
         A edição fica registada (quem e quando) e visível nesta avaliação e no registo de atividade.
       </p>
 
       <div className="space-y-6">
-        <section className="rounded-none border border-line p-3">
+        <section className="rounded-lg border border-line p-3">
           <h2 className="mb-3 text-sm font-semibold text-neutral-900 dark:text-neutral-100">Cabeçalho</h2>
           <div className="space-y-3">
             <Campo label="Treinador avaliado">
@@ -167,7 +167,7 @@ export function EditarAvaliacaoForm({
           const grupos = agruparPorDimensao(seccao.criterios);
           const totalSeccao = subtotalSeccao(seccao, respostas);
           return (
-            <section key={seccao.id} className="rounded-none border border-line p-3">
+            <section key={seccao.id} className="rounded-lg border border-line p-3">
               <div className="mb-3 flex items-baseline justify-between">
                 <h2 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">{seccao.nome}</h2>
                 <span className="text-xs text-muted">{seccao.percentagem}% da avaliação</span>
@@ -177,7 +177,7 @@ export function EditarAvaliacaoForm({
                 {grupos.map((grupo, i) => {
                   const st = subtotal(grupo.criterios, respostas);
                   return (
-                    <div key={i} className="rounded-none border border-line">
+                    <div key={i} className="rounded-lg border border-line">
                       {grupo.dimensao && <DimensaoBadge nome={grupo.dimensao} obtidos={st.obtidos} max={st.max} />}
                       <div className="px-3">
                         {grupo.criterios.map((criterio) => (
@@ -193,7 +193,7 @@ export function EditarAvaliacaoForm({
                   );
                 })}
 
-                <div className="flex items-center justify-between rounded-none bg-black dark:bg-white px-3 py-2 text-sm font-semibold text-white dark:text-black">
+                <div className="flex items-center justify-between rounded-lg bg-black dark:bg-white px-3 py-2 text-sm font-semibold text-white dark:text-black">
                   <span>Total</span>
                   <span className="tabular-nums">
                     {totalSeccao.obtidos} / {totalSeccao.max}
@@ -215,7 +215,7 @@ export function EditarAvaliacaoForm({
           );
         })}
 
-        <section className="rounded-none border border-line p-3">
+        <section className="rounded-lg border border-line p-3">
           <h2 className="mb-3 text-sm font-semibold text-neutral-900 dark:text-neutral-100">Classificação</h2>
           <div className="space-y-3">
             <Campo label="Classificação geral (1 a 100)">
@@ -240,7 +240,7 @@ export function EditarAvaliacaoForm({
           </div>
         </section>
 
-        <section className="rounded-none border border-line p-3">
+        <section className="rounded-lg border border-line p-3">
           <h2 className="mb-1 text-sm font-semibold text-neutral-900 dark:text-neutral-100">Plano de Ação</h2>
           <p className="mb-3 text-xs text-muted">Prioridades e o que trabalhar até à próxima avaliação.</p>
 
@@ -254,7 +254,7 @@ export function EditarAvaliacaoForm({
                     type="button"
                     disabled={origensNoPlano.has(s.origem)}
                     onClick={() => adicionarPonto(s.origem)}
-                    className="rounded-none border border-line px-3 py-1.5 text-xs font-medium text-neutral-700 dark:text-neutral-300 disabled:opacity-40"
+                    className="rounded-lg border border-line px-3 py-1.5 text-xs font-medium text-neutral-700 dark:text-neutral-300 disabled:opacity-40"
                   >
                     {s.origem} ({Math.round(s.percentagem)}%){!origensNoPlano.has(s.origem) && " · adicionar"}
                   </button>
@@ -264,13 +264,13 @@ export function EditarAvaliacaoForm({
           )}
 
           {planoAcao.length === 0 ? (
-            <p className="rounded-none border border-dashed border-line px-4 py-6 text-center text-xs text-muted">
+            <p className="rounded-lg border border-dashed border-line px-4 py-6 text-center text-xs text-muted">
               Sem nenhum ponto no plano de ação.
             </p>
           ) : (
             <div className="space-y-3">
               {planoAcao.map((item) => (
-                <div key={item.origem} className="rounded-none border border-line p-3">
+                <div key={item.origem} className="rounded-lg border border-line p-3">
                   <div className="mb-2 flex items-center justify-between">
                     <p className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">{item.origem}</p>
                     <button
@@ -307,7 +307,7 @@ export function EditarAvaliacaoForm({
                   const select = document.getElementById("nova-origem-plano") as HTMLSelectElement | null;
                   if (select?.value) adicionarPonto(select.value);
                 }}
-                className="shrink-0 rounded-none border border-line px-3 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300"
+                className="shrink-0 rounded-lg border border-line px-3 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300"
               >
                 Adicionar
               </button>
@@ -321,7 +321,7 @@ export function EditarAvaliacaoForm({
         <div className="mx-auto flex max-w-lg md:max-w-2xl lg:max-w-3xl items-center justify-end gap-3 px-4 py-3">
           <Link
             href={`/historico/${avaliacao.id}`}
-            className="rounded-none border border-line px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300"
+            className="rounded-lg border border-line px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300"
           >
             Cancelar
           </Link>
@@ -346,7 +346,7 @@ export function EditarAvaliacaoForm({
               }
               router.push(`/historico/${avaliacao.id}`);
             }}
-            className="rounded-none bg-black dark:bg-white px-4 py-2 text-sm font-medium text-white dark:text-black disabled:opacity-40"
+            className="rounded-lg bg-black dark:bg-white px-4 py-2 text-sm font-medium text-white dark:text-black disabled:opacity-40"
           >
             {aGuardar ? "A guardar..." : "Guardar alterações"}
           </button>

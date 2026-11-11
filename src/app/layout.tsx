@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, JetBrains_Mono } from "next/font/google";
+import { Barlow, Barlow_Condensed } from "next/font/google";
 import Image from "next/image";
 import Script from "next/script";
 import "./globals.css";
@@ -21,14 +21,17 @@ const TEMA_INIT_SCRIPT = `
 })();
 `;
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const barlow = Barlow({
+  variable: "--font-barlow",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
 });
 
-const jetbrainsMono = JetBrains_Mono({
-  variable: "--font-jetbrains-mono",
+// Títulos, menu e números: a mesma letra do relatório em PDF.
+const barlowCondensed = Barlow_Condensed({
+  variable: "--font-barlow-condensed",
   subsets: ["latin"],
+  weight: ["500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -61,30 +64,30 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="pt"
-      className={`${geistSans.variable} ${jetbrainsMono.variable} h-full antialiased`}
+      className={`${barlow.variable} ${barlowCondensed.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-ink text-neutral-800 dark:text-neutral-200">
         <Script id="cfa-theme-init" strategy="beforeInteractive">
           {TEMA_INIT_SCRIPT}
         </Script>
         <SessionProvider session={session}>
-          <header className="bg-panel border-b border-line px-4 py-3 md:px-6">
+          <header className="border-b-[3px] border-accent bg-neutral-950 px-4 py-3 md:px-6">
             <div className="mx-auto flex max-w-5xl items-center gap-3">
               <Image
                 src="/logo-cfa.jpg"
                 alt="CrossFit Alvalade"
                 width={32}
                 height={32}
-                className="dark:grayscale dark:contrast-125"
+                className="rounded-sm"
               />
               <div className="flex-1">
-                <p className="font-mono text-sm font-bold tracking-wide text-black dark:text-white">CFA AVALIAÇÕES</p>
-                <p className="font-mono text-[10px] tracking-wide text-dim">AVALIAÇÃO DE DESEMPENHO DO STAFF</p>
+                <p className="font-mono text-lg font-bold leading-tight tracking-wider text-white">CFA AVALIAÇÕES</p>
+                <p className="font-mono text-xs tracking-wider text-neutral-400">AVALIAÇÃO DE DESEMPENHO DO STAFF</p>
               </div>
               <ThemeToggle />
               {session && (
                 <div className="text-right">
-                  <Link href="/perfil" className="font-mono block text-xs text-muted underline">
+                  <Link href="/perfil" className="block text-xs text-white underline">
                     {session.user.name}
                   </Link>
                   <SignOutButton />

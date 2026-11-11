@@ -1,9 +1,7 @@
 "use client";
 
 import { AvaliacaoGuardada } from "@/types/avaliacao";
-
-const LIMIAR_BAIXO = 60;
-const LIMIAR_ALTO = 85;
+import { mediaUltimasAvaliacoes, nivelDaMedia, TITULO_NIVEL } from "@/lib/niveis";
 
 interface ItemLista {
   id: string;
@@ -11,49 +9,28 @@ interface ItemLista {
   ativo: boolean;
 }
 
-interface LinhaTreinador {
-  nome: string;
-  media: number;
-  quantidade: number;
-}
-
-function mediaUltimasAvaliacoes(avaliacoes: AvaliacaoGuardada[], nomeTreinador: string): LinhaTreinador | null {
-  const doTreinador = avaliacoes
-    .filter((a) => a.cabecalho.treinador === nomeTreinador)
-    .sort((a, b) => (a.cabecalho.data + a.cabecalho.hora < b.cabecalho.data + b.cabecalho.hora ? -1 : 1));
-  const ultimas = doTreinador.slice(-3);
-  if (ultimas.length === 0) return null;
-
-  const soma = ultimas.reduce((acc, a) => acc + Number(a.classificacaoGeral), 0);
-  return { nome: nomeTreinador, media: soma / ultimas.length, quantidade: ultimas.length };
-}
+type LinhaTreinador = NonNullable<ReturnType<typeof mediaUltimasAvaliacoes>>;
 
 const NIVEIS = [
   {
     chave: 1 as const,
-    titulo: "Nível 1 — Abaixo de 60%",
+    titulo: TITULO_NIVEL[1],
     cor: "text-red-600 dark:text-red-400",
     borda: "border-red-600 dark:border-red-400",
   },
   {
     chave: 2 as const,
-    titulo: "Nível 2 — Entre 60% e 85%",
+    titulo: TITULO_NIVEL[2],
     cor: "text-amber-700 dark:text-amber-400",
     borda: "border-amber-700 dark:border-amber-400",
   },
   {
     chave: 3 as const,
-    titulo: "Nível 3 — Acima de 85%",
+    titulo: TITULO_NIVEL[3],
     cor: "text-green-700 dark:text-green-400",
     borda: "border-green-700 dark:border-green-400",
   },
 ];
-
-function nivelDaMedia(media: number): 1 | 2 | 3 {
-  if (media < LIMIAR_BAIXO) return 1;
-  if (media <= LIMIAR_ALTO) return 2;
-  return 3;
-}
 
 export function NiveisTreinadores({
   treinadores,
@@ -83,7 +60,7 @@ export function NiveisTreinadores({
             .filter((l) => nivelDaMedia(l.media) === nivel.chave)
             .sort((a, b) => a.media - b.media);
           return (
-            <section key={nivel.chave} className={`rounded-none border-t-2 border border-line p-3 ${nivel.borda}`}>
+            <section key={nivel.chave} className={`rounded-lg border-t-2 border border-line p-3 ${nivel.borda}`}>
               <h2 className={`mb-2 text-sm font-semibold ${nivel.cor}`}>{nivel.titulo}</h2>
               {doNivel.length === 0 ? (
                 <p className="text-xs text-dim">Ninguém neste nível.</p>
@@ -94,7 +71,7 @@ export function NiveisTreinadores({
                       <button
                         type="button"
                         onClick={() => onSelecionar(l.nome)}
-                        className="flex w-full items-center justify-between gap-2 rounded-none border border-line px-2 py-1.5 text-left text-xs transition hover:border-black dark:hover:border-white"
+                        className="flex w-full items-center justify-between gap-2 rounded-lg border border-line px-2 py-1.5 text-left text-xs transition hover:border-black dark:hover:border-white"
                       >
                         <span className="text-neutral-900 dark:text-neutral-100">{l.nome}</span>
                         <span className={`shrink-0 font-semibold ${nivel.cor}`}>
@@ -111,7 +88,7 @@ export function NiveisTreinadores({
       </div>
 
       {semAvaliacoes.length > 0 && (
-        <section className="rounded-none border border-dashed border-line p-3">
+        <section className="rounded-lg border border-dashed border-line p-3">
           <h2 className="mb-2 text-sm font-semibold text-muted">Sem avaliações</h2>
           <ul className="flex flex-wrap gap-2">
             {semAvaliacoes.map((t) => (
@@ -119,7 +96,7 @@ export function NiveisTreinadores({
                 <button
                   type="button"
                   onClick={() => onSelecionar(t.nome)}
-                  className="rounded-none border border-line px-2 py-1 text-xs text-muted underline"
+                  className="rounded-lg border border-line px-2 py-1 text-xs text-muted underline"
                 >
                   {t.nome}
                 </button>

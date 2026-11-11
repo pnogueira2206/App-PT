@@ -20,7 +20,7 @@ export function CriteriosPilares({ seccoes, atribuicoes }: { seccoes: Seccao[]; 
       <Link href="/admin" className="mb-3 inline-block text-sm font-medium text-muted underline">
         ← Voltar ao Admin
       </Link>
-      <h1 className="mb-1 text-lg font-semibold text-neutral-900 dark:text-neutral-100">Critérios &amp; Pilares</h1>
+      <h1 className="mb-1 font-mono text-3xl font-bold uppercase tracking-wide text-neutral-900 dark:text-neutral-100">Critérios &amp; Pilares</h1>
       <p className="mb-4 text-sm text-muted">
         Atribui a cada critério um ou mais dos 6 pilares do ensino eficaz. Isto vai alimentar a spider web de
         desenvolvimento do treinador, mais à frente em &quot;Por Treinador&quot;.
@@ -30,9 +30,9 @@ export function CriteriosPilares({ seccoes, atribuicoes }: { seccoes: Seccao[]; 
         <p className="mb-1 text-xs text-muted">
           {categorizados} de {total} critérios categorizados
         </p>
-        <div className="h-1.5 w-full rounded-none bg-line">
+        <div className="h-1.5 w-full rounded-lg bg-line">
           <div
-            className="h-1.5 rounded-none bg-black dark:bg-white transition-all"
+            className="h-1.5 rounded-lg bg-black dark:bg-white transition-all"
             style={{ width: `${total > 0 ? (categorizados / total) * 100 : 0}%` }}
           />
         </div>
@@ -48,7 +48,7 @@ export function CriteriosPilares({ seccoes, atribuicoes }: { seccoes: Seccao[]; 
                 .map((c) => {
                   const atuais = atribuicoes[c.id] ?? [];
                   return (
-                    <div key={c.id} className="rounded-none border border-line p-3">
+                    <div key={c.id} className="rounded-lg border border-line p-3">
                       <p className="text-sm font-medium text-neutral-900 dark:text-neutral-100">{c.texto}</p>
                       {c.dimensao && <p className="text-xs text-dim">{c.dimensao}</p>}
                       <div className="mt-2 flex flex-wrap gap-1.5">
@@ -64,7 +64,7 @@ export function CriteriosPilares({ seccoes, atribuicoes }: { seccoes: Seccao[]; 
                                   router.refresh();
                                 })
                               }
-                              className={`rounded-none border px-3 py-1.5 text-xs font-medium transition ${
+                              className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition ${
                                 selecionado ? "border-black dark:border-white bg-black dark:bg-white text-white dark:text-black" : "border-line text-neutral-700 dark:text-neutral-300"
                               }`}
                             >

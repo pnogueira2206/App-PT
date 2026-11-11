@@ -82,5 +82,6 @@ Este projeto usa PostgreSQL desde o início (não SQLite). Para publicar:
 ## Ideias para o futuro
 
 - **Aviso ao treinador de que vai ser avaliado**: quando o treinador entra na app, ver uma notificação
-  ("Vais ser avaliado na semana de …") a partir do Plano de Avaliações. Por decidir: se mostra a semana ou
-  também o dia, e com quanta antecedência aparece. Pedido pelo Pedro a 11/11/2026; não é para publicar já.
+  ("Vais ser avaliado na semana de … , dia …") a partir do Plano de Avaliações. Mostra a semana e, se estiver
+  marcado, o dia; aparece a partir do domingo que antecede essa semana. Pedido pelo Pedro a 11/11/2026; não é
+  para publicar já.

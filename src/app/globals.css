@@ -61,3 +61,17 @@ select option {
   background-color: var(--color-panel);
   color: var(--foreground);
 }
+
+/* iOS Safari: os campos de data têm uma largura mínima própria e saíam fora da grelha
+   (ex.: filtro "Período" do Histórico). Tiram-se o estilo nativo e a largura mínima,
+   e o valor fica alinhado à esquerda como nos outros campos. */
+input[type="date"] {
+  -webkit-appearance: none;
+  appearance: none;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 2.5rem;
+}
+input[type="date"]::-webkit-date-and-time-value {
+  text-align: left;
+}

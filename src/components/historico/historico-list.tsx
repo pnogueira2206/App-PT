@@ -12,7 +12,7 @@ const inputClasses =
 
 function Campo({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <label className="block">
+    <label className="block min-w-0">
       <span className="mb-1 block text-xs font-medium text-muted">{label}</span>
       {children}
     </label>

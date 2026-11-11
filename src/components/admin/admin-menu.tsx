@@ -8,7 +8,6 @@ const areas = [
     descricao: "Agendar por semana que treinador avaliar e acompanhar o estado de cada avaliação.",
   },
   { href: "/admin/treinadores", nome: "Treinadores", descricao: "Adicionar, editar, desativar e repor palavra-passe." },
-  { href: "/admin/avaliadores", nome: "Avaliadores", descricao: "Adicionar, editar, desativar e repor palavra-passe." },
   {
     href: "/admin/administradores",
     nome: "Administradores",

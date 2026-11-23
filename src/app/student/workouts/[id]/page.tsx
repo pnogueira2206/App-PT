@@ -6,7 +6,7 @@ import { requireStudent } from "@/lib/require-session";
 import { formatLongDate, toDateKey } from "@/lib/dates";
 import { getI18n } from "@/i18n/server";
 import { loadFromPercent } from "@/lib/blocks";
-import { findStudentWorkout, getOneRepMaxes } from "@/lib/workouts";
+import { blockOrder, findStudentWorkout, getOneRepMaxes } from "@/lib/workouts";
 import { BlockView } from "@/components/block-view";
 import { ResultForm } from "@/components/result-form";
 import { CompleteWorkoutForm } from "@/components/complete-workout-form";
@@ -40,7 +40,7 @@ export default async function StudentWorkoutPage({ params }: PageProps<"/student
       trainer: { select: { name: true } },
       completions: { where: { studentId } },
       blocks: {
-        orderBy: { order: "asc" },
+        orderBy: blockOrder,
         include: {
           exercise: true,
           results: {

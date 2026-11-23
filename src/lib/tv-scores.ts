@@ -2,7 +2,7 @@ import type { BenchmarkKind } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { parseDuration } from "@/lib/blocks";
 import { syncBenchmarkRecord } from "@/lib/benchmark";
-import type { CalendarOwner } from "@/lib/workouts";
+import { copyOfBlock, type CalendarOwner } from "@/lib/workouts";
 
 /** What the coach types on the TV for a block: one number for benchmarks, free text otherwise. */
 export type TvScoreKind = BenchmarkKind | "TEXT";
@@ -50,10 +50,7 @@ export async function loadTvBlock(trainerId: string, owner: CalendarOwner, block
   const rows = await Promise.all(
     athletes.map(async (athlete) => {
       const override = overrides.find((o) => o.studentId === athlete.id);
-      const target =
-        override?.blocks.find((b) => b.order === block.order && b.title === block.title) ??
-        override?.blocks.find((b) => b.order === block.order) ??
-        block;
+      const target = (override && copyOfBlock(override.blocks, block)) ?? block;
       const result = await prisma.blockResult.findUnique({
         where: { blockId_studentId: { blockId: target.id, studentId: athlete.id } },
         include: resultInclude,

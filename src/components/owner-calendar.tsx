@@ -6,7 +6,7 @@ import { loadMaxes } from "@/lib/percent-loads";
 import { readClipboard } from "@/lib/clipboard";
 import { formatDuration, formatPrescription, formatResult } from "@/lib/blocks";
 import { loadTvBlock } from "@/lib/tv-scores";
-import type { CalendarOwner } from "@/lib/workouts";
+import { blockOrder, type CalendarOwner } from "@/lib/workouts";
 import { getI18n } from "@/i18n/server";
 import { CalendarGrid, GRID_WEEKS, gridStart } from "@/components/calendar-grid";
 import { WorkoutPanel, type PanelWorkout } from "@/components/workout-panel";
@@ -56,7 +56,7 @@ export async function OwnerCalendar({
       },
       include: {
         blocks: {
-          orderBy: { order: "asc" },
+          orderBy: blockOrder,
           // Results only matter on a student's calendar (groups report per member).
           include: {
             exercise: { select: { name: true } },

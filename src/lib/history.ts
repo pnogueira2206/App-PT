@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { formatLongDate, parseDateKey, todayKey } from "@/lib/dates";
 import { formatNumber, formatResult } from "@/lib/blocks";
-import { getStudentGroupIds, studentWorkoutsWhere, type CalendarOwner } from "@/lib/workouts";
+import { blockOrder, getStudentGroupIds, studentWorkoutsWhere, type CalendarOwner } from "@/lib/workouts";
 import type { Translate } from "@/i18n/translator";
 
 export type HistoryResult = { name: string | null; summary: string; done: boolean };
@@ -69,19 +69,19 @@ export async function searchHistory(
     prisma.workoutBlock.findMany({
       where: { title: match, workout: workoutWhere, ...(excludeBlockId ? { id: { not: excludeBlockId } } : {}) },
       include: {
-        workout: { select: { title: true, date: true, blocks: { select: { id: true }, orderBy: { order: "asc" } } } },
+        workout: { select: { title: true, date: true, blocks: { select: { id: true }, orderBy: blockOrder } } },
         results: {
           where: { studentId: { in: studentIds } },
           include: { sets: true, student: { select: { name: true } } },
           orderBy: { student: { name: "asc" } },
         },
       },
-      orderBy: [{ workout: { date: "desc" } }, { order: "asc" }],
+      orderBy: [{ workout: { date: "desc" } }, ...blockOrder],
       take: LIMIT,
     }),
     prisma.workout.findMany({
       where: { ...workoutWhere, title: match },
-      include: { blocks: { select: { title: true }, orderBy: { order: "asc" } } },
+      include: { blocks: { select: { title: true }, orderBy: blockOrder } },
       orderBy: { date: "desc" },
       take: LIMIT,
     }),

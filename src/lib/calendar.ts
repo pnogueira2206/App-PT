@@ -2,7 +2,9 @@ import type { BenchmarkKind, BlockType, CardioModality, MetconFormat, WorkoutKin
 import { prisma } from "@/lib/prisma";
 import { addDays, todayKey } from "@/lib/dates";
 import {
+  blockOrder,
   completionState,
+  copyOfBlock,
   getStudentGroupIds,
   studentWorkoutsWhere,
   withoutOverridden,
@@ -73,7 +75,7 @@ export type GridResult = {
 };
 
 const blockSelect = {
-  orderBy: { order: "asc" as const },
+  orderBy: blockOrder,
   include: { exercise: { select: { name: true } } },
 };
 
@@ -191,7 +193,7 @@ export async function loadCalendar(
         select: {
           studentId: true,
           completions: { select: { studentId: true } },
-          blocks: { select: { order: true, results: memberResults } },
+          blocks: { select: { order: true, sourceBlockId: true, results: memberResults } },
         },
       },
       blocks: { ...blockSelect, include: { ...blockSelect.include, results: memberResults } },
@@ -226,11 +228,11 @@ export async function loadCalendar(
           ? { done: done.size, total: memberIds.size }
           : null,
       blocks: toBlocks(w.blocks.map((b) => ({ ...b, results: undefined }))).map((block, i) => {
-        // A member with an adjusted version scores on that version's block in the same position.
+        // A member with an adjusted version scores on that version's copy of the block.
         const adjusted = new Set(w.overrides.map((o) => o.studentId));
         const direct = w.blocks[i].results.filter((r) => !adjusted.has(r.studentId));
         const fromOverrides = w.overrides.flatMap(
-          (o) => o.blocks.find((ob) => ob.order === w.blocks[i].order)?.results.filter((r) => r.studentId === o.studentId) ?? []
+          (o) => copyOfBlock(o.blocks, w.blocks[i])?.results.filter((r) => r.studentId === o.studentId) ?? []
         );
         return {
           ...block,

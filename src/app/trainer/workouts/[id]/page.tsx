@@ -5,7 +5,7 @@ import { requireTrainer } from "@/lib/require-session";
 import { APP_TIMEZONE, formatDate, formatLongDate, toDateKey } from "@/lib/dates";
 import { getI18n } from "@/i18n/server";
 import { formatResult } from "@/lib/blocks";
-import { calendarPath } from "@/lib/workouts";
+import { blockOrder, calendarPath } from "@/lib/workouts";
 import { AddBlockForm } from "@/components/add-block-form";
 import { BlockEditor } from "@/components/block-editor";
 import { BlockView } from "@/components/block-view";
@@ -46,7 +46,7 @@ export default async function WorkoutDetailPage({ params }: PageProps<"/trainer/
       overrides: { select: { id: true, studentId: true } },
       completions: true,
       blocks: {
-        orderBy: { order: "asc" },
+        orderBy: blockOrder,
         include: {
           exercise: true,
           results: {

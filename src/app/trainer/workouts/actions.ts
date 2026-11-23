@@ -13,7 +13,7 @@ import {
   isMetconFormat,
   parseDuration,
 } from "@/lib/blocks";
-import { calendarPath, duplicateWorkout, type CalendarOwner } from "@/lib/workouts";
+import { blockOrder, calendarPath, duplicateWorkout, type CalendarOwner } from "@/lib/workouts";
 
 type ActionState = { error?: string; success?: string } | undefined;
 
@@ -325,7 +325,8 @@ export async function duplicateBlockAction(workoutId: string, blockId: string) {
   const block = await prisma.workoutBlock.findFirst({ where: { id: blockId, workoutId } });
   if (!block) throw new Error("Not found");
 
-  const { id: _id, ...rest } = block;
+  // The duplicate is a new block, not another copy of the group's block.
+  const { id: _id, sourceBlockId: _sourceBlockId, ...rest } = block;
   await prisma.$transaction([
     prisma.workoutBlock.updateMany({
       where: { workoutId, order: { gt: block.order } },
@@ -346,7 +347,7 @@ export async function moveBlockAction(
 
   const blocks = await prisma.workoutBlock.findMany({
     where: { workoutId },
-    orderBy: { order: "asc" },
+    orderBy: blockOrder,
     select: { id: true },
   });
   const index = blocks.findIndex((b) => b.id === blockId);

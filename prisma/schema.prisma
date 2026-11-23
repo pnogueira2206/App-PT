@@ -301,7 +301,16 @@ model WorkoutBlock {
   /// MAX_LOAD only: 1 for a 1RM, 3 for a 3RM...
   benchmarkReps     Int?
 
+  /// Adjusted version of a group workout: the group block this one is a copy of,
+  /// so scores land on the right block even after the group's blocks are reordered.
+  sourceBlock       WorkoutBlock?  @relation("BlockCopies", fields: [sourceBlockId], references: [id], onDelete: SetNull)
+  sourceBlockId     String?
+  copies            WorkoutBlock[] @relation("BlockCopies")
+
   results           BlockResult[]
+
+  @@index([workoutId, order])
+  @@index([sourceBlockId])
 }
 
 model BlockResult {

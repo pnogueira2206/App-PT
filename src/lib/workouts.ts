@@ -5,6 +5,25 @@ import { toDateKey } from "@/lib/dates";
 
 export type CalendarOwner = { type: "student" | "group"; id: string };
 
+/**
+ * How blocks are listed everywhere: by their position, and by id when two share
+ * a position (older data), so the order never changes between screens or reloads.
+ */
+export const blockOrder = [{ order: "asc" }, { id: "asc" }] satisfies Prisma.WorkoutBlockOrderByWithRelationInput[];
+
+/**
+ * The block of a member's adjusted version that copies a given group block.
+ * Copies are linked to their group block; versions saved before that link
+ * existed fall back to the block in the same position.
+ */
+export function copyOfBlock<T extends { order: number; sourceBlockId: string | null }>(
+  copies: T[],
+  source: { id: string; order: number }
+): T | undefined {
+  if (copies.some((b) => b.sourceBlockId)) return copies.find((b) => b.sourceBlockId === source.id);
+  return copies.find((b) => b.order === source.order);
+}
+
 export function calendarPath(owner: CalendarOwner, date?: Date): string {
   const base = owner.type === "student" ? "/trainer/students" : "/trainer/groups";
   return `${base}/${owner.id}${date ? `?week=${toDateKey(date)}` : ""}`;
@@ -115,7 +134,7 @@ export async function duplicateWorkout(
 ) {
   const source = await tx.workout.findUniqueOrThrow({
     where: { id: sourceId },
-    include: { blocks: { orderBy: { order: "asc" } } },
+    include: { blocks: { orderBy: blockOrder } },
   });
 
   return tx.workout.create({
@@ -132,9 +151,10 @@ export async function duplicateWorkout(
       groupId: target.owner.type === "group" ? target.owner.id : null,
       sourceWorkoutId: target.sourceWorkoutId ?? null,
       blocks: {
-        create: source.blocks.map((block) => {
-          const { id: _id, workoutId: _workoutId, ...rest } = block;
-          return rest;
+        // Renumbered 1..n; an adjusted version keeps a link to each group block it copies.
+        create: source.blocks.map((block, index) => {
+          const { id, workoutId: _workoutId, sourceBlockId: _sourceBlockId, ...rest } = block;
+          return { ...rest, order: index + 1, sourceBlockId: target.sourceWorkoutId ? id : null };
         }),
       },
     },

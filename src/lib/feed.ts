@@ -166,7 +166,7 @@ export async function getFeed(
   }
 
   let list = [...entries.values()];
-  list.forEach((e) => e.results.sort((a, b) => a.block.order - b.block.order));
+  list.forEach((e) => e.results.sort((a, b) => a.block.order - b.block.order || (a.block.id < b.block.id ? -1 : 1)));
   if (options.onlyUnseen) list = list.filter((e) => e.unseen);
   list.sort((a, b) => b.lastActivity.getTime() - a.lastActivity.getTime());
   return options.limit ? list.slice(0, options.limit) : list;
